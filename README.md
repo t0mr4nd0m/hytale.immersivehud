@@ -22,6 +22,16 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
 ---
 
+## ✨ Features
+
+- Dynamic HUD visibility based on gameplay
+- Configurable triggers per component
+- Built-in config profiles (default, immersive, disabled)
+- Per-player configuration
+- Lightweight and performance-friendly
+
+---
+
 ## ⚡ Quick Start
 
 Get ImmersiveHud running in under a minute:
@@ -190,9 +200,10 @@ Rules to define the visibility behaviour of dynamic HUD components
 
 ---
 
-## 📚 Profiles
+##  🎮 Profiles
 
-ImmersiveHUD configuration profiles
+Profiles provide predefined HUD configurations for different playstyles.  
+You can switch between them instantly using commands.
 
 | Profile     | Description                                       |
 |-------------|---------------------------------------------------|
