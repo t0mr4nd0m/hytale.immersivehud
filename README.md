@@ -1,5 +1,5 @@
 <p style="text-align:center; margin-bottom:-32px">
-<img src="assets/logo.png" width="256" alt="Immersive HUD logo"/>
+<img src="assets/logo.png" width="400" alt="Immersive HUD logo"/>
 </p>
 <p style="text-align:center; font-family:'Lucida Handwriting',cursive; font-size: 24px;">«Less Is More»</p>
 
@@ -15,7 +15,7 @@ A server-side Hytale plugin that hides HUD elements and show them dynamically to
 ![Build](https://img.shields.io/badge/build-gradle-green)
 ![License](https://img.shields.io/github/license/T0mR4nD0m/hytale.immersivehud)
 
-<img src="assets/002_immersive_hud.png" width="640" alt="Immersive HUD logo"/>
+<img src="assets/002_immersive_hud.png" alt="Immersive HUD logo"/>
 
 ---
 
@@ -191,7 +191,7 @@ Example:
 
 ```json
 {
-  "ConfigVersion": "0.8.0",
+  "ConfigVersion": "1.0.0",
   "IntervalMs": 250,
   "HideDelayMs": 2000,
   "ReticleTargetRange": 8.0,
@@ -352,19 +352,19 @@ Changes made through commands:
 
 ## Profiles
 
-### Default 
+** Default 
 
 Default configuration for ImmersiveHud. Designed for players who want a cleaner, more immersive experience without losing essential gameplay information. 
 
 Most HUD elements stay hidden to reduce screen clutter and only appear when gameplay conditions trigger them through configurable activation rules.
 
-### Immersive
+** Immersive
 
 Extreme immersive experience configuration. Designed for players who want the clearest immersive experience possible.
 
 Activation rules have been reduced and even some elements (Like Health or Stamina bars) have been removed completely from HUD.
 
-### Disabled
+** Disabled
 
 Restores default Hytale Hud visibility
 

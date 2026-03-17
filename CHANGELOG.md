@@ -11,6 +11,6 @@
 **Commands**
 
 * `/ihud status` : check ihud player configuration
-* `/ihud toggle` : toggle hud components show|hidden
-* `/ihud rules` : list, clear, add|remove rules from dynamic hud components
-* `/ihud profiles` : apply quick setup using profiles (default|immersive|disabled)
+* `/ihud toggle` <component> <action> : toggle hud components. actions:[show|hide]
+* `/ihud rules` <component> <action> <rule> : list, clear, add or remove rules from dynamic hud components. actions:[list|clear|add|remove]
+* `/ihud profile` <profile> : apply quick setup. profiles:[default|immersive|disabled]
