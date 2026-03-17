@@ -1,11 +1,12 @@
 <p style="text-align:center; margin-bottom:-32px">
 <img src="assets/logo.png" width="400" alt="Immersive HUD logo"/>
 </p>
-<p style="text-align:center; font-family:'Lucida Handwriting',cursive; font-size: 24px;">«Less Is More»</p>
+
+<p style="text-align:center;"><img src="assets/000_ihudvdefault.png" alt="Immersive HUD"/></p>
 
 # Immersive HUD
 
-A server-side Hytale plugin that hides HUD elements and show them dynamically to create a cleaner and more immersive gameplay experience.
+A Hytale plugin that hides HUD elements and show them dynamically to create a cleaner and more immersive gameplay experience.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![GitHub release](https://img.shields.io/github/v/release/T0mR4nD0m/hytale.immersivehud)
@@ -14,8 +15,6 @@ A server-side Hytale plugin that hides HUD elements and show them dynamically to
 ![Java](https://img.shields.io/badge/java-25-orange)
 ![Build](https://img.shields.io/badge/build-gradle-green)
 ![License](https://img.shields.io/github/license/T0mR4nD0m/hytale.immersivehud)
-
-<img src="assets/002_immersive_hud.png" alt="Immersive HUD logo"/>
 
 ---
 
@@ -31,7 +30,7 @@ A server-side Hytale plugin that hides HUD elements and show them dynamically to
 | In-game configuration commands  |      ✖      |      ✔       |
 | Automatic HUD context detection |      ✖      |      ✔       |
 
-ImmersiveHud keeps the screen clean during exploration while automatically displaying important information during gameplay.
+ImmersiveHud keeps the screen clean during exploration while automatically displaying important information during gameplay providing a more immersive experience.
 
 ---
 
