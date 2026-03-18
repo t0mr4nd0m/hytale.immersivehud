@@ -87,9 +87,7 @@ public final class ProfilePresets {
         if (dh == null) {
             return;
         }
-
-        setRules(dh.getHotbar(),
-                DynamicHudTriggers.ALWAYS_HIDDEN);
+        clearAllDynamicRules(dh);
 
         setRules(dh.getReticle(),
                 DynamicHudTriggers.HOLDING_RANGED_WEAPON,
@@ -101,15 +99,6 @@ public final class ProfilePresets {
                 DynamicHudTriggers.PLAYER_RUNNING,
                 DynamicHudTriggers.PLAYER_SWIMMING,
                 DynamicHudTriggers.PLAYER_MOUNTING);
-
-        setRules(dh.getHealth(),
-                DynamicHudTriggers.ALWAYS_HIDDEN);
-
-        setRules(dh.getStamina(),
-                DynamicHudTriggers.ALWAYS_HIDDEN);
-
-        setRules(dh.getMana(),
-                DynamicHudTriggers.ALWAYS_HIDDEN);
     }
 
     private static void clearAllDynamicRules(DynamicHudConfig dh) {

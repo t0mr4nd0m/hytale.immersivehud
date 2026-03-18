@@ -108,16 +108,16 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 - are persisted automatically
 - override the global config
 
-| Command   | Parameters                        | Description                                                 | Example                              |
-|-----------|-----------------------------------|-------------------------------------------------------------|--------------------------------------|
-| `status`  | none                              | Displays the current visibility state of all HUD components | /ihud status                         |
-| `toggle`  | `<component>`                     | Toggles visibility of a specific HUD component              | /ihud toggle health                  |
-| `toggle`  | `<component>` `<state>`           | Hides/Shows a component                                     | /ihud toggle health hide             |
-| `toggle`  | `<group>` `<state>`               | Hides/Shows all components in a group                       | /ihud toggle ui hide                 |
-| `rules`   | `<component>` list                | List rules from a component                                 | /ihud rules health list              |
-| `rules`   | `<component>` clear               | Clear rules from a component                                | /ihud rules health clear             |
-| `rules`   | `<component>` add/remove `<rule>` | Add or remove rules to/from component                       | /ihud rules health add ALWAYS_HIDDEN |
-| `profile` | `<profile>`                       | Apply quick IHud configuration based on different profiles  | /ihud profile immersive              |
+| Command   | Parameters                        | Description                                                 | Example                                 |
+|-----------|-----------------------------------|-------------------------------------------------------------|-----------------------------------------|
+| `status`  | none                              | Displays the current visibility state of all HUD components | /ihud status                            |
+| `toggle`  | `<component>`                     | Toggles visibility of a specific HUD component              | /ihud toggle health                     |
+| `toggle`  | `<component>` `<state>`           | Hides/Shows a component                                     | /ihud toggle health hide                |
+| `toggle`  | `<group>` `<state>`               | Hides/Shows all components in a group                       | /ihud toggle ui hide                    |
+| `rules`   | `<component>` list                | List rules from a component                                 | /ihud rules health list                 |
+| `rules`   | `<component>` clear               | Clear rules from a component                                | /ihud rules health clear                |
+| `rules`   | `<component>` add/remove `<rule>` | Add or remove rules to/from component                       | /ihud rules health add  HEALTH_CRITICAL |
+| `profile` | `<profile>`                       | Apply quick IHud configuration based on different profiles  | /ihud profile immersive                 |
 
 | Parameter     | Description           | Values                                 |
 |---------------|-----------------------|----------------------------------------|
@@ -353,13 +353,13 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
       "rulesCsv": "PLAYER_WALKING,PLAYER_RUNNING"
     },
     "health": {
-      "rulesCsv": "ALWAYS_HIDDEN"
+      "rulesCsv": ""
     },
     "stamina": {
-      "rulesCsv": "ALWAYS_HIDDEN"
+      "rulesCsv": ""
     },
     "mana": {
-      "rulesCsv": "ALWAYS_HIDDEN"
+      "rulesCsv": ""
     }
   }
 }

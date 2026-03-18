@@ -38,8 +38,13 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         super(init);
     }
 
+    private static String pluginVersion;
+
     @Override
     protected void setup() {
+
+        pluginVersion = this.getManifest().getVersion().toString();
+
         globalConfig.load().join();
 
         GlobalConfig cfg = getImmersiveHudGlobalConfig();
@@ -92,6 +97,10 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         return globalConfig.get();
     }
 
+    public static String getPluginVersion() {
+        return pluginVersion;
+    }
+
     @Nullable
     public PlayerConfig requirePlayerConfig(PlayerRef playerRef) {
         return hudRuntimeService != null ? hudRuntimeService.requirePlayerConfig(playerRef) : null;
@@ -124,8 +133,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     private boolean migrateGlobalConfigIfNeeded(GlobalConfig cfg) {
         boolean changed = false;
 
-        if (!Objects.equals(cfg.getConfigVersion(), GlobalConfig.CONFIG_SCHEMA_VERSION)) {
-            cfg.setConfigVersion(GlobalConfig.CONFIG_SCHEMA_VERSION);
+        if (!Objects.equals(cfg.getConfigVersion(), pluginVersion)) {
+            cfg.setConfigVersion(pluginVersion);
             changed = true;
         }
 
