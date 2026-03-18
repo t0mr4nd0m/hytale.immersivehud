@@ -3,16 +3,15 @@ package com.tom.immersivehudplugin.config;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 
 public final class GlobalConfig {
-
-    public static final String CONFIG_SCHEMA_VERSION = "1.0.1";
 
     public static final int INTERVAL_MS = 250;
     public static final int HIDE_DELAY_MS = 2000;
     public static final float RETICLE_TARGET_RANGE = 8.0f;
 
-    private String configVersion = CONFIG_SCHEMA_VERSION;
+    private String configVersion = ImmersiveHudPlugin.getPluginVersion();
     private int intervalMs = INTERVAL_MS;
     private int hideDelayMs = HIDE_DELAY_MS;
     private float reticleTargetRange = RETICLE_TARGET_RANGE;
