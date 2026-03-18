@@ -6,7 +6,7 @@ import com.hypixel.hytale.codec.builder.BuilderCodec;
 
 public final class GlobalConfig {
 
-    public static final String CONFIG_SCHEMA_VERSION = "1.0.0";
+    public static final String CONFIG_SCHEMA_VERSION = "1.0.1";
 
     public static final int INTERVAL_MS = 250;
     public static final int HIDE_DELAY_MS = 2000;

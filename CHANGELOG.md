@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.1
+
+* Removed rule 'ALWAYS_HIDDEN' and all the related logic. To get the same behaviour for a component, simply toggle its visibility to hide and clear all its rules
+
 ## v1.0.0 - Initial release
 
 **Features**

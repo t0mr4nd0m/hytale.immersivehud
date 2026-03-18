@@ -5,8 +5,6 @@ import java.util.function.Predicate;
 
 public enum DynamicHudTriggers {
 
-    ALWAYS_HIDDEN(_ -> false),
-
     HOTBAR_INPUT(DynamicHudTriggersContext::hotbarInput),
     CHARGING_WEAPON(DynamicHudTriggersContext::chargingWeapon),
     CONSUMABLE_USE(DynamicHudTriggersContext::consumableUse),

@@ -96,7 +96,7 @@ public final class HudVisibilityService {
 
             DynamicHudRuleConfig rule = def.ruleGetter().apply(dh);
 
-            if (rule != null && !rule.isAlwaysHidden()) {
+            if (rule != null) {
                 requiredMask |= rule.getRulesMask();
             }
         }
@@ -110,9 +110,7 @@ public final class HudVisibilityService {
 
             DynamicHudRuleConfig rule = def.ruleGetter().apply(dh);
 
-            boolean hidden = rule == null
-                    || rule.isAlwaysHidden()
-                    || !shouldShowDynamic(rule, activeMask);
+            boolean hidden = !shouldShowDynamic(rule, activeMask);
 
             if (hidden) {
                 st.dynamicHidden.add(def.component());

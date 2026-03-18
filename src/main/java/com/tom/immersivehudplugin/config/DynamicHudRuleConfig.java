@@ -77,26 +77,12 @@ public final class DynamicHudRuleConfig {
         rulesMaskDirty = false;
     }
 
-    public boolean isAlwaysHidden() {
-        return getRules().contains(DynamicHudTriggers.ALWAYS_HIDDEN);
-    }
-
     public boolean addRule(DynamicHudTriggers rule) {
         if (rule == null) {
             return false;
         }
 
         EnumSet<DynamicHudTriggers> set = getRules();
-
-        if (rule == DynamicHudTriggers.ALWAYS_HIDDEN) {
-            boolean changed = !(set.size() == 1 && set.contains(DynamicHudTriggers.ALWAYS_HIDDEN));
-            set.clear();
-            set.add(DynamicHudTriggers.ALWAYS_HIDDEN);
-            setRules(set);
-            return changed;
-        }
-
-        set.remove(DynamicHudTriggers.ALWAYS_HIDDEN);
 
         boolean changed = set.add(rule);
         if (changed) {
