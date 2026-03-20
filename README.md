@@ -137,32 +137,32 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 
 HUD components supported by ImmersiveHUD
 
-| Hud Component                 | Group   | Type    |
-|-------------------------------|---------|---------|
-| hotbar                        | Core    | DYNAMIC |
-| compass                       | Core    | DYNAMIC |
-| reticle                       | Core    | DYNAMIC |
-| health                        | Bars    | DYNAMIC |
-| stamina                       | Bars    | DYNAMIC |
-| mana                          | Bars    | DYNAMIC |
-| oxygen                        | UI      | STATIC  |
-| inputbindings                 | UI      | STATIC  |
-| notifications                 | UI      | STATIC  |
-| speedometer                   | UI      | STATIC  |
-| statusicons                   | UI      | STATIC  |
-| ammoindicator                 | UI      | STATIC  |
-| utilityslotselector           | UI      | STATIC  |
-| chat                          | Social  | STATIC  |
-| requests                      | Social  | STATIC  |
-| killfeed                      | Social  | STATIC  |
-| playerlist                    | Social  | STATIC  |
-| eventtitle                    | Panels  | STATIC  |
-| objectivepanel                | Panels  | STATIC  |
-| portalpanel                   | Panels  | STATIC  |
-| sleep                         | Panels  | STATIC  |
-| buildertoolslegend            | Builder | STATIC  |
-| buildermaterialsslotselector  | Builder | STATIC  |
-| blockvariantselector          | Builder | STATIC  |
+| Component                         | Group   | Type    | Default state | Default rules                                                                                   |
+|-----------------------------------|---------|---------|---------------|-------------------------------------------------------------------------------------------------|
+| hotbar                            | Core    | Dynamic | Hidden        | `HOTBAR_INPUT`                                                                                  |
+| compass                           | Core    | Dynamic | Hidden        | `PLAYER_MOVING`                                                                                 |
+| reticle                           | Core    | Dynamic | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
+| health                            | Bars    | Dynamic | Hidden        | `HEALTH_NOT_FULL`                                                                               |
+| stamina                           | Bars    | Dynamic | Hidden        | `STAMINA_CRITICAL`                                                                              |
+| mana                              | Bars    | Dynamic | Hidden        | `MANA_CRITICAL`                                                                                 |
+| oxygen                            | UI      | Static  | Visible       | —                                                                                               |
+| inputbindings                     | UI      | Static  | Hidden        | —                                                                                               |
+| notifications                     | UI      | Static  | Hidden        | —                                                                                               |
+| statusicons                       | UI      | Static  | Visible       | —                                                                                               |
+| speedometer                       | UI      | Static  | Visible       | —                                                                                               |
+| ammo                              | UI      | Static  | Visible       | —                                                                                               |
+| utilityslotselector               | UI      | Static  | Visible       | —                                                                                               |
+| chat                              | Social  | Static  | Visible       | —                                                                                               |
+| requests                          | Social  | Static  | Visible       | —                                                                                               |
+| killfeed                          | Social  | Static  | Visible       | —                                                                                               |
+| playerlist                        | Social  | Static  | Visible       | —                                                                                               |
+| eventtitle                        | Panels  | Static  | Visible       | —                                                                                               |
+| objectivepanel                    | Panels  | Static  | Visible       | —                                                                                               |
+| portalpanel                       | Panels  | Static  | Visible       | —                                                                                               |
+| sleep                             | Panels  | Static  | Visible       | —                                                                                               |
+| blockvariantselector              | Builder | Static  | Visible       | —                                                                                               |
+| buildertoolslegend                | Builder | Static  | Visible       | —                                                                                               |
+| buildertoolsmaterialslotselector  | Builder | Static  | Visible       | —                                                                                               |
 
 ---
 
@@ -182,6 +182,16 @@ Rules to define the visibility behaviour of dynamic HUD components
 | `PLAYER_RUNNING`        | Player is running                           |
 | `PLAYER_SPRINTING`      | Player is sprinting                         |
 | `PLAYER_MOUNTING`       | Player is mounting                          |
+| `PLAYER_FLYING`         | Player is fying                             |
+| `PLAYER_GLIDING`        | Player is gliding                           |
+| `PLAYER_JUMPING`        | Player is jumping                           |
+| `PLAYER_CROUCHING`      | Player is crouching                         |
+| `PLAYER_CLIMBING`       | Player is climbing                          |
+| `PLAYER_IN_FLUID`       | Player is in fluid                          |
+| `PLAYER_ON_GROUND`      | Player is on ground                         |
+| `PLAYER_FALLING`        | Player is falling                           |
+| `PLAYER_SITTING`        | Player is sitting                           |
+| `PLAYER_ROLLING`        | Player is rolling                           |
 | `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon            |
 | `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon           |
 | `HEALTH_NOT_FULL`       | Health bar is not full                      |
@@ -196,7 +206,7 @@ Rules to define the visibility behaviour of dynamic HUD components
 
 ---
 
-💡 Tip: multiple rules can be combined to alter component behaviour. For example: Hotbar rules=`HOTBAR_INPUT`, `CHARGING_WEAPON` -> when changes hotbar slot and when aiming.
+💡 Tip: multiple rules can be combined to alter component behaviour. Ex. Hotbar rules=`HOTBAR_INPUT`, `CHARGING_WEAPON` -> when changes hotbar slot and when aiming.
 
 ---
 
@@ -240,54 +250,70 @@ Example:
 
 ```json
 {
-  "ConfigVersion": "1.0.0",
+  "ConfigVersion": "1.0.1",
   "IntervalMs": 250,
   "HideDelayMs": 2000,
   "ReticleTargetRange": 8.0,
   "DefaultHudComponents": {
-    "HideCompassHud": true,
-    "HideReticleHud": true,
     "HideHealthHud": true,
     "HideStaminaHud": true,
     "HideManaHud": true,
-    "HideOxygenHud": false,
+    "HideCompassHud": true,
     "HideHotbarHud": true,
+    "HideReticleHud": true,
     "HideInputBindingsHud": true,
-    "HideStatusIconsHud": false,
-    "HideAmmoIndicatorHud": false,
     "HideNotificationsHud": true,
-    "HideUtilitySlotSelectorHud": false,
+    "HideStatusIconsHud": false,
     "HideSpeedometerHud": true,
+    "HideAmmoIndicatorHud": false,
+    "HideOxygenHud": false,
     "HideChatHud": false,
     "HideRequestsHud": false,
     "HideKillFeedHud": false,
     "HidePlayerListHud": false,
-    "HideSleepHud": false,
     "HideEventTitleHud": false,
     "HideObjectivePanelHud": false,
     "HidePortalPanelHud": false,
+    "HideSleepHud": false,
+    "HideUtilitySlotSelectorHud": false,
+    "HideBlockVariantSelectorHud": false,
     "HideBuilderToolsLegendHud": false,
-    "HideBuilderToolsMaterialSlotSelectorHud": false,
-    "HideBlockVariantSelectorHud": false
+    "HideBuilderToolsMaterialSlotSelectorHud": false
   },
   "DefaultDynamicHud": {
-    "Hotbar": {
-      "Rules": "HOTBAR_INPUT"
-    },
-    "Reticle": {
-      "Rules": "AIMING,CONSUMABLE_USE,TARGET_ENTITY,INTERACTABLE_BLOCK"
-    },
-    "Compass": {
-      "Rules": "MOVING"
-    },
     "Health": {
-      "Rules": "HEALTH_NOT_FULL"
+      "Rules": [
+        "HEALTH_NOT_FULL"
+      ]
     },
     "Stamina": {
-      "Rules": "STAMINA_NOT_FULL"
+      "Rules": [
+        "STAMINA_CRITICAL"
+      ]
     },
     "Mana": {
-      "Rules": "MANA_NOT_FULL"
+      "Rules": [
+        "MANA_CRITICAL"
+      ]
+    },
+    "Compass": {
+      "Rules": [
+        "PLAYER_MOVING"
+      ]
+    },
+    "Hotbar": {
+      "Rules": [
+        "HOTBAR_INPUT"
+      ]
+    },
+    "Reticle": {
+      "Rules": [
+        "CHARGING_WEAPON",
+        "CONSUMABLE_USE",
+        "TARGET_ENTITY",
+        "INTERACTABLE_BLOCK",
+        "HOLDING_RANGED_WEAPON"
+      ]
     }
   }
 }
@@ -316,50 +342,61 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
 
 ```json
 {
-  "hudComponents": {
-    "hideCompassHud": true,
-    "hideReticleHud": true,
-    "hideHealthHud": true,
-    "hideStaminaHud": true,
-    "hideManaHud": true,
-    "hideHotbarHud": true,
-    "hideOxygenHud": true,
-    "hideStatusIconsHud": false,
-    "hideNotificationsHud": true,
-    "hideInputBindingsHud": true,
-    "hideSpeedometerHud": true,
-    "hideAmmoIndicatorHud": true,
-    "hideChatHud": true,
-    "hidePlayerListHud": true,
-    "hideRequestsHud": true,
-    "hideKillFeedHud": true,
-    "hideSleepHud": false,
-    "hideEventTitleHud": false,
-    "hideObjectivePanelHud": false,
-    "hidePortalPanelHud": false,
-    "hideBuilderToolsLegendHud": true,
-    "hideUtilitySlotSelectorHud": true,
-    "hideBlockVariantSelectorHud": true,
-    "hideBuilderToolsMaterialSlotSelectorHud": true
+  "HudComponents": {
+    "HideHealthHud": true,
+    "HideStaminaHud": true,
+    "HideManaHud": true,
+    "HideCompassHud": true,
+    "HideHotbarHud": true,
+    "HideReticleHud": true,
+    "HideInputBindingsHud": true,
+    "HideNotificationsHud": true,
+    "HideStatusIconsHud": false,
+    "HideSpeedometerHud": false,
+    "HideAmmoIndicatorHud": false,
+    "HideOxygenHud": false,
+    "HideChatHud": false,
+    "HideRequestsHud": true,
+    "HideKillFeedHud": true,
+    "HidePlayerListHud": true,
+    "HideEventTitleHud": false,
+    "HideObjectivePanelHud": false,
+    "HidePortalPanelHud": false,
+    "HideSleepHud": false,
+    "HideUtilitySlotSelectorHud": false,
+    "HideBlockVariantSelectorHud": false,
+    "HideBuilderToolsLegendHud": false,
+    "HideBuilderToolsMaterialSlotSelectorHud": false
   },
-  "dynamicHud": {
-    "hotbar": {
-      "rulesCsv": "HOTBAR_INPUT"
+  "DynamicHud": {
+    "Health": {
+      "Rules": []
     },
-    "reticle": {
-      "rulesCsv": "CHARGING_WEAPON,CONSUMABLE_USE,TARGET_ENTITY,INTERACTABLE_BLOCK,HOLDING_RANGED_WEAPON"
+    "Stamina": {
+      "Rules": []
     },
-    "compass": {
-      "rulesCsv": "PLAYER_WALKING,PLAYER_RUNNING"
+    "Mana": {
+      "Rules": []
     },
-    "health": {
-      "rulesCsv": ""
+    "Compass": {
+      "Rules": [
+        "PLAYER_RUNNING",
+        "PLAYER_MOUNTING",
+        "PLAYER_SWIMMING"
+      ]
     },
-    "stamina": {
-      "rulesCsv": ""
+    "Hotbar": {
+      "Rules": [
+        "HOTBAR_INPUT"
+      ]
     },
-    "mana": {
-      "rulesCsv": ""
+    "Reticle": {
+      "Rules": [
+        "CHARGING_WEAPON",
+        "CONSUMABLE_USE",
+        "TARGET_ENTITY",
+        "HOLDING_RANGED_WEAPON"
+      ]
     }
   }
 }
@@ -368,18 +405,13 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
 ---
 
 ## 🛠️ Technical highlights
-
-- Codec-based config serialization with `BuilderCodec`
-- Structured config sections for `HudComponents` and `DynamicHud`
-- Per-player runtime HUD state tracking
-- Automatic player config saving
-- Packet watching for player interaction changes
-- Scheduled HUD updates
-- Defensive configuration sanitization
-- Schema migration support
-- Separate configuration layers:
-  - Server default configuration
-  - Per-player overrides
+- Dynamic HUD visibility system based on rules and triggers
+- Robust configuration system: auto-generated and self-healing configs
+- Per-player configuration system
+- Quick configuration profiles system
+- Command-driven configuration control
+- Lightweight event & packet-driven state tracking
+- Clean and extensible design
 
 ---
 
@@ -411,6 +443,8 @@ commands/
    StatusCmd.java
    ToggleCmd.java
 config/
+   ConfigJsonMapper.java
+   ConfigSchemaValidator.java
    DynamicHudConfig.java
    DynamicHudRuleConfig.java
    GlobalConfig.java

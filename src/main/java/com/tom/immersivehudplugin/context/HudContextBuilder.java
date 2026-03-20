@@ -66,9 +66,6 @@ public final class HudContextBuilder {
     }
 
     public void refreshHeldItemStateIfNeeded(PlayerHudState st, PlayerTickContext ctx) {
-        if (!st.heldItemRefreshRequested && st.heldItemStateInitialized) {
-            return;
-        }
 
         Item heldItem = getHeldItemFromInventory(ctx);
         st.heldItem = heldItem;
@@ -139,7 +136,7 @@ public final class HudContextBuilder {
             }
 
             String itemId = heldStack.getItemId();
-            if (itemId.isBlank()) {
+            if (itemId == null || itemId.isBlank()) {
                 return null;
             }
 
@@ -155,43 +152,75 @@ public final class HudContextBuilder {
             long now,
             int hideDelay
     ) {
-        var movementStates = ctx.movement() != null ? ctx.movement().getMovementStates() : null;
-        if (movementStates == null) {
+        var ms = ctx.movement() != null ? ctx.movement().getMovementStates() : null;
+        if (ms == null) {
+            clearMovementSignals(st);
             return;
         }
 
-        boolean isMoving =
-                movementStates.walking
-                        || movementStates.running
-                        || movementStates.sprinting
-                        || movementStates.swimming
-                        || movementStates.gliding
-                        || movementStates.flying
-                        || movementStates.mounting;
+        boolean moving =
+                ms.walking
+                        || ms.running
+                        || ms.sprinting
+                        || ms.swimming
+                        || ms.gliding
+                        || ms.flying
+                        || ms.mounting
+                        || ms.jumping
+                        || ms.crouching
+                        || ms.climbing
+                        || ms.falling
+                        || ms.rolling;
 
-        if (isMoving) {
-            st.t.pulse(HudSignal.PLAYER_MOVING, now, hideDelay);
-        }
+        setTimedState(st, HudSignal.PLAYER_MOVING, moving, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_WALKING, ms.walking, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_RUNNING, ms.running, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_SPRINTING, ms.sprinting, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_MOUNTING, ms.mounting, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_SWIMMING, ms.swimming, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_FLYING, ms.flying, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_GLIDING, ms.gliding, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_JUMPING, ms.jumping, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_CROUCHING, ms.crouching, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_CLIMBING, ms.climbing, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_IN_FLUID, ms.inFluid, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_ON_GROUND, ms.onGround, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_FALLING, ms.falling, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_SITTING, ms.sitting, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_ROLLING, ms.rolling, now, hideDelay);
+    }
 
-        if (movementStates.walking) {
-            st.t.pulse(HudSignal.PLAYER_WALKING, now, hideDelay);
+    private void setTimedState(
+            PlayerHudState st,
+            HudSignal signal,
+            boolean active,
+            long now,
+            int hideDelay
+    ) {
+        if (active) {
+            st.t.pulse(signal, now, hideDelay);
+        } else {
+            st.t.clear(signal);
         }
+    }
 
-        if (movementStates.running) {
-            st.t.pulse(HudSignal.PLAYER_RUNNING, now, hideDelay);
-        }
-
-        if (movementStates.sprinting) {
-            st.t.pulse(HudSignal.PLAYER_SPRINTING, now, hideDelay);
-        }
-
-        if (movementStates.mounting) {
-            st.t.pulse(HudSignal.PLAYER_MOUNTING, now, hideDelay);
-        }
-
-        if (movementStates.swimming) {
-            st.t.pulse(HudSignal.PLAYER_SWIMMING, now, hideDelay);
-        }
+    private void clearMovementSignals(PlayerHudState st) {
+        st.t.clear(HudSignal.PLAYER_MOVING);
+        st.t.clear(HudSignal.PLAYER_WALKING);
+        st.t.clear(HudSignal.PLAYER_RUNNING);
+        st.t.clear(HudSignal.PLAYER_SPRINTING);
+        st.t.clear(HudSignal.PLAYER_MOUNTING);
+        st.t.clear(HudSignal.PLAYER_SWIMMING);
+        st.t.clear(HudSignal.PLAYER_FLYING);
+        st.t.clear(HudSignal.PLAYER_GLIDING);
+        st.t.clear(HudSignal.PLAYER_JUMPING);
+        st.t.clear(HudSignal.PLAYER_CROUCHING);
+        st.t.clear(HudSignal.PLAYER_CLIMBING);
+        st.t.clear(HudSignal.PLAYER_IN_FLUID);
+        st.t.clear(HudSignal.PLAYER_ON_GROUND);
+        st.t.clear(HudSignal.PLAYER_FALLING);
+        st.t.clear(HudSignal.PLAYER_SITTING);
+        st.t.clear(HudSignal.PLAYER_ROLLING);
     }
 
     private void updateReticleSignalsIfNeeded(
@@ -212,13 +241,8 @@ public final class HudContextBuilder {
         float targetRange = reticleTargetRange(global);
         ReticleScanResult scan = scanReticle(world, ctx, targetRange);
 
-        if (scan.targetEntity()) {
-            st.t.pulse(HudSignal.TARGET_ENTITY, now, hideDelay);
-        }
-
-        if (scan.interactableBlock()) {
-            st.t.pulse(HudSignal.INTERACTABLE_BLOCK, now, hideDelay);
-        }
+        setTimedState(st, HudSignal.TARGET_ENTITY, scan.targetEntity(), now, hideDelay);
+        setTimedState(st, HudSignal.INTERACTABLE_BLOCK, scan.interactableBlock(), now, hideDelay);
 
         st.lastReticleScanMs = now;
     }
@@ -249,6 +273,7 @@ public final class HudContextBuilder {
     }
 
     private void cleanupWeaponSignals(PlayerHudState st) {
+
         if (!st.meleeWeaponInHand) {
             st.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
         }
@@ -275,14 +300,27 @@ public final class HudContextBuilder {
                 st.t.active(HudSignal.CONSUMABLE_USE, now),
                 st.t.active(HudSignal.TARGET_ENTITY, now),
                 st.t.active(HudSignal.INTERACTABLE_BLOCK, now),
+
                 st.t.active(HudSignal.PLAYER_MOVING, now),
                 st.t.active(HudSignal.PLAYER_WALKING, now),
                 st.t.active(HudSignal.PLAYER_RUNNING, now),
                 st.t.active(HudSignal.PLAYER_SPRINTING, now),
                 st.t.active(HudSignal.PLAYER_MOUNTING, now),
                 st.t.active(HudSignal.PLAYER_SWIMMING, now),
+                st.t.active(HudSignal.PLAYER_FLYING, now),
+                st.t.active(HudSignal.PLAYER_GLIDING, now),
+                st.t.active(HudSignal.PLAYER_JUMPING, now),
+                st.t.active(HudSignal.PLAYER_CROUCHING, now),
+                st.t.active(HudSignal.PLAYER_CLIMBING, now),
+                st.t.active(HudSignal.PLAYER_IN_FLUID, now),
+                st.t.active(HudSignal.PLAYER_ON_GROUND, now),
+                st.t.active(HudSignal.PLAYER_FALLING, now),
+                st.t.active(HudSignal.PLAYER_SITTING, now),
+                st.t.active(HudSignal.PLAYER_ROLLING, now),
+
                 rangedWeaponInHand,
                 meleeWeaponInHand,
+
                 st.healthBar,
                 st.staminaBar,
                 st.manaBar

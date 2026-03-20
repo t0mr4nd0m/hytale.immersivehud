@@ -61,6 +61,7 @@ public final class ProfileCmd extends AbstractPlayerCommand {
     ) {
         Profile profile = Profile.fromString(profileArg.get(context));
         if (profile == null) {
+            context.sendMessage(Message.raw("Unknown profile.").color(ERROR_COLOR));
             return;
         }
 
@@ -97,7 +98,7 @@ public final class ProfileCmd extends AbstractPlayerCommand {
             @Nonnull PlayerConfig playerCfg,
             @Nonnull Profile profile
     ) {
-        ProfilePresets.apply(plugin, playerCfg, profile);
+        ProfilePresets.applyTo(playerCfg, profile);
 
         UUID uuid = playerRef.getUuid();
         plugin.markPlayerConfigDirty(uuid);

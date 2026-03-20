@@ -3,6 +3,8 @@ package com.tom.immersivehudplugin.managers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tom.immersivehudplugin.ImmersiveHudPlugin;
+import com.tom.immersivehudplugin.config.ConfigJsonMapper;
+import com.tom.immersivehudplugin.config.ConfigSchemaValidator;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 
@@ -67,16 +69,16 @@ public final class PlayerConfigManager {
             PlayerConfig cfg;
 
             if (Files.exists(file)) {
+                com.google.gson.JsonElement root;
                 try (Reader reader = Files.newBufferedReader(file)) {
-                    cfg = gson.fromJson(reader, PlayerConfig.class);
+                    root = com.google.gson.JsonParser.parseReader(reader);
                 }
 
-                if (cfg == null) {
-                    cfg = PlayerConfig.fromDefaults(
-                            globalCfg.getDefaultHudComponents(),
-                            globalCfg.getDefaultDynamicHud()
-                    );
+                if (!ConfigSchemaValidator.isValidPlayerConfig(root)) {
+                    throw new IllegalStateException("player config does not match expected schema");
                 }
+
+                cfg = ConfigJsonMapper.fromJsonPlayer(root.getAsJsonObject());
             } else {
                 cfg = PlayerConfig.fromDefaults(
                         globalCfg.getDefaultHudComponents(),
@@ -100,12 +102,18 @@ public final class PlayerConfigManager {
                             + t.getMessage()
             );
 
+            Path file = pathFor(uuid);
+            backupBrokenPlayerFile(file);
+
             PlayerConfig fallback = PlayerConfig.fromDefaults(
                     globalCfg.getDefaultHudComponents(),
                     globalCfg.getDefaultDynamicHud()
             );
 
             cache.put(uuid, fallback);
+            markDirty(uuid);
+            save(uuid);
+
             return fallback;
         }
     }
@@ -126,15 +134,41 @@ public final class PlayerConfigManager {
 
             Path file = pathFor(uuid);
             try (Writer writer = Files.newBufferedWriter(file)) {
-                gson.toJson(cfg, writer);
+                gson.toJson(ConfigJsonMapper.toJson(cfg), writer);
             }
 
             dirty.remove(uuid);
+
         } catch (Throwable t) {
             plugin.getLogger().at(Level.WARNING).log(
                     "Failed to save player config for " + uuid
                             + " [" + t.getClass().getSimpleName() + "]: "
                             + t.getMessage()
+            );
+        }
+    }
+
+    private void backupBrokenPlayerFile(Path file) {
+        try {
+            if (file == null || !Files.exists(file)) {
+                return;
+            }
+
+            String timestamp = java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"));
+
+            Path backup = file.resolveSibling(file.getFileName().toString() + ".broken-" + timestamp);
+            Files.move(file, backup, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            plugin.getLogger().at(Level.WARNING).log(
+                    "Backed up invalid player config to " + backup
+            );
+        } catch (Throwable moveEx) {
+            plugin.getLogger().at(Level.WARNING).log(
+                    "Failed to back up broken player config "
+                            + file
+                            + " [" + moveEx.getClass().getSimpleName() + "]: "
+                            + moveEx.getMessage()
             );
         }
     }

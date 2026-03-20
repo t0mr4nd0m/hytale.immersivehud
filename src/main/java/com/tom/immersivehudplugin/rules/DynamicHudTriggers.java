@@ -17,6 +17,16 @@ public enum DynamicHudTriggers {
     PLAYER_SPRINTING(DynamicHudTriggersContext::playerSprinting),
     PLAYER_MOUNTING(DynamicHudTriggersContext::playerMounting),
     PLAYER_SWIMMING(DynamicHudTriggersContext::playerSwimming),
+    PLAYER_FLYING(DynamicHudTriggersContext::playerFlying),
+    PLAYER_GLIDING(DynamicHudTriggersContext::playerGliding),
+    PLAYER_JUMPING(DynamicHudTriggersContext::playerJumping),
+    PLAYER_CROUCHING(DynamicHudTriggersContext::playerCrouching),
+    PLAYER_CLIMBING(DynamicHudTriggersContext::playerClimbing),
+    PLAYER_IN_FLUID(DynamicHudTriggersContext::playerInFluid),
+    PLAYER_ON_GROUND(DynamicHudTriggersContext::playerOnGround),
+    PLAYER_FALLING(DynamicHudTriggersContext::playerFalling),
+    PLAYER_SITTING(DynamicHudTriggersContext::playerSitting),
+    PLAYER_ROLLING(DynamicHudTriggersContext::playerRolling),
 
     HOLDING_RANGED_WEAPON(DynamicHudTriggersContext::holdingRangedWeapon),
     HOLDING_MELEE_WEAPON(DynamicHudTriggersContext::holdingMeleeWeapon),
@@ -74,48 +84,6 @@ public enum DynamicHudTriggers {
         }
 
         return mask;
-    }
-
-    public static EnumSet<DynamicHudTriggers> parseCsv(String csv) {
-        EnumSet<DynamicHudTriggers> set = EnumSet.noneOf(DynamicHudTriggers.class);
-
-        if (csv == null || csv.isBlank()) {
-            return set;
-        }
-
-        String[] parts = csv.split(",");
-
-        for (String part : parts) {
-            String name = part.trim().toUpperCase();
-            if (name.isEmpty()) {
-                continue;
-            }
-
-            try {
-                set.add(DynamicHudTriggers.valueOf(name));
-            } catch (IllegalArgumentException ignored) {
-                // ignore invalid tokens
-            }
-        }
-
-        return set;
-    }
-
-    public static String toCsv(EnumSet<DynamicHudTriggers> rules) {
-        if (rules == null || rules.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        for (DynamicHudTriggers rule : rules) {
-            if (!sb.isEmpty()) {
-                sb.append(',');
-            }
-            sb.append(rule.name());
-        }
-
-        return sb.toString();
     }
 
     public static DynamicHudTriggers fromString(String value) {

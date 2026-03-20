@@ -1,185 +1,148 @@
 package com.tom.immersivehudplugin.config;
 
-import com.hypixel.hytale.codec.KeyedCodec;
-import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
 
-import java.util.EnumSet;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class DynamicHudConfig {
 
-    public static final BuilderCodec<DynamicHudConfig> CODEC =
-            BuilderCodec.builder(DynamicHudConfig.class, DynamicHudConfig::new)
+    private final Map<String, DynamicHudRuleConfig> rulesByKey = new LinkedHashMap<>();
 
-                    .append(new KeyedCodec<>("Hotbar", DynamicHudRuleConfig.CODEC),
-                            (cfg, v) -> cfg.hotbar = v,
-                            DynamicHudConfig::getHotbar)
-                    .add()
-
-                    .append(new KeyedCodec<>("Reticle", DynamicHudRuleConfig.CODEC),
-                            (cfg, v) -> cfg.reticle = v,
-                            DynamicHudConfig::getReticle)
-                    .add()
-
-                    .append(new KeyedCodec<>("Compass", DynamicHudRuleConfig.CODEC),
-                            (cfg, v) -> cfg.compass = v,
-                            DynamicHudConfig::getCompass)
-                    .add()
-
-                    .append(new KeyedCodec<>("Health", DynamicHudRuleConfig.CODEC),
-                            (cfg, v) -> cfg.health = v,
-                            DynamicHudConfig::getHealth)
-                    .add()
-
-                    .append(new KeyedCodec<>("Stamina", DynamicHudRuleConfig.CODEC),
-                            (cfg, v) -> cfg.stamina = v,
-                            DynamicHudConfig::getStamina)
-                    .add()
-
-                    .append(new KeyedCodec<>("Mana", DynamicHudRuleConfig.CODEC),
-                            (cfg, v) -> cfg.mana = v,
-                            DynamicHudConfig::getMana)
-                    .add()
-
-                    .build();
-
-    private DynamicHudRuleConfig hotbar = defaultHotbar();
-    private DynamicHudRuleConfig reticle = defaultReticle();
-    private DynamicHudRuleConfig compass = defaultCompass();
-    private DynamicHudRuleConfig health = defaultHealth();
-    private DynamicHudRuleConfig stamina = defaultStamina();
-    private DynamicHudRuleConfig mana = defaultMana();
-
-    private static DynamicHudRuleConfig defaultHotbar() {
-        DynamicHudRuleConfig r = new DynamicHudRuleConfig();
-        r.setRules(EnumSet.of(DynamicHudTriggers.HOTBAR_INPUT));
-        return r;
+    public DynamicHudConfig() {
+        ensureAllDynamicEntries();
     }
 
-    private static DynamicHudRuleConfig defaultReticle() {
-        DynamicHudRuleConfig r = new DynamicHudRuleConfig();
-        r.setRules(EnumSet.of(
-                DynamicHudTriggers.HOLDING_RANGED_WEAPON,
-                DynamicHudTriggers.CHARGING_WEAPON,
-                DynamicHudTriggers.CONSUMABLE_USE,
-                DynamicHudTriggers.TARGET_ENTITY,
-                DynamicHudTriggers.INTERACTABLE_BLOCK
-        ));
-        return r;
-    }
-
-    private static DynamicHudRuleConfig defaultCompass() {
-        DynamicHudRuleConfig r = new DynamicHudRuleConfig();
-        r.setRules(EnumSet.of(DynamicHudTriggers.PLAYER_MOVING));
-        return r;
-    }
-
-    private static DynamicHudRuleConfig defaultHealth() {
-        DynamicHudRuleConfig r = new DynamicHudRuleConfig();
-        r.setRules(EnumSet.of(DynamicHudTriggers.HEALTH_NOT_FULL));
-        return r;
-    }
-
-    private static DynamicHudRuleConfig defaultStamina() {
-        DynamicHudRuleConfig r = new DynamicHudRuleConfig();
-        r.setRules(EnumSet.of(DynamicHudTriggers.STAMINA_CRITICAL));
-        return r;
-    }
-
-    private static DynamicHudRuleConfig defaultMana() {
-        DynamicHudRuleConfig r = new DynamicHudRuleConfig();
-        r.setRules(EnumSet.of(DynamicHudTriggers.MANA_CRITICAL));
-        return r;
-    }
-
+    @Nonnull
     public DynamicHudRuleConfig getHotbar() {
-        if (hotbar == null) hotbar = defaultHotbar();
-        return hotbar;
+        return getByKey("hotbar");
     }
 
-    public void setHotbar(DynamicHudRuleConfig v) {
-        hotbar = (v != null) ? v : defaultHotbar();
+    public void setHotbar(@Nullable DynamicHudRuleConfig v) {
+        setByKey("hotbar", v);
     }
 
+    @Nonnull
     public DynamicHudRuleConfig getReticle() {
-        if (reticle == null) reticle = defaultReticle();
-        return reticle;
+        return getByKey("reticle");
     }
 
-    public void setReticle(DynamicHudRuleConfig v) {
-        reticle = (v != null) ? v : defaultReticle();
+    public void setReticle(@Nullable DynamicHudRuleConfig v) {
+        setByKey("reticle", v);
     }
 
+    @Nonnull
     public DynamicHudRuleConfig getCompass() {
-        if (compass == null) compass = defaultCompass();
-        return compass;
+        return getByKey("compass");
     }
 
-    public void setCompass(DynamicHudRuleConfig v) {
-        compass = (v != null) ? v : defaultCompass();
+    public void setCompass(@Nullable DynamicHudRuleConfig v) {
+        setByKey("compass", v);
     }
 
+    @Nonnull
     public DynamicHudRuleConfig getHealth() {
-        if (health == null) health = defaultHealth();
-        return health;
+        return getByKey("health");
     }
 
-    public void setHealth(DynamicHudRuleConfig v) {
-        health = (v != null) ? v : defaultHealth();
+    public void setHealth(@Nullable DynamicHudRuleConfig v) {
+        setByKey("health", v);
     }
 
+    @Nonnull
     public DynamicHudRuleConfig getStamina() {
-        if (stamina == null) stamina = defaultStamina();
-        return stamina;
+        return getByKey("stamina");
     }
 
-    public void setStamina(DynamicHudRuleConfig v) {
-        stamina = (v != null) ? v : defaultStamina();
+    public void setStamina(@Nullable DynamicHudRuleConfig v) {
+        setByKey("stamina", v);
     }
 
+    @Nonnull
     public DynamicHudRuleConfig getMana() {
-        if (mana == null) mana = defaultMana();
-        return mana;
+        return getByKey("mana");
     }
 
-    public void setMana(DynamicHudRuleConfig v) {
-        mana = (v != null) ? v : defaultMana();
+    public void setMana(@Nullable DynamicHudRuleConfig v) {
+        setByKey("mana", v);
+    }
+
+    @Nonnull
+    public DynamicHudRuleConfig getByKey(@Nullable String key) {
+        String normalized = HudComponentRegistry.normalize(key);
+        ensureAllDynamicEntries();
+        return rulesByKey.computeIfAbsent(normalized, k -> new DynamicHudRuleConfig());
+    }
+
+    public void setByKey(@Nullable String key, @Nullable DynamicHudRuleConfig value) {
+        String normalized = HudComponentRegistry.normalize(key);
+        if (normalized.isEmpty()) {
+            return;
+        }
+
+        rulesByKey.put(normalized, value != null ? value : new DynamicHudRuleConfig());
+    }
+
+    @Nonnull
+    public Map<String, DynamicHudRuleConfig> asMap() {
+        ensureAllDynamicEntries();
+        return java.util.Collections.unmodifiableMap(rulesByKey);
     }
 
     public boolean sanitize() {
         boolean changed = false;
 
-        if (hotbar == null) { hotbar = defaultHotbar(); changed = true; }
-        else changed |= hotbar.sanitize();
+        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+            String key = HudComponentRegistry.normalize(entry.key());
+            DynamicHudRuleConfig ruleCfg = rulesByKey.get(key);
 
-        if (reticle == null) { reticle = defaultReticle(); changed = true; }
-        else changed |= reticle.sanitize();
+            if (ruleCfg == null) {
+                rulesByKey.put(key, new DynamicHudRuleConfig());
+                changed = true;
+            } else {
+                changed |= ruleCfg.sanitize();
+            }
+        }
 
-        if (compass == null) { compass = defaultCompass(); changed = true; }
-        else changed |= compass.sanitize();
+        java.util.Set<String> validKeys = HudComponentRegistry.dynamicList().stream()
+                .map(HudEntry::key)
+                .map(HudComponentRegistry::normalize)
+                .collect(java.util.stream.Collectors.toSet());
 
-        if (health == null) { health = defaultHealth(); changed = true; }
-        else changed |= health.sanitize();
-
-        if (stamina == null) { stamina = defaultStamina(); changed = true; }
-        else changed |= stamina.sanitize();
-
-        if (mana == null) { mana = defaultMana(); changed = true; }
-        else changed |= mana.sanitize();
+        java.util.Iterator<Map.Entry<String, DynamicHudRuleConfig>> it = rulesByKey.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, DynamicHudRuleConfig> entry = it.next();
+            if (!validKeys.contains(entry.getKey())) {
+                it.remove();
+                changed = true;
+            }
+        }
 
         return changed;
     }
 
     public DynamicHudConfig copy() {
         DynamicHudConfig c = new DynamicHudConfig();
+        c.rulesByKey.clear();
 
-        c.setHotbar(getHotbar() != null ? getHotbar().copy() : new DynamicHudRuleConfig());
-        c.setReticle(getReticle() != null ? getReticle().copy() : new DynamicHudRuleConfig());
-        c.setCompass(getCompass() != null ? getCompass().copy() : new DynamicHudRuleConfig());
-        c.setHealth(getHealth() != null ? getHealth().copy() : new DynamicHudRuleConfig());
-        c.setStamina(getStamina() != null ? getStamina().copy() : new DynamicHudRuleConfig());
-        c.setMana(getMana() != null ? getMana().copy() : new DynamicHudRuleConfig());
+        for (Map.Entry<String, DynamicHudRuleConfig> entry : rulesByKey.entrySet()) {
+            c.rulesByKey.put(
+                    entry.getKey(),
+                    entry.getValue() != null ? entry.getValue().copy() : new DynamicHudRuleConfig()
+            );
+        }
 
+        c.ensureAllDynamicEntries();
         return c;
+    }
+
+    private void ensureAllDynamicEntries() {
+        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+            String key = HudComponentRegistry.normalize(entry.key());
+            rulesByKey.computeIfAbsent(key, k -> new DynamicHudRuleConfig());
+        }
     }
 }

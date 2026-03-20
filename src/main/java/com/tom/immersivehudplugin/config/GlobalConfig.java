@@ -1,9 +1,7 @@
 package com.tom.immersivehudplugin.config;
 
-import com.hypixel.hytale.codec.Codec;
-import com.hypixel.hytale.codec.KeyedCodec;
-import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.tom.immersivehudplugin.ImmersiveHudPlugin;
+import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 
 public final class GlobalConfig {
 
@@ -16,43 +14,8 @@ public final class GlobalConfig {
     private int hideDelayMs = HIDE_DELAY_MS;
     private float reticleTargetRange = RETICLE_TARGET_RANGE;
 
-    private HudComponentsConfig defaultHudComponents = new HudComponentsConfig();
-    private DynamicHudConfig defaultDynamicHud = new DynamicHudConfig();
-
-    public static final BuilderCodec<GlobalConfig> CODEC =
-            BuilderCodec.builder(GlobalConfig.class, GlobalConfig::new)
-
-                    .append(new KeyedCodec<>("ConfigVersion", Codec.STRING),
-                            (cfg, v) -> cfg.configVersion = v,
-                            GlobalConfig::getConfigVersion)
-                    .add()
-
-                    .append(new KeyedCodec<>("IntervalMs", Codec.INTEGER),
-                            (cfg, v) -> cfg.intervalMs = v,
-                            GlobalConfig::getIntervalMs)
-                    .add()
-
-                    .append(new KeyedCodec<>("HideDelayMs", Codec.INTEGER),
-                            (cfg, v) -> cfg.hideDelayMs = v,
-                            GlobalConfig::getHideDelayMs)
-                    .add()
-
-                    .append(new KeyedCodec<>("ReticleTargetRange", Codec.FLOAT),
-                            (cfg, v) -> cfg.reticleTargetRange = v,
-                            GlobalConfig::getReticleTargetRange)
-                    .add()
-
-                    .append(new KeyedCodec<>("DefaultHudComponents", HudComponentsConfig.CODEC),
-                            (cfg, v) -> cfg.defaultHudComponents = (v != null ? v : new HudComponentsConfig()),
-                            GlobalConfig::getDefaultHudComponents)
-                    .add()
-
-                    .append(new KeyedCodec<>("DefaultDynamicHud", DynamicHudConfig.CODEC),
-                            (cfg, v) -> cfg.defaultDynamicHud = (v != null ? v : new DynamicHudConfig()),
-                            GlobalConfig::getDefaultDynamicHud)
-                    .add()
-
-                    .build();
+    private HudComponentsConfig defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
+    private DynamicHudConfig defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
 
     public String getConfigVersion() {
         return configVersion;
@@ -66,34 +29,50 @@ public final class GlobalConfig {
         return intervalMs;
     }
 
+    public void setIntervalMs(int intervalMs) {
+        this.intervalMs = intervalMs;
+    }
+
     public int getHideDelayMs() {
         return hideDelayMs;
+    }
+
+    public void setHideDelayMs(int hideDelayMs) {
+        this.hideDelayMs = hideDelayMs;
     }
 
     public float getReticleTargetRange() {
         return reticleTargetRange;
     }
 
-    public HudComponentsConfig getDefaultHudComponents() {
-        if (defaultHudComponents == null) {
-            defaultHudComponents = new HudComponentsConfig();
-        }
-        return defaultHudComponents;
+    public void setReticleTargetRange(float reticleTargetRange) {
+        this.reticleTargetRange = reticleTargetRange;
     }
 
-    public void setDefaultHudComponents(HudComponentsConfig defaultHudComponents) {
-        this.defaultHudComponents = (defaultHudComponents != null) ? defaultHudComponents : new HudComponentsConfig();
+    public HudComponentsConfig getDefaultHudComponents() {
+        if (defaultHudComponents == null) {
+            defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
+        }
+        return defaultHudComponents.copy();
+    }
+
+    public void setDefaultHudComponents(HudComponentsConfig value) {
+        this.defaultHudComponents = (value != null)
+                ? value.copy()
+                : HudComponentRegistry.buildDefaultHudComponents();
     }
 
     public DynamicHudConfig getDefaultDynamicHud() {
         if (defaultDynamicHud == null) {
-            defaultDynamicHud = new DynamicHudConfig();
+            defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
         }
-        return defaultDynamicHud;
+        return defaultDynamicHud.copy();
     }
 
-    public void setDefaultDynamicHud(DynamicHudConfig defaultDynamicHud) {
-        this.defaultDynamicHud = (defaultDynamicHud != null) ? defaultDynamicHud : new DynamicHudConfig();
+    public void setDefaultDynamicHud(DynamicHudConfig value) {
+        this.defaultDynamicHud = (value != null)
+                ? value.copy()
+                : HudComponentRegistry.buildDefaultDynamicHud();
     }
 
     public boolean sanitize() {
@@ -115,14 +94,14 @@ public final class GlobalConfig {
         }
 
         if (defaultHudComponents == null) {
-            defaultHudComponents = new HudComponentsConfig();
+            defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
             changed = true;
         } else {
             changed |= defaultHudComponents.sanitize();
         }
 
         if (defaultDynamicHud == null) {
-            defaultDynamicHud = new DynamicHudConfig();
+            defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
             changed = true;
         } else {
             changed |= defaultDynamicHud.sanitize();

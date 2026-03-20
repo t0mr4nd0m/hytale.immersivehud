@@ -4,9 +4,12 @@ import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
+import com.tom.immersivehudplugin.config.PlayerConfig;
+import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -60,12 +63,22 @@ public final class HudComponentRegistry {
             String label,
             Group group,
             HudComponent hudComponent,
+            String staticConfigKey,
+            @Nullable String dynamicConfigKey,
             BoolGetter<HudComponentsConfig> staticGetter,
             BoolSetter<HudComponentsConfig> staticSetter,
-            @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter
+            @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
+            boolean defaultHidden,
+            EnumSet<DynamicHudTriggers> defaultRules
     ) {
+        public HudEntry {
+            defaultRules = defaultRules == null
+                    ? EnumSet.noneOf(DynamicHudTriggers.class)
+                    : EnumSet.copyOf(defaultRules);
+        }
+
         public boolean supportsDynamicRules() {
-            return dynamicGetter != null;
+            return dynamicGetter != null && dynamicConfigKey != null;
         }
     }
 
@@ -80,174 +93,276 @@ public final class HudComponentRegistry {
 
         register(new HudEntry(
                 "health", "Health", Group.BARS, HudComponent.Health,
+                "HideHealth",
+                "Health",
                 HudComponentsConfig::isHideHealthHud,
                 HudComponentsConfig::setHideHealthHud,
-                DynamicHudConfig::getHealth
+                DynamicHudConfig::getHealth,
+                true,
+                EnumSet.of(DynamicHudTriggers.HEALTH_NOT_FULL)
         ));
 
         register(new HudEntry(
                 "stamina", "Stamina", Group.BARS, HudComponent.Stamina,
+                "HideStamina",
+                "Stamina",
                 HudComponentsConfig::isHideStaminaHud,
                 HudComponentsConfig::setHideStaminaHud,
-                DynamicHudConfig::getStamina
+                DynamicHudConfig::getStamina,
+                true,
+                EnumSet.of(DynamicHudTriggers.STAMINA_CRITICAL)
         ));
 
         register(new HudEntry(
                 "mana", "Mana", Group.BARS, HudComponent.Mana,
+                "HideMana",
+                "Mana",
                 HudComponentsConfig::isHideManaHud,
                 HudComponentsConfig::setHideManaHud,
-                DynamicHudConfig::getMana
+                DynamicHudConfig::getMana,
+                true,
+                EnumSet.of(DynamicHudTriggers.MANA_CRITICAL)
         ));
 
         // Core (dynamic-capable)
 
         register(new HudEntry(
                 "compass", "Compass", Group.CORE, HudComponent.Compass,
+                "HideCompass",
+                "Compass",
                 HudComponentsConfig::isHideCompassHud,
                 HudComponentsConfig::setHideCompassHud,
-                DynamicHudConfig::getCompass
+                DynamicHudConfig::getCompass,
+                true,
+                EnumSet.of(DynamicHudTriggers.PLAYER_MOVING)
         ));
 
         register(new HudEntry(
                 "hotbar", "Hotbar", Group.CORE, HudComponent.Hotbar,
+                "HideHotbar",
+                "Hotbar",
                 HudComponentsConfig::isHideHotbarHud,
                 HudComponentsConfig::setHideHotbarHud,
-                DynamicHudConfig::getHotbar
+                DynamicHudConfig::getHotbar,
+                true,
+                EnumSet.of(DynamicHudTriggers.HOTBAR_INPUT)
         ));
 
         register(new HudEntry(
                 "reticle", "Reticle", Group.CORE, HudComponent.Reticle,
+                "HideReticle",
+                "Reticle",
                 HudComponentsConfig::isHideReticleHud,
                 HudComponentsConfig::setHideReticleHud,
-                DynamicHudConfig::getReticle
+                DynamicHudConfig::getReticle,
+                true,
+                EnumSet.of(
+                        DynamicHudTriggers.CHARGING_WEAPON,
+                        DynamicHudTriggers.CONSUMABLE_USE,
+                        DynamicHudTriggers.TARGET_ENTITY,
+                        DynamicHudTriggers.INTERACTABLE_BLOCK,
+                        DynamicHudTriggers.HOLDING_RANGED_WEAPON
+                )
         ));
 
         // Static-only
 
         register(new HudEntry(
                 "inputbindings", "Input Bindings", Group.UI, HudComponent.InputBindings,
+                "HideInputBindings",
+                null,
                 HudComponentsConfig::isHideInputBindingsHud,
                 HudComponentsConfig::setHideInputBindingsHud,
-                null
+                null,
+                true,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "notifications", "Notifications", Group.UI, HudComponent.Notifications,
+                "HideNotifications",
+                null,
                 HudComponentsConfig::isHideNotificationsHud,
                 HudComponentsConfig::setHideNotificationsHud,
-                null
+                null,
+                true,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "statusicons", "Status Icons", Group.UI, HudComponent.StatusIcons,
+                "HideStatusIcons",
+                null,
                 HudComponentsConfig::isHideStatusIconsHud,
                 HudComponentsConfig::setHideStatusIconsHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "speedometer", "Speedometer", Group.UI, HudComponent.Speedometer,
+                "HideSpeedometer",
+                null,
                 HudComponentsConfig::isHideSpeedometerHud,
                 HudComponentsConfig::setHideSpeedometerHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "ammo", "Ammo Indicator", Group.UI, HudComponent.AmmoIndicator,
+                "HideAmmoIndicator",
+                null,
                 HudComponentsConfig::isHideAmmoIndicatorHud,
                 HudComponentsConfig::setHideAmmoIndicatorHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "oxygen", "Oxygen", Group.UI, HudComponent.Oxygen,
+                "HideOxygen",
+                null,
                 HudComponentsConfig::isHideOxygenHud,
                 HudComponentsConfig::setHideOxygenHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
+        ));
+
+        register(new HudEntry(
+                "utilityslotselector", "Utility Slot Selector", Group.UI, HudComponent.UtilitySlotSelector,
+                "HideUtilitySlotSelector",
+                null,
+                HudComponentsConfig::isHideUtilitySlotSelectorHud,
+                HudComponentsConfig::setHideUtilitySlotSelectorHud,
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "chat", "Chat", Group.SOCIAL, HudComponent.Chat,
+                "HideChat",
+                null,
                 HudComponentsConfig::isHideChatHud,
                 HudComponentsConfig::setHideChatHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "requests", "Requests", Group.SOCIAL, HudComponent.Requests,
+                "HideRequests",
+                null,
                 HudComponentsConfig::isHideRequestsHud,
                 HudComponentsConfig::setHideRequestsHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "killfeed", "Kill Feed", Group.SOCIAL, HudComponent.KillFeed,
+                "HideKillFeed",
+                null,
                 HudComponentsConfig::isHideKillFeedHud,
                 HudComponentsConfig::setHideKillFeedHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "playerlist", "Player List", Group.SOCIAL, HudComponent.PlayerList,
+                "HidePlayerList",
+                null,
                 HudComponentsConfig::isHidePlayerListHud,
                 HudComponentsConfig::setHidePlayerListHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "eventtitle", "Event Title", Group.PANELS, HudComponent.EventTitle,
+                "HideEventTitle",
+                null,
                 HudComponentsConfig::isHideEventTitleHud,
                 HudComponentsConfig::setHideEventTitleHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "objectivepanel", "Objective Panel", Group.PANELS, HudComponent.ObjectivePanel,
+                "HideObjectivePanel",
+                null,
                 HudComponentsConfig::isHideObjectivePanelHud,
                 HudComponentsConfig::setHideObjectivePanelHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "portalpanel", "Portal Panel", Group.PANELS, HudComponent.PortalPanel,
+                "HidePortalPanel",
+                null,
                 HudComponentsConfig::isHidePortalPanelHud,
                 HudComponentsConfig::setHidePortalPanelHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "sleep", "Sleep", Group.PANELS, HudComponent.Sleep,
+                "HideSleep",
+                null,
                 HudComponentsConfig::isHideSleepHud,
                 HudComponentsConfig::setHideSleepHud,
-                null
-        ));
-
-        register(new HudEntry(
-                "utilityslotselector", "Utility Slot Selector", Group.BUILDER, HudComponent.UtilitySlotSelector,
-                HudComponentsConfig::isHideUtilitySlotSelectorHud,
-                HudComponentsConfig::setHideUtilitySlotSelectorHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "blockvariantselector", "Block Variant Selector", Group.BUILDER, HudComponent.BlockVariantSelector,
+                "HideBlockVariantSelector",
+                null,
                 HudComponentsConfig::isHideBlockVariantSelectorHud,
                 HudComponentsConfig::setHideBlockVariantSelectorHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "buildertoolslegend", "Builder Tools Legend", Group.BUILDER, HudComponent.BuilderToolsLegend,
+                "HideBuilderToolsLegend",
+                null,
                 HudComponentsConfig::isHideBuilderToolsLegendHud,
                 HudComponentsConfig::setHideBuilderToolsLegendHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         register(new HudEntry(
                 "buildertoolsmaterialslotselector", "Builder Tools Material Slot Selector", Group.BUILDER, HudComponent.BuilderToolsMaterialSlotSelector,
+                "HideBuilderToolsMaterialSlotSelector",
+                null,
                 HudComponentsConfig::isHideBuilderToolsMaterialSlotSelectorHud,
                 HudComponentsConfig::setHideBuilderToolsMaterialSlotSelectorHud,
-                null
+                null,
+                false,
+                EnumSet.noneOf(DynamicHudTriggers.class)
         ));
 
         ALL_LIST = List.copyOf(REGISTRY.values());
@@ -276,6 +391,34 @@ public final class HudComponentRegistry {
 
     public static List<HudEntry> dynamicList() {
         return DYNAMIC_LIST;
+    }
+
+    public static HudComponentsConfig buildDefaultHudComponents() {
+        HudComponentsConfig cfg = new HudComponentsConfig();
+
+        for (HudEntry entry : allList()) {
+            entry.staticSetter().set(cfg, entry.defaultHidden());
+        }
+
+        return cfg;
+    }
+
+    public static DynamicHudConfig buildDefaultDynamicHud() {
+        DynamicHudConfig cfg = new DynamicHudConfig();
+
+        for (HudEntry entry : dynamicList()) {
+            DynamicHudRuleConfig ruleCfg = entry.dynamicGetter().apply(cfg);
+            ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
+        }
+
+        return cfg;
+    }
+
+    public static PlayerConfig buildDefaultPlayerConfig() {
+        return PlayerConfig.fromDefaults(
+                buildDefaultHudComponents(),
+                buildDefaultDynamicHud()
+        );
     }
 
     @Nullable
