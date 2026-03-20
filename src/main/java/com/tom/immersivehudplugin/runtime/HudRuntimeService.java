@@ -85,6 +85,7 @@ public final class HudRuntimeService {
     }
 
     public void restartTickTaskIfNeeded() {
+
         GlobalConfig cfg = getGlobalConfig();
         int wanted = intervalMs(cfg);
         if (wanted <= 0) {
@@ -150,20 +151,19 @@ public final class HudRuntimeService {
     }
 
     private void registerInboundWatcher() {
-        if (inboundRegistered) {
-            return;
-        }
+
+        if (inboundRegistered) { return; }
         inboundRegistered = true;
 
         PacketAdapters.registerInbound((PlayerPacketWatcher) (playerRef, packet) -> {
-            if (!(packet instanceof SyncInteractionChains sic)) {
-                return;
-            }
+
+            if (!(packet instanceof SyncInteractionChains sic)) { return; }
 
             long now = nowMs();
             PlayerHudState st = stateFor(playerRef.getUuid());
 
             for (SyncInteractionChain u : sic.updates) {
+
                 boolean isChargingStart = (u.interactionType == InteractionType.Primary);
                 boolean isChargingEnd = (u.interactionType == InteractionType.ProjectileHit
                         || u.interactionType == InteractionType.ProjectileBounce
@@ -191,23 +191,35 @@ public final class HudRuntimeService {
 
                     if (prev != -1 && slot != prev) {
                         st.heldItemRefreshRequested = true;
+                        st.heldItemStateInitialized = false;
+                        st.heldItem = null;
+                        st.rangedWeaponInHand = false;
+                        st.meleeWeaponInHand = false;
+
+                        st.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
+                        st.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
+                        st.t.clear(HudSignal.CHARGING_WEAPON);
+
+                        isChargingStart = false;
+                        isChargingEnd = true;
+
                         st.t.pulse(HudSignal.HOTBAR_INPUT, now, st.hideDelayMsHint);
                     }
                 }
 
-                if (st.rangedWeaponInHand) {
+                /*if (st.rangedWeaponInHand) {
                     st.t.pulse(HudSignal.HOLDING_RANGED_WEAPON, now, st.hideDelayMsHint);
-                }
+                }*/
 
-                if (st.meleeWeaponInHand) {
+                /*if (st.meleeWeaponInHand) {
                     st.t.pulse(HudSignal.HOLDING_MELEE_WEAPON, now, st.hideDelayMsHint);
-                }
+                }*/
 
                 if (isChargingStart && (st.rangedWeaponInHand || st.meleeWeaponInHand)) {
                     st.t.pulse(HudSignal.CHARGING_WEAPON, now, st.hideDelayMsHint);
                 }
 
-                if (st.rangedWeaponInHand && isChargingEnd) {
+                if (isChargingEnd) {
                     st.t.clear(HudSignal.CHARGING_WEAPON);
                 }
             }
@@ -252,12 +264,6 @@ public final class HudRuntimeService {
 
         st.t.pulse(HudSignal.READY_GRACE, now, hideDelay);
         st.t.pulse(HudSignal.HOTBAR_INPUT, now, hideDelay);
-        st.t.pulse(HudSignal.PLAYER_MOVING, now, hideDelay);
-        st.t.pulse(HudSignal.PLAYER_WALKING, now, hideDelay);
-        st.t.pulse(HudSignal.PLAYER_RUNNING, now, hideDelay);
-        st.t.pulse(HudSignal.PLAYER_SPRINTING, now, hideDelay);
-        st.t.pulse(HudSignal.PLAYER_MOUNTING, now, hideDelay);
-        st.t.pulse(HudSignal.PLAYER_SWIMMING, now, hideDelay);
     }
 
     private void tickReadyPlayers() {

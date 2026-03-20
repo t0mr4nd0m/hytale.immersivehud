@@ -15,12 +15,16 @@ import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
-import java.util.StringJoiner;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public final class StatusCmd extends AbstractPlayerCommand {
 
@@ -96,39 +100,52 @@ public final class StatusCmd extends AbstractPlayerCommand {
     ) {
         sendSectionHeader(context, "HudComponents");
 
+        Map<HudComponentRegistry.Group, List<HudEntry>> byGroup = HudComponentRegistry.allList().stream()
+                .collect(Collectors.groupingBy(
+                        HudEntry::group,
+                        java.util.LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
         for (HudComponentRegistry.Group group : HudComponentRegistry.Group.values()) {
-            boolean wroteGroupHeader = false;
+            List<HudEntry> entries = byGroup.get(group);
+            if (entries == null || entries.isEmpty()) {
+                continue;
+            }
 
-            for (var entry : HudComponentRegistry.allList()) {
-                if (entry.group() != group) {
-                    continue;
-                }
+            sendSectionHeader(context, group.label);
 
-                if (!wroteGroupHeader) {
-                    sendSectionHeader(context, group.label);
-                    wroteGroupHeader = true;
-                }
-
-                boolean hiddenNow = entry.staticGetter().get(hud);
-
-                if (entry.supportsDynamicRules()) {
-                    @SuppressWarnings("DataFlowIssue") DynamicHudRuleConfig rule = entry.dynamicGetter().apply(dynamic);
-                    sendDynamicComponentLine(context, entry.key(), hiddenNow, rule);
-                } else {
-                    sendStaticComponentLine(context, entry.key(), hiddenNow);
-                }
+            for (HudEntry entry : entries) {
+                sendHudEntryLine(context, entry, hud, dynamic);
             }
         }
     }
 
+    private static void sendHudEntryLine(
+            @Nonnull CommandContext context,
+            @Nonnull HudEntry entry,
+            @Nonnull HudComponentsConfig hud,
+            @Nonnull DynamicHudConfig dynamic
+    ) {
+        boolean hiddenNow = entry.staticGetter().get(hud);
+
+        if (!entry.supportsDynamicRules()) {
+            sendStaticComponentLine(context, entry.label(), hiddenNow);
+            return;
+        }
+
+        DynamicHudRuleConfig rule = entry.dynamicGetter().apply(dynamic);
+        sendDynamicComponentLine(context, entry.label(), hiddenNow, rule);
+    }
+
     private static void sendStaticComponentLine(
             @Nonnull CommandContext context,
-            @Nonnull String key,
+            @Nonnull String label,
             boolean hidden
     ) {
         context.sendMessage(Message.join(
                 Message.raw(" • ").color(LABEL_COLOR),
-                Message.raw(key).color(VALUE_COLOR),
+                Message.raw(label).color(VALUE_COLOR),
                 Message.raw(": ").color(LABEL_COLOR),
                 Message.raw(hidden ? "hide" : "show").color(hidden ? HIDE_COLOR : SHOW_COLOR)
         ));
@@ -136,14 +153,13 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
     private static void sendDynamicComponentLine(
             @Nonnull CommandContext context,
-            @Nonnull String key,
+            @Nonnull String label,
             boolean hidden,
             @Nullable DynamicHudRuleConfig rule
     ) {
-
         context.sendMessage(Message.join(
                 Message.raw(" • ").color(LABEL_COLOR),
-                Message.raw(key).color(VALUE_COLOR),
+                Message.raw(label).color(VALUE_COLOR),
                 Message.raw(": ").color(LABEL_COLOR),
                 Message.raw(hidden ? "hide" : "show").color(hidden ? HIDE_COLOR : SHOW_COLOR),
                 Message.raw(" | ").color(LABEL_COLOR),
@@ -177,7 +193,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
             @Nonnull CommandContext context,
             @Nonnull String label,
             @Nonnull Object value,
-            @SuppressWarnings("SameParameterValue") @Nonnull Color valueColor
+            @Nonnull Color valueColor
     ) {
         context.sendMessage(Message.join(
                 Message.raw(" • ").color(LABEL_COLOR),

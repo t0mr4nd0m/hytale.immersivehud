@@ -1,6 +1,13 @@
 # Changelog
 
 
+## v1.0.3
+
+* Improved config file system (sorry guys but if you are not using the default configuration you will need to customize your configuration again)
+* Centralized all HUD component definition (Ex. config key, default visibility and default rules) in one class to make it easier to maintain and more stable
+* Added more rules related to player movement status: PLAYER_SWIMMING, PLAYER_FLYING, PLAYER_GLIDING, PLAYER_JUMPING, PLAYER_CROUCHING, PLAYER_CLIMBING, PLAYER_IN_FLUID, PLAYER_ON_GROUND, PLAYER_FALLING, PLAYER_SITTING, PLAYER_ROLLING
+* Fixed bug with packet_watcher not detecting the item in hand properly and not releasing CHARGING_WEAPON rule
+
 ## v1.0.2
 
 * added method getPluginVersion to get plugin version from manifest and pass it to GlobalConfig 
