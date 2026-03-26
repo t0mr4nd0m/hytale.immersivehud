@@ -1,0 +1,24 @@
+$C = "../../../Common.ui";
+
+@BaseHelpStyle = LabelStyle( FontSize: 14 );
+
+Group #ProfilesRoot {
+  LayoutMode: Top;
+  Padding: (Right: 2);
+  Anchor: (Height: 540);
+
+  $C.@SimpleContainer  #ViewHelpRow {
+    Anchor: (Vertical: 8);
+
+    Label #ViewHelpText {
+      FlexWeight: 1;
+      Text: "Profile view copy";
+      Style: @BaseHelpStyle;
+    }
+  }
+
+  Group #ProfilesList {
+    LayoutMode: Top;
+    Anchor: (Top: 8);
+  }
+}

@@ -1,0 +1,106 @@
+$C = "../../../Common.ui";
+
+@VisibilitySectionButtonClosedStyle = TextButtonStyle(
+  Default : ( Background: #38424c,       LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #7f91a3 )),
+  Hovered : ( Background: #38424c(0.35), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #bfcdd5 )),
+  Pressed : ( Background: #38424c(0.5),  LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #ffffff )),
+  Sounds  : $C.@ButtonSounds
+);
+
+@VisibilitySectionButtonOpenStyle = TextButtonStyle(
+  Default : ( Background: #93844c(0.35), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #93844c )),
+  Hovered : ( Background: #93844c(0.45), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #cdbb75 )),
+  Pressed : ( Background: #93844c(0.55), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #ffffff )),
+  Sounds  : $C.@ButtonSounds
+);
+
+@VisibilitySectionClosedLabelStyle  = LabelStyle( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #7f91a3 );
+@VisibilitySectionOpenLabelStyle    = LabelStyle( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #93844c );
+@VisibilitySectionClosedSymbolStyle = LabelStyle( FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: #7f91a3 );
+@VisibilitySectionOpenSymbolStyle   = LabelStyle( FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: #93844c );
+
+Group #VisibilitySectionRow {
+  LayoutMode: Full;
+  Anchor: (Height: 48);
+  Padding: (Top: 8, Bottom: 4);
+
+  TextButton #VisibilitySectionButtonClosed {
+    Anchor: (Full: 0);
+    Text: "";
+    Style: @VisibilitySectionButtonClosedStyle;
+    Visible: true;
+  }
+
+  TextButton #VisibilitySectionButtonOpen {
+    Anchor: (Full: 0);
+    Text: "";
+    Style: @VisibilitySectionButtonOpenStyle;
+    Visible: false;
+  }
+
+  Group #VisibilitySectionContentClosed {
+    LayoutMode: Left;
+    Anchor: (Full: 0);
+    Padding: (Horizontal: 8);
+    Visible: true;
+
+    Label #VisibilitySectionGroupClosed {
+      FlexWeight: 1;
+      Text: "SECTION";
+      Style: @VisibilitySectionClosedLabelStyle;
+    }
+
+    Group {
+      Anchor: (Width: 92);
+      LayoutMode: Right;
+
+      Label #VisibilitySectionCounterClosed {
+        Text: "[0/0]";
+        Style: @VisibilitySectionClosedLabelStyle;
+      }
+    }
+
+    Group {
+      Anchor: (Width: 48);
+      LayoutMode: CenterMiddle;
+
+      Label #VisibilitySectionSymbolClosed {
+        Text: ">";
+        Style: @VisibilitySectionClosedSymbolStyle;
+      }
+    }
+  }
+
+  Group #VisibilitySectionContentOpen {
+    LayoutMode: Left;
+    Anchor: (Full: 0);
+    Padding: (Horizontal: 8);
+    Visible: false;
+
+    Label #VisibilitySectionGroupOpen {
+      FlexWeight: 1;
+      Text: "SECTION";
+      Style: @VisibilitySectionOpenLabelStyle;
+    }
+
+    Group {
+      Anchor: (Width: 92);
+      LayoutMode: Right;
+
+      Label #VisibilitySectionCounterOpen {
+        Text: "[0/0]";
+        Style: @VisibilitySectionOpenLabelStyle;
+      }
+    }
+
+    Group {
+      Anchor: (Width: 48);
+      LayoutMode: CenterMiddle;
+
+      Label #VisibilitySectionSymbolOpen {
+        Text: "v";
+        Style: @VisibilitySectionOpenSymbolStyle;
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -20,6 +21,24 @@ public final class HudComponentRegistry {
 
     private HudComponentRegistry() {}
 
+    @Nullable
+    public static HudEntry byKey(String key) {
+        return allList().stream()
+                .filter(e -> e.key().equals(key))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Nullable
+    public static HudComponentRegistry.HudEntry findByKey(@Nonnull String key) {
+        for (HudComponentRegistry.HudEntry entry : allList()) {
+            if (entry.key().equals(key)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
     @FunctionalInterface
     public interface BoolGetter<T> {
         boolean get(T value);
@@ -31,6 +50,7 @@ public final class HudComponentRegistry {
     }
 
     public enum Group {
+
         CORE("core", "Core"),
         BARS("bars", "Bars"),
         UI("ui", "UI"),
@@ -48,6 +68,7 @@ public final class HudComponentRegistry {
 
         @Nullable
         public static Group fromKey(@Nullable String key) {
+
             String normalized = normalize(key);
             for (Group g : values()) {
                 if (g.key.equals(normalized)) {
@@ -55,6 +76,10 @@ public final class HudComponentRegistry {
                 }
             }
             return null;
+        }
+
+        public String label() {
+            return label;
         }
     }
 
@@ -223,7 +248,7 @@ public final class HudComponentRegistry {
         ));
 
         register(new HudEntry(
-                "oxygen", "Oxygen", Group.UI, HudComponent.Oxygen,
+                "oxygen", "Oxygen", Group.BARS, HudComponent.Oxygen,
                 "HideOxygen",
                 null,
                 HudComponentsConfig::isHideOxygenHud,
@@ -434,4 +459,13 @@ public final class HudComponentRegistry {
     public static String normalize(@Nullable String key) {
         return key == null ? "" : key.trim().toLowerCase(Locale.ROOT).replace("_", "");
     }
+
+    public static List<HudComponentRegistry.Group> groupOrder = List.of(
+            Group.CORE,
+            Group.BARS,
+            Group.UI,
+            Group.SOCIAL,
+            Group.PANELS,
+            Group.BUILDER
+    );
 }

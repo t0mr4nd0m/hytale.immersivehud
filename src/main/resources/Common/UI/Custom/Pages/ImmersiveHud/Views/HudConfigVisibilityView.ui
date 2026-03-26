@@ -1,0 +1,23 @@
+$C = "../../../Common.ui";
+
+@BaseHelpStyle = LabelStyle( FontSize: 14 );
+
+Group #VisibilityRoot {
+    LayoutMode: Top;
+
+    $C.@SimpleContainer #ViewHelpRow {
+        Anchor: (Vertical: 8);
+
+        Label #ViewHelpText {
+            FlexWeight: 1;
+            Text: "Visibility view copy";
+            Style: @BaseHelpStyle;
+        }
+    }
+
+    Group #VisibilityList {
+        Anchor: (Height: 540);
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+    }
+}

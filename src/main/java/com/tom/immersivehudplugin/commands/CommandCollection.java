@@ -13,6 +13,7 @@ public final class CommandCollection extends AbstractCommandCollection {
         addSubCommand(new ToggleCmd(plugin));
         addSubCommand(new RulesCmd(plugin));
         addSubCommand(new ProfileCmd(plugin));
+        addSubCommand(new ConfigUICmd(plugin));
     }
 
     @Override

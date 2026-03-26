@@ -6,13 +6,12 @@
 
 # Immersive HUD
 
-ImmersiveHud is a lightweight, fully configurable Hytale plugin that dynamically hides and reveals HUD elements based on player actions and gameplay context.
+ImmersiveHud is a lightweight, fully configurable Hytale mod that dynamically hides and reveals HUD elements based on player actions and gameplay context.
 
 With a flexible trigger system and ready-to-use profiles, it shows only what matters, when it matters, delivering a cleaner, more immersive experience without losing critical information.
 
 By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![GitHub release](https://img.shields.io/github/v/release/T0mR4nD0m/hytale.immersivehud)
 ![GitHub last commit](https://img.shields.io/github/last-commit/T0mR4nD0m/hytale.immersivehud)
 ![GitHub repo size](https://img.shields.io/github/repo-size/T0mR4nD0m/hytale.immersivehud)
@@ -36,9 +35,9 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
 Get ImmersiveHud running in under a minute:
 
-### 1. Install the plugin
+### 1. Install the mod
 
-- **CurseForge App** : (recomended)
+- **CurseForge App** : (recommended)
   - Install [CurseForge App](https://www.curseforge.com/download/app)
   - Search 'ImmersiveHud' mod and install it
 
@@ -54,7 +53,7 @@ Get ImmersiveHud running in under a minute:
   >   macOS: ~/Library/Application Support/Hytale/UserData/Mods
 
 ### 2. Start your server
-- Launch your Hytale server and activate the plugin
+- Launch your Hytale server and activate the mod
 
 ### 3. You're done
 The HUD will now dynamically hide and show based on gameplay actions and conditions.
@@ -96,7 +95,7 @@ Examples:
 
 ---
 
-💡 Tip: Use command `/ihud rules` <rules> to define dynamic components visibility behaviour
+💡 Tip: Use command `/ihud rules` <component> <add|remove> <rule> to define dynamic components visibility behaviour
 
 ---
 
@@ -110,6 +109,7 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 
 | Command   | Parameters                        | Description                                                 | Example                                 |
 |-----------|-----------------------------------|-------------------------------------------------------------|-----------------------------------------|
+| `config`  | none                              | Opens config UI                                             | /ihud config                            |
 | `status`  | none                              | Displays the current visibility state of all HUD components | /ihud status                            |
 | `toggle`  | `<component>`                     | Toggles visibility of a specific HUD component              | /ihud toggle health                     |
 | `toggle`  | `<component>` `<state>`           | Hides/Shows a component                                     | /ihud toggle health hide                |
@@ -170,39 +170,39 @@ HUD components supported by ImmersiveHUD
 
 Rules to define the visibility behaviour of dynamic HUD components
 
-| Rule                    | Trigger condition                           |
-|-------------------------|---------------------------------------------|
-| `HOTBAR_INPUT`          | Player changes hotbar selection             |
-| `CHARGING_WEAPON`       | Player is aiming or charging a weapon       |
-| `CONSUMABLE_USE`        | Player is consuming food or potion          |
-| `TARGET_ENTITY`         | Player is targeting an entity               |
-| `INTERACTABLE_BLOCK`    | Player is looking at an interactable blocks |
-| `PLAYER_MOVING`         | Player is moving                            |
-| `PLAYER_WALKING`        | Player is walking                           |
-| `PLAYER_RUNNING`        | Player is running                           |
-| `PLAYER_SPRINTING`      | Player is sprinting                         |
-| `PLAYER_MOUNTING`       | Player is mounting                          |
-| `PLAYER_FLYING`         | Player is fying                             |
-| `PLAYER_GLIDING`        | Player is gliding                           |
-| `PLAYER_JUMPING`        | Player is jumping                           |
-| `PLAYER_CROUCHING`      | Player is crouching                         |
-| `PLAYER_CLIMBING`       | Player is climbing                          |
-| `PLAYER_IN_FLUID`       | Player is in fluid                          |
-| `PLAYER_ON_GROUND`      | Player is on ground                         |
-| `PLAYER_FALLING`        | Player is falling                           |
-| `PLAYER_SITTING`        | Player is sitting                           |
-| `PLAYER_ROLLING`        | Player is rolling                           |
-| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon            |
-| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon           |
-| `HEALTH_NOT_FULL`       | Health bar is not full                      |
-| `HEALTH_LOW`            | Health bar is below 50%                     |
-| `HEALTH_CRITICAL`       | Health bar is below 25%                     |
-| `STAMINA_NOT_FULL`      | Stamina bar is not full                     |
-| `STAMINA_LOW`           | Stamina bar is below 50%                    |
-| `STAMINA_CRITICAL`      | Stamina bar is below 25%                    |
-| `MANA_NOT_FULL`         | Mana bar is not full                        |
-| `MANA_LOW`              | Mana bar is below 50%                       |
-| `MANA_CRITICAL`         | Mana bar is below 25%                       |
+| Rule                    | Trigger condition                          |
+|-------------------------|--------------------------------------------|
+| `HOTBAR_INPUT`          | Player changes hotbar selection            |
+| `CHARGING_WEAPON`       | Player is aiming or charging a weapon      |
+| `CONSUMABLE_USE`        | Player is consuming food or potion         |
+| `TARGET_ENTITY`         | Player is targeting an entity              |
+| `INTERACTABLE_BLOCK`    | Player is looking at interactable blocks   |
+| `PLAYER_MOVING`         | Player is moving                           |
+| `PLAYER_WALKING`        | Player is walking                          |
+| `PLAYER_RUNNING`        | Player is running                          |
+| `PLAYER_SPRINTING`      | Player is sprinting                        |
+| `PLAYER_MOUNTING`       | Player is mounting                         |
+| `PLAYER_FLYING`         | Player is flying                           |
+| `PLAYER_GLIDING`        | Player is gliding                          |
+| `PLAYER_JUMPING`        | Player is jumping                          |
+| `PLAYER_CROUCHING`      | Player is crouching                        |
+| `PLAYER_CLIMBING`       | Player is climbing                         |
+| `PLAYER_IN_FLUID`       | Player is in fluid                         |
+| `PLAYER_ON_GROUND`      | Player is on ground                        |
+| `PLAYER_FALLING`        | Player is falling                          |
+| `PLAYER_SITTING`        | Player is sitting                          |
+| `PLAYER_ROLLING`        | Player is rolling                          |
+| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon           |
+| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon          |
+| `HEALTH_NOT_FULL`       | Health bar is not full                     |
+| `HEALTH_LOW`            | Health bar is below 50%                    |
+| `HEALTH_CRITICAL`       | Health bar is below 25%                    |
+| `STAMINA_NOT_FULL`      | Stamina bar is not full                    |
+| `STAMINA_LOW`           | Stamina bar is below 50%                   |
+| `STAMINA_CRITICAL`      | Stamina bar is below 25%                   |
+| `MANA_NOT_FULL`         | Mana bar is not full                       |
+| `MANA_LOW`              | Mana bar is below 50%                      |
+| `MANA_CRITICAL`         | Mana bar is below 25%                      |
 
 ---
 
@@ -219,7 +219,7 @@ You can switch between them instantly using commands.
 |-------------|---------------------------------------------------|
 | `default`   | Balanced. Shows HUD components only when relevant |
 | `immersive` | Minimal HUD, maximum immersion                    |
-| `disable`   | HUD always visible (vanilla-like)                 |
+| `disabled`  | HUD always visible (vanilla-like)                 |
 
 ---
 
@@ -234,7 +234,7 @@ To configure ImmersiveHud behaviour you can edit manually the player config file
 
 ### Global Configuration file - `config.json`
 
-The global configuration file is created automatically when the plugin is first loaded.
+The global configuration file is created automatically when the mod is first loaded.
 
 This file defines default settings for all players.
 
@@ -412,6 +412,7 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
 - Command-driven configuration control
 - Lightweight event & packet-driven state tracking
 - Clean and extensible design
+- Custom Config UI
 
 ---
 
@@ -424,7 +425,7 @@ Requirements:
 Build the project using:
 > ./gradlew build
 
-The build produces a shaded plugin jar named:
+The build produces a shaded mod jar named:
 > ImmersiveHud.jar
 
 ---
@@ -438,6 +439,7 @@ ImmersiveHudPlugin.java
 
 commands/
    CommandCollection.java
+   ConfigUICmd.java
    ProfileCmd.java
    RulesCmd.java
    StatusCmd.java
@@ -461,13 +463,18 @@ registry/
    HudComponentRegistry.java
 rules/
    DynamicHudTriggers.java
-   DynamicHudTriggersContext.java
+   DynamicHudTriggersCategory.java
 runtime/
    HudRuntimeService
    HudSignal
    HudTimers
    PlayerHudState
    PlayerTickContext
+ui/
+   HudConfigPage.java
+   HudConfigUiService.java
+   HudConfigUiSession.java
+   HudConfigView.java
 utils/
    HudBarState.java
    ItemUtils.java
@@ -480,12 +487,12 @@ visibility/
 ## 🚧 Roadmap
 
 Possible future improvements:
-- GUI configuration menu
+~~- GUI configuration menu~~
 - Additional dynamic triggers:
-  - PLAYER_FLYING
-  - PLAYER_GLIDING
+  ~~- PLAYER_FLYING~~
+  ~~- PLAYER_GLIDING~~
   - IN_COMBAT
-- Import / export config profiles
+- Import / export custom config profiles
 - Support for future Hud components
 
 ---

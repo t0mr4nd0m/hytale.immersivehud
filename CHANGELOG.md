@@ -1,6 +1,11 @@
 # Changelog
 
 
+## v1.1.0
+
+* New feature: Added Config UI. Run command `/ihud config` to configure the mod using custom ui interface. 
+* Fixed compatibility issue with the latest game version. // 2026.03.26-89796e57b
+
 ## v1.0.3
 
 * Improved config file system (sorry guys but if you are not using the default configuration you will need to customize your configuration again)
@@ -10,7 +15,7 @@
 
 ## v1.0.2
 
-* added method getPluginVersion to get plugin version from manifest and pass it to GlobalConfig 
+* Added method getPluginVersion to get plugin version from manifest and pass it to GlobalConfig 
 
 ## v1.0.1
 

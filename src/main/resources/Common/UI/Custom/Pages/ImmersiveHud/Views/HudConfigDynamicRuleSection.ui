@@ -1,0 +1,112 @@
+$C = "../../../Common.ui";
+
+@DynamicSectionButtonClosedStyle = TextButtonStyle(
+  Default: (Background: #38424c, LabelStyle: (FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #7f91a3)),
+  Hovered: (Background: #38424c(0.35), LabelStyle: (FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #bfcdd5)),
+  Pressed: (Background: #38424c(0.5), LabelStyle: (FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #ffffff)),
+  Sounds: $C.@ButtonSounds
+);
+@DynamicSectionButtonOpenStyle = TextButtonStyle(
+  Default: (Background: #93844c(0.35), LabelStyle: (FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: $C.@ColorGoldHighlight)),
+  Sounds: $C.@ButtonSounds
+);
+@DynamicSectionClosedLabelStyle = LabelStyle(FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #7f91a3);
+@DynamicSectionOpenLabelStyle = LabelStyle(FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: $C.@ColorGoldHighlight);
+@DynamicSectionClosedSymbolStyle = LabelStyle(FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: #7f91a3);
+@DynamicSectionOpenSymbolStyle = LabelStyle(FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: $C.@ColorGoldHighlight);
+
+Group #DynamicRuleSectionRow {
+  LayoutMode: Top;
+  Padding: (Top: 8, Bottom: 4);
+
+  Group #DynamicRuleSectionHeader {
+    LayoutMode: Full;
+    Anchor: (Height: 48);
+
+    TextButton #DynamicRuleSectionButtonClosed {
+      Anchor: (Full: 0);
+      Text: "";
+      Style: @DynamicSectionButtonClosedStyle;
+      Visible: true;
+    }
+
+    TextButton #DynamicRuleSectionButtonOpen {
+      Anchor: (Full: 0);
+      Text: "";
+      Style: @DynamicSectionButtonOpenStyle;
+      Visible: false;
+    }
+
+    Group #DynamicRuleSectionContentClosed {
+      LayoutMode: Left;
+      Anchor: (Full: 0);
+      Padding: (Horizontal: 8);
+      Visible: true;
+
+      Label #DynamicRuleSectionGroupClosed {
+        FlexWeight: 1;
+        Text: "SECTION";
+        Style: @DynamicSectionClosedLabelStyle;
+      }
+
+      Group {
+        Anchor: (Width: 84);
+        LayoutMode: Right;
+
+        Label #DynamicRuleSectionCounterClosed {
+          Text: "[0/0]";
+          Style: @DynamicSectionClosedLabelStyle;
+        }
+      }
+
+      Group {
+        Anchor: (Width: 48);
+        LayoutMode: CenterMiddle;
+
+        Label #DynamicRuleSectionSymbolClosed {
+          Text: ">";
+          Style: @DynamicSectionClosedSymbolStyle;
+        }
+      }
+    }
+
+    Group #DynamicRuleSectionContentOpen {
+      LayoutMode: Left;
+      Anchor: (Full: 0);
+      Padding: (Horizontal: 8);
+      Visible: false;
+
+      Label #DynamicRuleSectionGroupOpen {
+        FlexWeight: 1;
+        Text: "SECTION";
+        Style: @DynamicSectionOpenLabelStyle;
+      }
+
+      Group {
+        Anchor: (Width: 84);
+        LayoutMode: Right;
+
+        Label #DynamicRuleSectionCounterOpen {
+          Text: "[0/0]";
+          Style: @DynamicSectionOpenLabelStyle;
+        }
+      }
+
+      Group {
+        Anchor: (Width: 48);
+        LayoutMode: CenterMiddle;
+
+        Label #DynamicRuleSectionSymbolOpen {
+          Text: "v";
+          Style: @DynamicSectionOpenSymbolStyle;
+        }
+      }
+    }
+  }
+
+  Group #DynamicRuleSectionTagsHost {
+    LayoutMode: LeftCenterWrap;
+    Padding: (Left: 12, Right: 12, Top: 4, Bottom: 6);
+    Visible: true;
+  }
+}
