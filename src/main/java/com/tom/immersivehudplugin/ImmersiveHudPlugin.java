@@ -18,6 +18,7 @@ import com.tom.immersivehudplugin.context.HudContextBuilder;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 import com.tom.immersivehudplugin.visibility.HudVisibilityService;
+import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
 import javax.annotation.Nullable;
 import java.io.Reader;
@@ -43,6 +44,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     private HudRuntimeService hudRuntimeService;
 
     private static String pluginVersion;
+
+    private  HudConfigUiService hudConfigUiService;
 
     public ImmersiveHudPlugin(JavaPluginInit init) {
         super(init);
@@ -73,6 +76,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         );
 
         HudVisibilityService hudVisibilityService = new HudVisibilityService();
+
+        hudConfigUiService = new HudConfigUiService(this);
 
         hudRuntimeService = new HudRuntimeService(
                 this,
@@ -226,5 +231,9 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         }
 
         return changed || cfg.sanitize();
+    }
+
+    public HudConfigUiService getHudConfigUiService() {
+        return hudConfigUiService;
     }
 }

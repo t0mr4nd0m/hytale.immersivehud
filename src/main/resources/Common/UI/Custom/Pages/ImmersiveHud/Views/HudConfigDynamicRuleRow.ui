@@ -1,0 +1,36 @@
+$C = "../../../Common.ui";
+
+@RuleLabelStyle = LabelStyle(
+  FontSize: 14,
+  TextColor: #bfcdd5,
+  RenderBold: true,
+  RenderUppercase: true,
+  VerticalAlignment: Center
+);
+
+Group #DynamicRuleRow {
+  LayoutMode: Left;
+  Anchor: (Height: 38);
+  Padding: (Vertical: 3);
+  Background: #1a2533(0.6);
+  OutlineColor: #3a4a5a(0.35);
+  OutlineSize: 1;
+
+  Label #DynamicRuleLabel {
+    FlexWeight: 1;
+    Anchor: (Height: 32);
+    Padding: (Left: 12, Right: 12);
+    Text: "RULE";
+    Style: @RuleLabelStyle;
+  }
+
+  Group #DynamicRuleCheckHost {
+    Anchor: (Width: 32, Height: 32);
+    LayoutMode: Center;
+
+    $C.@CheckBox #DynamicRuleCheckBox {
+      TooltipText: "Check to apply trigger";
+      TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    }
+  }
+}

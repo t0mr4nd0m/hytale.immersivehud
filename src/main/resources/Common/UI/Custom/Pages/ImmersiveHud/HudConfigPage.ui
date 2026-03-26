@@ -1,0 +1,152 @@
+$C = "../../Common.ui";
+
+@HorizontalSpacer    = Group { Anchor: (Width:  4); };
+
+@CustomLabelStyle = LabelStyle ( FontSize: 15, TextColor: #bfcdd5, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center );
+
+@CustomStyle = TextButtonStyle(
+    Default:  ( Background: $C.@DefaultSquareButtonDisabledBackground,  LabelStyle: @CustomLabelStyle ),
+    Hovered:  ( Background: $C.@DefaultSquareButtonHoveredBackground,  LabelStyle: @CustomLabelStyle ),
+    Pressed:  ( Background: $C.@DefaultSquareButtonPressedBackground,  LabelStyle: @CustomLabelStyle ),
+    Disabled: ( Background: $C.@DefaultSquareButtonDefaultBackground, LabelStyle: @CustomLabelStyle ),
+    Sounds:   $C.@ButtonSounds,
+);
+
+@NavButtonGroup             = Group { FlexWeight: 1; Anchor: (Height: 32); };
+@NavButtonContainer         = Group { LayoutMode: Left; Background: #1a2533(0.5);};
+@NavButtonSelectedContainer = Group { LayoutMode: Left; };
+
+$C.@PageOverlay {
+
+    $C.@Container {
+        Anchor: (Width: 760, Height: 760);
+
+        #Title {
+            $C.@Title {
+                @Text = "IMMERSIVE HUD CONFIG";
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+            Padding: (Full: 8);
+
+            Group #NavBar {
+                LayoutMode: Left;
+                Anchor: (Height: 40);
+                Padding: (Vertical: 8);
+
+                @NavButtonGroup {
+
+                    @NavButtonContainer #ViewProfilesBtnContainer {
+                        Anchor: (Full: 0);
+                        Visible: true;
+
+                        $C.@TextButton #ViewProfilesBtn {
+                            FlexWeight: 1;
+                            Text: "PROFILE";
+                            Style: @CustomStyle;
+                        }
+                    }
+                    @NavButtonSelectedContainer #ViewProfilesBtnSelectedContainer {
+                        Anchor: (Full: 0);
+                        Visible: false;
+
+                        $C.@TextButton #ViewProfilesBtnSelected {
+                            FlexWeight: 1;
+                            Text: "PROFILE";
+                            Disabled: true;
+                            Style: @CustomStyle;
+                        }
+                    }
+                }
+
+                @HorizontalSpacer {}
+
+                @NavButtonGroup {
+
+                    @NavButtonContainer #ViewVisibilityBtnContainer {
+                        Anchor: (Full: 0);
+                        Visible: false;
+
+                        $C.@TextButton #ViewVisibilityBtn {
+                            FlexWeight: 1;
+                            Text: "VISIBILITY";
+                            Style: @CustomStyle;
+                        }
+                    }
+                    @NavButtonSelectedContainer #ViewVisibilityBtnSelectedContainer {
+                        Anchor: (Full: 0);
+                        Visible: true;
+
+                        $C.@TextButton #ViewVisibilityBtnSelected {
+                            FlexWeight: 1;
+                            Text: "VISIBILITY";
+                            Disabled: true;
+                            Style: @CustomStyle;
+                        }
+                    }
+                }
+
+                @HorizontalSpacer {}
+
+                @NavButtonGroup {
+
+                    @NavButtonContainer #ViewDynamicRulesBtnContainer {
+                        Anchor: (Full: 0);
+                        Visible: true;
+
+                        $C.@TextButton #ViewDynamicRulesBtn {
+                            FlexWeight: 1;
+                            Text: "DYNAMIC RULES";
+                            Style: @CustomStyle;
+                        }
+                    }
+                    @NavButtonSelectedContainer #ViewDynamicRulesBtnSelectedContainer {
+                        Anchor: (Full: 0);
+                        Visible: false;
+
+                        $C.@TextButton #ViewDynamicRulesBtnSelected {
+                            FlexWeight: 1;
+                            Text: "DYNAMIC RULES";
+                            Disabled: true;
+                            Style: @CustomStyle;
+                        }
+                    }
+                }
+            }
+
+            $C.@ContentSeparator {}
+
+            Group #ContentFrame {
+                LayoutMode: Top;
+                FlexWeight: 1;
+                Padding: (Full: 8);
+
+                Group #ContentHost {
+                    LayoutMode: Top;
+                }
+            }
+
+            $C.@PanelSeparatorFancy {}
+
+            $C.@ActionButtonContainer #Footer {
+                LayoutMode: Center;
+                Anchor: (Height: 44);
+                Padding: (Vertical: 8);
+
+                $C.@TextButton #ApplyButton {
+                    Anchor: (Width: 130);
+                    Text: "APPLY";
+                }
+
+                @HorizontalSpacer {}
+
+                $C.@CancelTextButton #CancelButton {
+                    Anchor: (Width: 130);
+                    Text: "CANCEL";
+                }
+            }
+        }
+    }
+}

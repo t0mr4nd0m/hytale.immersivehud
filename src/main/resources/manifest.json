@@ -1,7 +1,7 @@
 {
     "Group": "T0mR4nD0m",
     "Name": "ImmersiveHud",
-    "Version": "1.0.3",
+    "Version": "1.1.0",
     "Description": "Lightweight, configurable immersive HUD auto-hide plugin for Hytale.",
     "Authors": [
         {
@@ -10,7 +10,7 @@
         }
     ],
     "WebSite": "https://github.com/T0mR4nD0m/hytale.immersivehud",
-    "ServerVersion": "2026.02.19-1a311a592",
+    "ServerVersion": "2026.03.26-89796e57b",
     "Dependencies": {
         
     },
@@ -18,6 +18,6 @@
         
     },
     "DisabledByDefault": false,
-    "IncludesAssetPack": false,
+    "IncludesAssetPack": true,
     "Main": "com.tom.immersivehudplugin.ImmersiveHudPlugin"
 }

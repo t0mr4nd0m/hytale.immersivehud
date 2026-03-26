@@ -1,0 +1,35 @@
+$C = "../../../Common.ui";
+
+@VisibilityLabelStyle = LabelStyle(
+  FontSize: 14,
+  TextColor: #bfcdd5,
+  RenderBold: true,
+  RenderUppercase: true,
+  VerticalAlignment: Center
+);
+
+Group #VisibilityRow {
+  LayoutMode: Left;
+  Anchor: (Height: 38);
+  Background: #1a2533(0.6);
+  OutlineColor: #3a4a5a(0.35);
+  OutlineSize: 1;
+
+  Label #VisibilityComponentLabel {
+    FlexWeight: 1;
+    Anchor: (Height: 32);
+    Padding: (Left: 12, Right: 12);
+    Text: "COMPONENT";
+    Style: @VisibilityLabelStyle;
+  }
+
+  Group #VisibilityCheckHost {
+    Anchor: (Width: 32, Height: 32);
+    LayoutMode: Center;
+
+    $C.@CheckBox #VisibilityToggleCheckBox {
+      TooltipText: "Uncheck to hide component";
+      TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    }
+  }
+}
