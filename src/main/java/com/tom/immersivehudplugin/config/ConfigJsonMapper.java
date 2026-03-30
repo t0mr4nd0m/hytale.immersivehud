@@ -81,7 +81,7 @@ public final class ConfigJsonMapper {
 
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.dynamicGetter().apply(cfg);
-            obj.add(entry.dynamicConfigKey(), toJson(ruleCfg));
+            obj.add(entry.dynamicConfigKey(), toJson(ruleCfg, entry));
         }
 
         return obj;
@@ -98,13 +98,14 @@ public final class ConfigJsonMapper {
             DynamicHudRuleConfig target = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(cfg) : null;
             if (target != null) {
                 target.setRules(loaded.getRules());
+                target.setThreshold(loaded.getThreshold());
             }
         }
 
         return cfg;
     }
 
-    public static JsonObject toJson(DynamicHudRuleConfig cfg) {
+    public static JsonObject toJson(DynamicHudRuleConfig cfg, HudEntry entry) {
         JsonObject obj = new JsonObject();
         JsonArray arr = new JsonArray();
 
@@ -113,35 +114,77 @@ public final class ConfigJsonMapper {
         }
 
         obj.add("Rules", arr);
+
+        if (entry.supportsThreshold()) {
+            obj.addProperty("Threshold", cfg.getThreshold());
+        }
+
         return obj;
     }
 
     public static DynamicHudRuleConfig fromJsonDynamicHudRuleConfig(JsonObject obj) {
-
         DynamicHudRuleConfig cfg = new DynamicHudRuleConfig();
         EnumSet<DynamicHudTriggers> rules = EnumSet.noneOf(DynamicHudTriggers.class);
 
         JsonElement rulesEl = obj.get("Rules");
+        JsonElement thresholdEl = obj.get("Threshold");
 
-        if (rulesEl == null || rulesEl.isJsonNull()) {
-            cfg.setRules(rules);
-            return cfg;
-        }
+        Float migratedThreshold = null;
 
-        JsonArray arr = rulesEl.getAsJsonArray();
+        if (rulesEl != null && rulesEl.isJsonArray()) {
+            JsonArray arr = rulesEl.getAsJsonArray();
 
-        for (JsonElement el : arr) {
-            if (!el.isJsonPrimitive()) {
-                continue; // ignore bad entries instead of crashing
-            }
+            for (JsonElement el : arr) {
+                if (!el.isJsonPrimitive()) {
+                    continue;
+                }
 
-            DynamicHudTriggers trigger = DynamicHudTriggers.fromString(el.getAsString());
-            if (trigger != null) {
-                rules.add(trigger);
+                String raw = el.getAsString();
+                String normalized = raw == null ? "" : raw.trim().toUpperCase().replace('-', '_').replace(' ', '_');
+
+                switch (normalized) {
+                    case "HEALTH_NOT_FULL" -> {
+                        rules.add(DynamicHudTriggers.HEALTH_NOT_FULL);
+                        if (migratedThreshold == null) {
+                            migratedThreshold = 100f;
+                        }
+                    }
+                    case "STAMINA_NOT_FULL" -> {
+                        rules.add(DynamicHudTriggers.STAMINA_NOT_FULL);
+                        if (migratedThreshold == null) {
+                            migratedThreshold = 100f;
+                        }
+                    }
+                    case "MANA_NOT_FULL" -> {
+                        rules.add(DynamicHudTriggers.MANA_NOT_FULL);
+                        if (migratedThreshold == null) {
+                            migratedThreshold = 100f;
+                        }
+                        }
+                    case "OXYGEN_NOT_FULL" -> {
+                        rules.add(DynamicHudTriggers.OXYGEN_NOT_FULL);
+                        if (migratedThreshold == null) {
+                            migratedThreshold = 100f;
+                        }
+                    }
+                    default -> {
+                        DynamicHudTriggers trigger = DynamicHudTriggers.fromString(raw);
+                        if (trigger != null) {
+                            rules.add(trigger);
+                        }
+                    }
+                }
             }
         }
 
         cfg.setRules(rules);
+
+        if (thresholdEl != null && thresholdEl.isJsonPrimitive()) {
+            cfg.setThreshold(thresholdEl.getAsFloat());
+        } else if (migratedThreshold != null) {
+            cfg.setThreshold(migratedThreshold);
+        }
+
         return cfg;
     }
 }

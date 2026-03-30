@@ -28,17 +28,20 @@ public final class HudContextBuilder {
     private final int healthState;
     private final int staminaState;
     private final int manaState;
+    private final int oxygenState;
 
     public HudContextBuilder(
             AssetMap<String, Item> itemAssetMap,
             int healthState,
             int staminaState,
-            int manaState
+            int manaState,
+            int oxygenState
     ) {
         this.itemAssetMap = itemAssetMap;
         this.healthState = healthState;
         this.staminaState = staminaState;
         this.manaState = manaState;
+        this.oxygenState = oxygenState;
     }
 
     @Nullable
@@ -136,7 +139,7 @@ public final class HudContextBuilder {
             }
 
             String itemId = heldStack.getItemId();
-            if (itemId == null || itemId.isBlank()) {
+            if (itemId.isBlank()) {
                 return null;
             }
 
@@ -158,36 +161,34 @@ public final class HudContextBuilder {
             return;
         }
 
-        boolean moving =
-                ms.walking
-                        || ms.running
-                        || ms.sprinting
-                        || ms.swimming
-                        || ms.gliding
-                        || ms.flying
-                        || ms.mounting
-                        || ms.jumping
-                        || ms.crouching
-                        || ms.climbing
-                        || ms.falling
-                        || ms.rolling;
+        boolean moving = ms.walking
+                || ms.running
+                || ms.sprinting
+                || ms.swimming
+                || ms.mounting
+                || ms.flying
+                || ms.gliding
+                || ms.jumping
+                || ms.climbing
+                || ms.falling
+                || ms.rolling;
 
         setTimedState(st, HudSignal.PLAYER_MOVING, moving, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_WALKING, ms.walking, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_RUNNING, ms.running, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_SPRINTING, ms.sprinting, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_MOUNTING, ms.mounting, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_SWIMMING, ms.swimming, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_MOUNTING, ms.mounting, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_FLYING, ms.flying, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_GLIDING, ms.gliding, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_JUMPING, ms.jumping, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_CROUCHING, ms.crouching, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_CLIMBING, ms.climbing, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_FALLING, ms.falling, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_ROLLING, ms.rolling, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_CROUCHING, ms.crouching, now, hideDelay);
+        setTimedState(st, HudSignal.PLAYER_SITTING, ms.sitting, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_IN_FLUID, ms.inFluid, now, hideDelay);
         setTimedState(st, HudSignal.PLAYER_ON_GROUND, ms.onGround, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_FALLING, ms.falling, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_SITTING, ms.sitting, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_ROLLING, ms.rolling, now, hideDelay);
     }
 
     private void setTimedState(
@@ -209,18 +210,18 @@ public final class HudContextBuilder {
         st.t.clear(HudSignal.PLAYER_WALKING);
         st.t.clear(HudSignal.PLAYER_RUNNING);
         st.t.clear(HudSignal.PLAYER_SPRINTING);
-        st.t.clear(HudSignal.PLAYER_MOUNTING);
         st.t.clear(HudSignal.PLAYER_SWIMMING);
+        st.t.clear(HudSignal.PLAYER_MOUNTING);
         st.t.clear(HudSignal.PLAYER_FLYING);
         st.t.clear(HudSignal.PLAYER_GLIDING);
         st.t.clear(HudSignal.PLAYER_JUMPING);
-        st.t.clear(HudSignal.PLAYER_CROUCHING);
         st.t.clear(HudSignal.PLAYER_CLIMBING);
+        st.t.clear(HudSignal.PLAYER_FALLING);
+        st.t.clear(HudSignal.PLAYER_ROLLING);
+        st.t.clear(HudSignal.PLAYER_SITTING);
+        st.t.clear(HudSignal.PLAYER_CROUCHING);
         st.t.clear(HudSignal.PLAYER_IN_FLUID);
         st.t.clear(HudSignal.PLAYER_ON_GROUND);
-        st.t.clear(HudSignal.PLAYER_FALLING);
-        st.t.clear(HudSignal.PLAYER_SITTING);
-        st.t.clear(HudSignal.PLAYER_ROLLING);
     }
 
     private void updateReticleSignalsIfNeeded(
@@ -270,6 +271,7 @@ public final class HudContextBuilder {
         st.healthBar.update(getCurrentBar(ctx, healthState), getMaxBar(ctx, healthState));
         st.staminaBar.update(getCurrentBar(ctx, staminaState), getMaxBar(ctx, staminaState));
         st.manaBar.update(getCurrentBar(ctx, manaState), getMaxBar(ctx, manaState));
+        st.oxygenBar.update(getCurrentBar(ctx, oxygenState), getMaxBar(ctx, oxygenState));
     }
 
     private void cleanupWeaponSignals(PlayerHudState st) {
@@ -323,7 +325,8 @@ public final class HudContextBuilder {
 
                 st.healthBar,
                 st.staminaBar,
-                st.manaBar
+                st.manaBar,
+                st.oxygenBar
         );
     }
 

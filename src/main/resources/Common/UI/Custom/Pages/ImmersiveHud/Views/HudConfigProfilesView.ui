@@ -5,7 +5,7 @@ $C = "../../../Common.ui";
 Group #ProfilesRoot {
   LayoutMode: Top;
   Padding: (Right: 2);
-  Anchor: (Height: 540);
+  Anchor: (Height: 380);
 
   $C.@SimpleContainer  #ViewHelpRow {
     Anchor: (Vertical: 8);
@@ -19,6 +19,5 @@ Group #ProfilesRoot {
 
   Group #ProfilesList {
     LayoutMode: Top;
-    Anchor: (Top: 8);
   }
 }

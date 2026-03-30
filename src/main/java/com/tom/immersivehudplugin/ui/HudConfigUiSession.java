@@ -7,7 +7,6 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggerCategory;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import javax.annotation.Nonnull;
@@ -19,12 +18,18 @@ import java.util.Map;
 
 public final class HudConfigUiSession {
 
+    private record DynamicRuleRowKey(String componentKey, String host, DynamicHudTriggers trigger) {}
+    private record DynamicComponentRowKey(String componentKey) {}
+
+    private final Map<String, Boolean> moreTriggersExpandedByComponent = new HashMap<>();
+
     public HudConfigUiSession(@Nonnull PlayerConfig source) {
         this.draftHudComponents = source.getHudComponents().copy();
         this.draftDynamicHud = source.getDynamicHud().copy();
     }
 
     private boolean dirty;
+
     @SuppressWarnings("unused")
     public boolean isDirty() {
         return dirty;
@@ -39,10 +44,12 @@ public final class HudConfigUiSession {
     }
 
     public void showProfilesView() {
+        resetDynamicUiState();
         currentView = HudConfigView.PROFILES;
     }
 
     public void showVisibilityView() {
+        resetDynamicUiState();
         currentView = HudConfigView.VISIBILITY;
     }
 
@@ -130,14 +137,29 @@ public final class HudConfigUiSession {
             if (!aRuleConfig.getRules().equals(bRuleConfig.getRules())) {
                 return false;
             }
+
+            if (entry.supportsThreshold()
+                    && Float.compare(aRuleConfig.getThreshold(), bRuleConfig.getThreshold()) != 0) {
+                return false;
+            }
         }
 
         return true;
     }
 
-    // HUD COMPONENTS VISIBILITY  =====================================================
+    // HUD COMPONENTS VISIBILITY =====================================================
 
     private final Map<String, Integer> visibilitySectionRowIndexes = new HashMap<>();
+    private final Map<String, Integer> visibilityRowIndexes = new HashMap<>();
+
+    @Nullable
+    private HudComponentRegistry.Group expandedVisibilityGroup = HudComponentRegistry.Group.CORE;
+
+    private HudComponentsConfig draftHudComponents;
+
+    public HudComponentsConfig getDraftHudComponents() {
+        return draftHudComponents;
+    }
 
     public void clearVisibilitySectionRowIndexes() {
         visibilitySectionRowIndexes.clear();
@@ -153,17 +175,6 @@ public final class HudConfigUiSession {
     @Nullable
     public Integer getVisibilitySectionRowIndex(@Nonnull HudComponentRegistry.Group group) {
         return visibilitySectionRowIndexes.get(group.name());
-    }
-
-    private final Map<String, Integer> visibilityRowIndexes = new HashMap<>();
-
-    @Nullable
-    private HudComponentRegistry.Group expandedVisibilityGroup = HudComponentRegistry.Group.CORE;
-
-    private HudComponentsConfig draftHudComponents;
-
-    public HudComponentsConfig getDraftHudComponents() {
-        return draftHudComponents;
     }
 
     public boolean isHidden(@Nonnull HudComponentRegistry.HudEntry entry) {
@@ -188,7 +199,7 @@ public final class HudConfigUiSession {
         int hidden = getGroupHiddenCount(group);
         int total = getGroupTotal(group);
         int shown = total - hidden;
-        return "[" + shown + "/" + total + "]";
+        return "visible [" + shown + "/" + total + "] total";
     }
 
     public void toggleVisibility(@Nonnull String componentKey) {
@@ -230,95 +241,77 @@ public final class HudConfigUiSession {
 
     // DYNAMIC RULES =====================================================
 
-    private final Map<String, Integer> dynamicCategoryRowIndexes = new HashMap<>();
-
-    public void clearDynamicCategoryRowIndexes() {
-        dynamicCategoryRowIndexes.clear();
-    }
-
-    public void putDynamicCategoryRowIndex(
-            @Nonnull DynamicHudTriggerCategory category,
-            int rowIndex
-    ) {
-        dynamicCategoryRowIndexes.put(category.name(), rowIndex);
-    }
-
-    @Nullable
-    public Integer getDynamicCategoryRowIndex(@Nonnull DynamicHudTriggerCategory category) {
-        return dynamicCategoryRowIndexes.get(category.name());
-    }
-
-    @Nullable
-    private DynamicHudTriggerCategory expandedDynamicCategory = null;
-
-    public void collapseAllDynamicCategories() {
-        this.expandedDynamicCategory = null;
-    }
+    private final Map<DynamicRuleRowKey, Integer> dynamicRuleRowIndexes = new HashMap<>();
+    private final Map<DynamicComponentRowKey, Integer> dynamicComponentRowIndexes = new HashMap<>();
 
     private DynamicHudConfig draftDynamicHud;
-
-    private int dynamicComponentIndex = 0;
 
     public DynamicHudConfig getDraftDynamicHud() {
         return draftDynamicHud;
     }
 
-    public HudComponentRegistry.HudEntry currentDynamicEntry() {
-
-        List<HudComponentRegistry.HudEntry> all = HudComponentRegistry.dynamicList();
-        if (all.isEmpty()) {
-            throw new IllegalStateException("No dynamic HUD entries found");
-        }
-
-        dynamicComponentIndex = clamp(dynamicComponentIndex, 0, all.size() - 1);
-        return all.get(dynamicComponentIndex);
+    @Nonnull
+    public List<HudComponentRegistry.HudEntry> getDynamicEntries() {
+        return HudComponentRegistry.dynamicList();
     }
 
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    public void nextDynamicEntry() {
-        List<HudComponentRegistry.HudEntry> all = HudComponentRegistry.dynamicList();
-        if (!all.isEmpty()) {
-            dynamicComponentIndex = (dynamicComponentIndex + 1) % all.size();
-            collapseAllDynamicCategories();
-        }
-    }
-
-    public void previousDynamicEntry() {
-        List<HudComponentRegistry.HudEntry> all = HudComponentRegistry.dynamicList();
-        if (!all.isEmpty()) {
-            dynamicComponentIndex = (dynamicComponentIndex - 1 + all.size()) % all.size();
-            collapseAllDynamicCategories();
-        }
-    }
-
-    public DynamicHudRuleConfig currentDynamicRuleConfig() {
-        HudComponentRegistry.HudEntry entry = currentDynamicEntry();
+    @Nonnull
+    public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudComponentRegistry.HudEntry entry) {
         if (!entry.supportsDynamicRules() || entry.dynamicGetter() == null) {
-            throw new IllegalStateException("Current dynamic entry is not dynamic-capable");
+            throw new IllegalStateException("Entry is not dynamic-capable: " + entry.key());
         }
+
         return entry.dynamicGetter().apply(draftDynamicHud);
     }
-
-    private final Map<String, Integer> dynamicRuleRowIndexes = new HashMap<>();
 
     public void clearDynamicRuleRowIndexes() {
         dynamicRuleRowIndexes.clear();
     }
 
-    public void putDynamicRuleRowIndex(@Nonnull DynamicHudTriggers trigger, int rowIndex) {
-        dynamicRuleRowIndexes.put(trigger.name(), rowIndex);
+    public void putDynamicRuleRowIndex(
+            @Nonnull String componentKey,
+            @Nonnull String host,
+            @Nonnull DynamicHudTriggers trigger,
+            int rowIndex
+    ) {
+        dynamicRuleRowIndexes.put(new DynamicRuleRowKey(componentKey, host, trigger), rowIndex);
     }
 
     @Nullable
-    public Integer getDynamicRuleRowIndex(@Nonnull DynamicHudTriggers trigger) {
-        return dynamicRuleRowIndexes.get(trigger.name());
+    public Integer getDynamicRuleRowIndex(
+            @Nonnull String componentKey,
+            @Nonnull String host,
+            @Nonnull DynamicHudTriggers trigger
+    ) {
+        return dynamicRuleRowIndexes.get(new DynamicRuleRowKey(componentKey, host, trigger));
     }
 
-    public void toggleRule(@Nonnull DynamicHudTriggers rule) {
-        DynamicHudRuleConfig cfg = currentDynamicRuleConfig();
+    public void clearDynamicComponentRowIndexes() {
+        dynamicComponentRowIndexes.clear();
+    }
+
+    public void putDynamicComponentRowIndex(@Nonnull String componentKey, int rowIndex) {
+        dynamicComponentRowIndexes.put(new DynamicComponentRowKey(componentKey), rowIndex);
+    }
+
+    @Nullable
+    public Integer getDynamicComponentRowIndex(@Nonnull String componentKey) {
+        return dynamicComponentRowIndexes.get(new DynamicComponentRowKey(componentKey));
+    }
+
+    public boolean isRuleEnabled(
+            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull DynamicHudTriggers rule
+    ) {
+        return getDynamicRuleConfig(entry).getRules().contains(rule);
+    }
+
+    public void toggleRule(
+            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull DynamicHudTriggers rule
+    ) {
+        DynamicHudRuleConfig cfg = getDynamicRuleConfig(entry);
+
         if (cfg.getRules().contains(rule)) {
             cfg.removeRule(rule);
         } else {
@@ -328,50 +321,78 @@ public final class HudConfigUiSession {
         dirty = true;
     }
 
-    public boolean isRuleEnabled(@Nonnull DynamicHudTriggers rule) {
-        return currentDynamicRuleConfig().getRules().contains(rule);
+    public float getDynamicThreshold(@Nonnull HudComponentRegistry.HudEntry entry) {
+        return getDynamicRuleConfig(entry).getThreshold();
     }
 
-    @Nullable
-    public DynamicHudTriggerCategory getExpandedDynamicCategory() {
-        return expandedDynamicCategory;
+    public void setDynamicThreshold(
+            @Nonnull HudComponentRegistry.HudEntry entry,
+            float value
+    ) {
+        getDynamicRuleConfig(entry).setThreshold(value);
+        dirty = true;
     }
 
-    public void toggleDynamicCategory(@Nonnull DynamicHudTriggerCategory category) {
-        if (expandedDynamicCategory == category) {
-            expandedDynamicCategory = null;
-        } else {
-            expandedDynamicCategory = category;
+    public boolean isDynamicThresholdEnabled(@Nonnull HudComponentRegistry.HudEntry entry) {
+        if (!entry.supportsThreshold()) {
+            return false;
         }
+
+        return switch (entry.key()) {
+            case "health" -> isRuleEnabled(entry, DynamicHudTriggers.HEALTH_NOT_FULL);
+            case "stamina" -> isRuleEnabled(entry, DynamicHudTriggers.STAMINA_NOT_FULL);
+            case "mana" -> isRuleEnabled(entry, DynamicHudTriggers.MANA_NOT_FULL);
+            case "oxygen" -> isRuleEnabled(entry, DynamicHudTriggers.OXYGEN_NOT_FULL);
+            default -> false;
+        };
     }
 
-    public int getDynamicCategoryTotal(@Nonnull DynamicHudTriggerCategory category) {
-        return (int) Arrays.stream(DynamicHudTriggers.values())
-                .filter(trigger -> trigger.category() == category)
-                .count();
+    public boolean isMoreTriggersRevealed(@Nonnull String componentKey) {
+        return moreTriggersExpandedByComponent.getOrDefault(componentKey, false);
     }
 
-    public int getDynamicCategoryEnabledCount(@Nonnull DynamicHudTriggerCategory category) {
-        return (int) currentDynamicRuleConfig().getRules().stream()
-                .filter(trigger -> trigger.category() == category)
-                .count();
+    public void revealMoreTriggers(@Nonnull String componentKey) {
+        moreTriggersExpandedByComponent.put(componentKey, true);
+    }
+
+    private void resetDynamicUiState() {
+        moreTriggersExpandedByComponent.clear();
+        clearDynamicRuleRowIndexes();
+        clearDynamicComponentRowIndexes();
     }
 
     @Nonnull
-    public String getDynamicCategoryCounterLabel(@Nonnull DynamicHudTriggerCategory category) {
-        int enabled = getDynamicCategoryEnabledCount(category);
-        int total = getDynamicCategoryTotal(category);
-        return "[" + enabled + "/" + total + "]";
-    }
-
-    @Nonnull
-    public List<DynamicHudTriggers> getCurrentSelectedRulesInDisplayOrder() {
-        DynamicHudRuleConfig cfg = currentDynamicRuleConfig();
-
+    public List<DynamicHudTriggers> getBaseRulesInDisplayOrder(
+            @Nonnull HudComponentRegistry.HudEntry entry
+    ) {
         return DynamicHudTriggers.displayCategoryOrder().stream()
                 .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
-                        .filter(trigger -> trigger.category() == category))
-                .filter(cfg.getRules()::contains)
+                        .filter(trigger -> trigger.category() == category)
+                        .filter(entry::supportsRule))
                 .toList();
+    }
+
+    @Nonnull
+    public List<DynamicHudTriggers> getExtraRulesInDisplayOrder(
+            @Nonnull HudComponentRegistry.HudEntry entry
+    ) {
+        return DynamicHudTriggers.displayCategoryOrder().stream()
+                .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
+                        .filter(trigger -> trigger.category() == category)
+                        .filter(trigger -> !entry.supportsRule(trigger))
+                        .filter(trigger -> trigger != DynamicHudTriggers.HEALTH_NOT_FULL)
+                        .filter(trigger -> trigger != DynamicHudTriggers.STAMINA_NOT_FULL)
+                        .filter(trigger -> trigger != DynamicHudTriggers.MANA_NOT_FULL)
+                        .filter(trigger -> trigger != DynamicHudTriggers.OXYGEN_NOT_FULL))
+                .toList();
+    }
+
+    public boolean isDynamicComponentVisible(@Nonnull HudComponentRegistry.HudEntry entry) {
+        return !entry.staticGetter().get(draftHudComponents);
+    }
+
+    @Nonnull
+    public String getDynamicComponentVisibilityLabel(@Nonnull HudComponentRegistry.HudEntry entry) {
+        return isDynamicComponentVisible(entry) ? "<VISIBLE>" : "<HIDDEN>";
     }
 }

@@ -16,7 +16,7 @@ Group #VisibilityRoot {
     }
 
     Group #VisibilityList {
-        Anchor: (Height: 540);
+        Anchor: (Height: 344);
         LayoutMode: TopScrolling;
         ScrollbarStyle: $C.@DefaultScrollbarStyle;
     }

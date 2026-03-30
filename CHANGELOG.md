@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.0
+
+* Added Oxygen bar to dynamic components
+* Added threshold configuration for HUD bar components (health, stamina, mana and oxygen)
+* Removed triggers HEALTH_LOW, HEALTH_CRITICAL, STAMINA_LOW, STAMINA_CRITICAL, MANA_LOW and MANA_CRITICAL
+* Config UI redesign (still a WIP)
 
 ## v1.1.0
 

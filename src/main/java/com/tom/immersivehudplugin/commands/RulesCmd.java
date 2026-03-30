@@ -36,9 +36,9 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static final Color WARN_COLOR = Color.YELLOW;
     private static final Color ERROR_COLOR = Color.RED;
     private static final Color HIDE_COLOR = Color.RED;
-    
+
     public RulesCmd(ImmersiveHudPlugin plugin) {
-        super("rules", "List, add, remove or clear dynamic HUD rules.");
+        super("rules", "List, add, remove, clear or configure dynamic HUD rules.");
 
         addUsageVariant(new TwoArgVariant(plugin));
         addUsageVariant(new ThreeArgVariant(plugin));
@@ -61,6 +61,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw("   or: /ihud rules <component> clear").color(WARN_COLOR));
         context.sendMessage(Message.raw("   or: /ihud rules <component> add <rule>").color(WARN_COLOR));
         context.sendMessage(Message.raw("   or: /ihud rules <component> remove <rule>").color(WARN_COLOR));
+        context.sendMessage(Message.raw("   or: /ihud rules <component> threshold <0-100>").color(WARN_COLOR));
         context.sendMessage(Message.raw("Dynamic components: " + availableComponents()).color(INFO_COLOR));
         context.sendMessage(Message.raw("Rules: " + availableRules()).color(INFO_COLOR));
     }
@@ -99,8 +100,22 @@ public final class RulesCmd extends AbstractPlayerCommand {
             String action = normalize(actionArg.get(context));
 
             if ("list".equals(action)) {
-                context.sendMessage(Message.raw(resolved.messagePrefix() + " rules: ").color(INFO_COLOR));
-                context.sendMessage(Message.raw(formatRules(resolved.rules().getRules())).color(INFO_COLOR));
+                String rulesText = formatRules(resolved.rules().getRules());
+
+                if (resolved.entry().supportsThreshold()) {
+                    context.sendMessage(Message.raw(
+                            resolved.messagePrefix()
+                                    + " rules: "
+                                    + rulesText
+                                    + " | threshold: "
+                                    + formatThreshold(resolved.rules().getThreshold())
+                                    + "%"
+                    ).color(INFO_COLOR));
+                } else {
+                    context.sendMessage(Message.raw(
+                            resolved.messagePrefix() + " rules: " + rulesText
+                    ).color(INFO_COLOR));
+                }
                 return;
             }
 
@@ -110,9 +125,26 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             resolved.rules().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
+
+            if (resolved.entry().supportsThreshold()) {
+                Float defaultThreshold = resolved.entry().defaultThreshold();
+                resolved.rules().setThreshold(defaultThreshold != null ? defaultThreshold : 100f);
+            }
+
             saveRulesChange(plugin, playerRef);
 
-            context.sendMessage(Message.raw(resolved.messagePrefix() + " rules cleared.").color(Color.GREEN));
+            if (resolved.entry().supportsThreshold()) {
+                context.sendMessage(Message.raw(
+                        resolved.messagePrefix()
+                                + " rules cleared. Threshold reset to "
+                                + formatThreshold(resolved.rules().getThreshold())
+                                + "%."
+                ).color(Color.GREEN));
+            } else {
+                context.sendMessage(Message.raw(
+                        resolved.messagePrefix() + " rules cleared."
+                ).color(Color.GREEN));
+            }
         }
     }
 
@@ -120,15 +152,15 @@ public final class RulesCmd extends AbstractPlayerCommand {
         private final ImmersiveHudPlugin plugin;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
-        private final RequiredArg<String> ruleArg;
+        private final RequiredArg<String> valueArg;
 
         ThreeArgVariant(ImmersiveHudPlugin plugin) {
-            super("Add or remove rule");
+            super("Add, remove rule or configure threshold");
             this.plugin = plugin;
 
             this.componentArg = dynamicComponentArg(this);
-            this.actionArg = allowedArg(this, "action", "add/remove", "add", "remove");
-            this.ruleArg = dynamicRuleArg(this);
+            this.actionArg = allowedArg(this, "action", "add/remove/threshold", "add", "remove", "threshold");
+            this.valueArg = genericValueArg(this);
         }
 
         @Override
@@ -150,12 +182,63 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             String action = normalize(actionArg.get(context));
-            DynamicHudTriggers rule = DynamicHudTriggers.fromString(ruleArg.get(context));
+            String rawValue = valueArg.get(context);
+
+            if ("threshold".equals(action)) {
+                if (!resolved.entry().supportsThreshold()) {
+                    context.sendMessage(Message.raw(
+                            resolved.messagePrefix() + " does not support threshold."
+                    ).color(ERROR_COLOR));
+                    return;
+                }
+
+                Float threshold = parseThreshold(rawValue);
+                if (threshold == null) {
+                    context.sendMessage(Message.raw(
+                            "Invalid threshold. Use a value between 0 and 100."
+                    ).color(ERROR_COLOR));
+                    return;
+                }
+
+                resolved.rules().setThreshold(threshold);
+                saveRulesChange(plugin, playerRef);
+
+                if (!hasMatchingThresholdRule(resolved.entry(), resolved.rules())) {
+                    context.sendMessage(Message.raw(
+                            resolved.messagePrefix()
+                                    + " threshold set to "
+                                    + formatThreshold(resolved.rules().getThreshold())
+                                    + "%, but no threshold-based rule is currently active."
+                    ).color(WARN_COLOR));
+                    return;
+                }
+
+                context.sendMessage(Message.raw(
+                        resolved.messagePrefix()
+                                + " threshold set to "
+                                + formatThreshold(resolved.rules().getThreshold())
+                                + "%."
+                ).color(Color.GREEN));
+                return;
+            }
+
+            DynamicHudTriggers rule = DynamicHudTriggers.fromString(rawValue);
             if (rule == null) {
+                context.sendMessage(Message.raw(
+                        "Unknown rule: " + rawValue + ". Available rules: " + availableRules()
+                ).color(ERROR_COLOR));
                 return;
             }
 
             if ("add".equals(action)) {
+
+                if (!resolved.entry().supportsRule(rule)) {
+                    context.sendMessage(Message.raw(
+                            "Rule " + rule.name() + " is not valid for " + resolved.entry().label() + "."
+                    ).color(ERROR_COLOR));
+                    return;
+                }
+
                 boolean changed = resolved.rules().addRule(rule);
                 if (!changed) {
                     context.sendMessage(Message.raw(
@@ -206,9 +289,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 .addValidator(new ManagedHudComponentValidator());
     }
 
-    private static RequiredArg<String> dynamicRuleArg(AbstractPlayerCommand cmd) {
-        return cmd.withRequiredArg("rule", "Rule", ArgTypes.STRING)
-                .addValidator(new DynamicHudRuleValidator());
+    private static RequiredArg<String> genericValueArg(AbstractPlayerCommand cmd) {
+        return cmd.withRequiredArg("value", "Rule or threshold", ArgTypes.STRING);
     }
 
     private static RequiredArg<String> allowedArg(
@@ -281,6 +363,46 @@ public final class RulesCmd extends AbstractPlayerCommand {
         return rules;
     }
 
+    private static boolean hasMatchingThresholdRule(
+            HudComponentRegistry.HudEntry entry,
+            DynamicHudRuleConfig ruleCfg
+    ) {
+        return switch (entry.key()) {
+            case "health" -> ruleCfg.getRules().contains(DynamicHudTriggers.HEALTH_NOT_FULL);
+            case "stamina" -> ruleCfg.getRules().contains(DynamicHudTriggers.STAMINA_NOT_FULL);
+            case "mana" -> ruleCfg.getRules().contains(DynamicHudTriggers.MANA_NOT_FULL);
+            case "oxygen" -> ruleCfg.getRules().contains(DynamicHudTriggers.OXYGEN_NOT_FULL);
+            default -> false;
+        };
+    }
+
+    @Nullable
+    private static Float parseThreshold(@Nullable String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+
+        try {
+            float value = Float.parseFloat(raw.trim());
+            if (Float.isNaN(value) || Float.isInfinite(value)) {
+                return null;
+            }
+            if (value < 0f || value > 100f) {
+                return null;
+            }
+            return value;
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private static String formatThreshold(float value) {
+        if (value == (long) value) {
+            return Long.toString((long) value);
+        }
+        return Float.toString(value);
+    }
+
     private static String formatRules(EnumSet<DynamicHudTriggers> rules) {
         if (rules == null || rules.isEmpty()) {
             return "(none)";
@@ -314,19 +436,6 @@ public final class RulesCmd extends AbstractPlayerCommand {
             String key = HudComponentRegistry.normalize(input);
             if (HudComponentRegistry.findDynamic(key) == null) {
                 results.fail("Unknown dynamic HUD component: " + input + ". Available components: " + availableComponents());
-            }
-        }
-
-        @Override
-        public void updateSchema(SchemaContext context, @Nonnull Schema target) {
-        }
-    }
-
-    private static final class DynamicHudRuleValidator implements Validator<String> {
-        @Override
-        public void accept(@Nullable String input, @Nonnull ValidationResults results) {
-            if (DynamicHudTriggers.fromString(input) == null) {
-                results.fail("Unknown rule: " + input + ". Available rules: " + availableRules());
             }
         }
 

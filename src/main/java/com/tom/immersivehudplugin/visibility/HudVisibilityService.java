@@ -87,30 +87,13 @@ public final class HudVisibilityService {
     ) {
         st.dynamicHidden.clear();
 
-        long requiredMask = 0L;
-
         for (ManagedHudRuntimeDef def : MANAGED_HUD_COMPONENTS) {
             if (!Boolean.TRUE.equals(def.hideFlag().apply(hc))) {
                 continue;
             }
 
-            DynamicHudRuleConfig rule = def.ruleGetter().apply(dh);
-
-            if (rule != null) {
-                requiredMask |= rule.getRulesMask();
-            }
-        }
-
-        long activeMask = DynamicHudTriggers.activeMask(dyn, requiredMask);
-
-        for (ManagedHudRuntimeDef def : MANAGED_HUD_COMPONENTS) {
-            if (!Boolean.TRUE.equals(def.hideFlag().apply(hc))) {
-                continue;
-            }
-
-            DynamicHudRuleConfig rule = def.ruleGetter().apply(dh);
-
-            boolean hidden = !shouldShowDynamic(rule, activeMask);
+            DynamicHudRuleConfig ruleCfg = def.ruleGetter().apply(dh);
+            boolean hidden = !shouldShowDynamic(ruleCfg, dyn);
 
             if (hidden) {
                 st.dynamicHidden.add(def.component());
@@ -157,13 +140,59 @@ public final class HudVisibilityService {
     }
 
     private boolean shouldShowDynamic(
-            DynamicHudRuleConfig rule,
-            long activeMask
+            DynamicHudRuleConfig ruleCfg,
+            DynamicHudTriggersContext ctx
     ) {
-        if (rule == null) {
+        if (ruleCfg == null) {
             return false;
         }
 
-        return (rule.getRulesMask() & activeMask) != 0L;
+        EnumSet<DynamicHudTriggers> rules = ruleCfg.getRules();
+        if (rules.isEmpty()) {
+            return false;
+        }
+
+        for (DynamicHudTriggers trigger : rules) {
+            if (matchesTrigger(trigger, ruleCfg, ctx)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean matchesTrigger(
+            DynamicHudTriggers trigger,
+            DynamicHudRuleConfig ruleCfg,
+            DynamicHudTriggersContext ctx
+    ) {
+        if (isThresholdRule(trigger)) {
+            return matchesThresholdTrigger(trigger, ruleCfg, ctx);
+        }
+
+        return trigger.test(ctx);
+    }
+
+    private boolean isThresholdRule(DynamicHudTriggers trigger) {
+        return trigger == DynamicHudTriggers.HEALTH_NOT_FULL
+                || trigger == DynamicHudTriggers.STAMINA_NOT_FULL
+                || trigger == DynamicHudTriggers.MANA_NOT_FULL
+                || trigger == DynamicHudTriggers.OXYGEN_NOT_FULL;
+    }
+
+    private boolean matchesThresholdTrigger(
+            DynamicHudTriggers trigger,
+            DynamicHudRuleConfig ruleCfg,
+            DynamicHudTriggersContext ctx
+    ) {
+        float threshold = ruleCfg != null ? ruleCfg.getThreshold() : 100f;
+
+        return switch (trigger) {
+            case HEALTH_NOT_FULL -> ctx.healthBar() != null && ctx.healthBar().isBelowPercent(threshold);
+            case STAMINA_NOT_FULL -> ctx.staminaBar() != null && ctx.staminaBar().isBelowPercent(threshold);
+            case MANA_NOT_FULL -> ctx.manaBar() != null && ctx.manaBar().isBelowPercent(threshold);
+            case OXYGEN_NOT_FULL -> ctx.oxygenBar() != null && ctx.oxygenBar().isBelowPercent(threshold);
+            default -> false;
+        };
     }
 }

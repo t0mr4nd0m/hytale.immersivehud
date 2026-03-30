@@ -31,6 +31,6 @@ public record DynamicHudTriggersContext(
 
         HudBarState healthBar,
         HudBarState staminaBar,
-        HudBarState manaBar
-) {
-}
+        HudBarState manaBar,
+        HudBarState oxygenBar
+) { }

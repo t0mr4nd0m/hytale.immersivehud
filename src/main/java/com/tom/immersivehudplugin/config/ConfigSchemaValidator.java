@@ -116,7 +116,9 @@ public final class ConfigSchemaValidator {
 
         JsonObject obj = root.getAsJsonObject();
 
-        if (!hasExactlyKeys(obj, Set.of("Rules"))) {
+        Set<String> keys = obj.keySet();
+
+        if (!(keys.equals(Set.of("Rules")) || keys.equals(Set.of("Rules", "Threshold")))) {
             return false;
         }
 

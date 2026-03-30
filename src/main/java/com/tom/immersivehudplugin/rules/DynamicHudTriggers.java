@@ -1,32 +1,17 @@
 package com.tom.immersivehudplugin.rules;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public enum DynamicHudTriggers {
 
-    HEALTH_NOT_FULL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.healthBar().isNotFull()),
-    HEALTH_LOW(DynamicHudTriggerCategory.STATUS, ctx -> ctx.healthBar().isBelow(2f)),
-    HEALTH_CRITICAL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.healthBar().isBelow(4f)),
-    HEALTH_FULL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.healthBar().isFull()),
-    STAMINA_NOT_FULL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.staminaBar().isNotFull()),
-    STAMINA_LOW(DynamicHudTriggerCategory.STATUS, ctx -> ctx.staminaBar().isBelow(2f)),
-    STAMINA_CRITICAL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.staminaBar().isBelow(4f)),
-    STAMINA_FULL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.staminaBar().isFull()),
-    MANA_NOT_FULL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.manaBar().isNotFull()),
-    MANA_LOW(DynamicHudTriggerCategory.STATUS, ctx -> ctx.manaBar().isBelow(2f)),
-    MANA_CRITICAL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.manaBar().isBelow(4f)),
-    MANA_FULL(DynamicHudTriggerCategory.STATUS, ctx -> ctx.manaBar().isFull()),
-
     HOTBAR_INPUT(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::hotbarInput),
+    CHARGING_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::chargingWeapon),
     CONSUMABLE_USE(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::consumableUse),
     TARGET_ENTITY(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::targetEntity),
     INTERACTABLE_BLOCK(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::interactableBlock),
-
-    HOLDING_RANGED_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::holdingRangedWeapon),
-    HOLDING_MELEE_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::holdingMeleeWeapon),
-    CHARGING_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::chargingWeapon),
 
     PLAYER_MOVING(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerMoving),
     PLAYER_WALKING(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerWalking),
@@ -43,11 +28,18 @@ public enum DynamicHudTriggers {
     PLAYER_ON_GROUND(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerOnGround),
     PLAYER_FALLING(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerFalling),
     PLAYER_SITTING(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerSitting),
-    PLAYER_ROLLING(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerRolling);
+    PLAYER_ROLLING(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerRolling),
+
+    HOLDING_RANGED_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::holdingRangedWeapon),
+    HOLDING_MELEE_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::holdingMeleeWeapon),
+
+    HEALTH_NOT_FULL(DynamicHudTriggerCategory.STATUS, _ -> true),
+    STAMINA_NOT_FULL(DynamicHudTriggerCategory.STATUS, _ -> true),
+    MANA_NOT_FULL(DynamicHudTriggerCategory.STATUS, _ -> true),
+    OXYGEN_NOT_FULL(DynamicHudTriggerCategory.STATUS, _ -> true);
 
     private final DynamicHudTriggerCategory category;
     private final Predicate<DynamicHudTriggersContext> predicate;
-    private final long bit;
 
     DynamicHudTriggers(
             DynamicHudTriggerCategory category,
@@ -55,43 +47,14 @@ public enum DynamicHudTriggers {
     ) {
         this.category = category;
         this.predicate = predicate;
-        this.bit = 1L << ordinal();
     }
 
     public DynamicHudTriggerCategory category() {
         return category;
     }
 
-    public long bit() {
-        return bit;
-    }
-
     public boolean test(DynamicHudTriggersContext ctx) {
         return predicate.test(ctx);
-    }
-
-    public static long toMask(EnumSet<DynamicHudTriggers> rules) {
-        long mask = 0L;
-        for (DynamicHudTriggers trigger : rules) {
-            mask |= trigger.bit();
-        }
-        return mask;
-    }
-
-    public static long activeMask(DynamicHudTriggersContext ctx, long requiredMask) {
-        long mask = 0L;
-
-        for (DynamicHudTriggers trigger : values()) {
-            if ((requiredMask & trigger.bit()) == 0) {
-                continue;
-            }
-
-            if (trigger.test(ctx)) {
-                mask |= trigger.bit();
-            }
-        }
-
-        return mask;
     }
 
     public static DynamicHudTriggers fromString(String value) {
@@ -103,6 +66,13 @@ public enum DynamicHudTriggers {
                 .toUpperCase()
                 .replace('-', '_')
                 .replace(' ', '_');
+
+        normalized = switch (normalized) {
+            case "HEALTH_LOW", "HEALTH_CRITICAL" -> "HEALTH_NOT_FULL";
+            case "STAMINA_LOW", "STAMINA_CRITICAL" -> "STAMINA_NOT_FULL";
+            case "MANA_LOW", "MANA_CRITICAL" -> "MANA_NOT_FULL";
+            default -> normalized;
+        };
 
         try {
             return DynamicHudTriggers.valueOf(normalized);
@@ -122,8 +92,7 @@ public enum DynamicHudTriggers {
                 DynamicHudTriggerCategory.INTERACTION,
                 DynamicHudTriggerCategory.COMBAT,
                 DynamicHudTriggerCategory.STATUS,
-                DynamicHudTriggerCategory.MOVEMENT,
-                DynamicHudTriggerCategory.SPECIAL
+                DynamicHudTriggerCategory.MOVEMENT
         );
     }
 }

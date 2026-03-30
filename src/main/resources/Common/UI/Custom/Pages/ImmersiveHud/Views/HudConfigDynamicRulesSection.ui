@@ -1,0 +1,78 @@
+$C = "../../../Common.ui";
+
+@VisibilityLabelStyle  = LabelStyle( FontSize: 13, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@SectionLabelStyle     = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@ComponentValueStyle   = LabelStyle( FontSize: 15, TextColor: $C.@ColorGoldHighlight, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@SliderInputFieldStyle = InputFieldStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true );
+
+Group #DynamicComponentSectionRoot {
+  LayoutMode: Top;
+  Anchor: (Bottom: 8);
+
+  Group #DynamicComponentHeader {
+    LayoutMode: Left;
+    Anchor: (Height: 38);
+    Padding: (Vertical: 8);
+    Background: #1a2533(0.6);
+    OutlineColor: #3a4a5a(0.35);
+    OutlineSize: 1;
+
+    Label #DynamicComponentValueLabel {
+      FlexWeight: 1;
+      Anchor: (Height: 32);
+      Padding: (Horizontal: 12);
+      Text: "Component Name";
+      Style: @ComponentValueStyle;
+    }
+
+    Label #DynamicComponentVisibilityLabel {
+      Anchor: (Width: 110, Height: 32);
+      Padding: (Left: 8, Right: 12);
+      Text: "VISIBLE";
+      Style: @VisibilityLabelStyle;
+    }
+
+    Label {
+      Padding: (Horizontal: 8);
+      Text: "visible when:";
+      Style: @SectionLabelStyle;
+    }
+  }
+
+  Group #DynamicRulesList {
+    LayoutMode: Top;
+  }
+
+  Group #DynamicThresholdHost {
+    LayoutMode: Left;
+    Anchor: (Height: 38);
+    Padding: (Vertical: 8);
+    Background: #1a2533(0.6);
+    OutlineColor: #3a4a5a(0.35);
+    OutlineSize: 1;
+    Visible: false;
+
+    Label #DynamicThresholdTitleLabel {
+      FlexWeight: 1;
+      Anchor: (Height: 32);
+      Padding: (Horizontal: 12);
+      Text: "VALUE BELOW";
+      Style: @SectionLabelStyle;
+    }
+
+    $C.@SliderNumberField #DynamicThresholdSlider {
+      @Anchor = (Width: 380);
+      Value: 100;
+      Min: 0;
+      Max: 100;
+      NumberFieldContainerAnchor: (Left: 16, Width: 60, Height: 24);
+      NumberFieldSuffix: "%";
+      NumberFieldStyle: @SliderInputFieldStyle;
+    }
+  }
+
+  Group #DynamicExtraTriggersList {
+    LayoutMode: Top;
+    Visible: false;
+  }
+}

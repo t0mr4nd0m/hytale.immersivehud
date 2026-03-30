@@ -207,14 +207,6 @@ public final class HudRuntimeService {
                     }
                 }
 
-                /*if (st.rangedWeaponInHand) {
-                    st.t.pulse(HudSignal.HOLDING_RANGED_WEAPON, now, st.hideDelayMsHint);
-                }*/
-
-                /*if (st.meleeWeaponInHand) {
-                    st.t.pulse(HudSignal.HOLDING_MELEE_WEAPON, now, st.hideDelayMsHint);
-                }*/
-
                 if (isChargingStart && (st.rangedWeaponInHand || st.meleeWeaponInHand)) {
                     st.t.pulse(HudSignal.CHARGING_WEAPON, now, st.hideDelayMsHint);
                 }
