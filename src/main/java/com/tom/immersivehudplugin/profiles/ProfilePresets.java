@@ -40,20 +40,17 @@ public final class ProfilePresets {
         HudComponentsConfig hud = cfg.getHudComponents();
         DynamicHudConfig dyn = cfg.getDynamicHud();
 
-        // Reduce non-essential static UI
         hud.setHideRequestsHud(true);
         hud.setHideKillFeedHud(true);
         hud.setHidePlayerListHud(true);
         hud.setHideNotificationsHud(true);
         hud.setHideInputBindingsHud(true);
-        hud.setHideSpeedometerHud(true);
 
-        // More restrictive bar rules
         dyn.getHealth().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
         dyn.getStamina().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
         dyn.getMana().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
+        dyn.getOxygen().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
 
-        // Core HUD stays contextual
         dyn.getCompass().setRules(EnumSet.of(
                 DynamicHudTriggers.PLAYER_RUNNING,
                 DynamicHudTriggers.PLAYER_MOUNTING,
@@ -67,9 +64,7 @@ public final class ProfilePresets {
                 DynamicHudTriggers.TARGET_ENTITY,
                 DynamicHudTriggers.HOLDING_RANGED_WEAPON
         ));
-        dyn.getHotbar().setRules(EnumSet.of(
-                DynamicHudTriggers.HOTBAR_INPUT
-        ));
+        dyn.getHotbar().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
     }
 
     private static void applyDisabled(PlayerConfig cfg) {

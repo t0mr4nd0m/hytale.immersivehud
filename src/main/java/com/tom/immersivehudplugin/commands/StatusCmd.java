@@ -134,7 +134,10 @@ public final class StatusCmd extends AbstractPlayerCommand {
             return;
         }
 
-        DynamicHudRuleConfig rule = entry.dynamicGetter().apply(dynamic);
+        DynamicHudRuleConfig rule = null;
+        if (entry.dynamicGetter() != null) {
+            rule = entry.dynamicGetter().apply(dynamic);
+        }
         sendDynamicComponentLine(context, entry.label(), hiddenNow, rule);
     }
 
@@ -180,7 +183,12 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
         for (var trigger : triggers) {
-            joiner.add(trigger.name().toLowerCase(Locale.ROOT));
+            switch (trigger) {
+                case HEALTH_NOT_FULL, STAMINA_NOT_FULL, MANA_NOT_FULL, OXYGEN_NOT_FULL ->
+                        joiner.add(trigger.name().toLowerCase(Locale.ROOT) + "(" + rule.getThreshold() + "%)");
+                default ->
+                        joiner.add(trigger.name().toLowerCase(Locale.ROOT));
+            }
         }
         return joiner.toString();
     }

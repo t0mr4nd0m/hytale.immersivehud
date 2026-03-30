@@ -33,20 +33,12 @@ public final class PlayerConfigManager {
         this.playersDir = plugin.getDataDirectory().resolve("players");
     }
 
-    public Path playersDir() {
-        return playersDir;
-    }
-
     public Path pathFor(UUID uuid) {
         return playersDir.resolve(uuid + ".json");
     }
 
     public PlayerConfig getCached(UUID uuid) {
         return cache.get(uuid);
-    }
-
-    public void put(UUID uuid, PlayerConfig cfg) {
-        cache.put(uuid, cfg);
     }
 
     public void unload(UUID uuid) {
@@ -181,35 +173,6 @@ public final class PlayerConfigManager {
     public void markDirty(UUID uuid) {
         if (uuid != null) {
             dirty.add(uuid);
-        }
-    }
-
-    public void reset(UUID uuid) {
-        if (uuid == null) {
-            return;
-        }
-
-        cache.remove(uuid);
-        dirty.remove(uuid);
-
-        try {
-            Files.deleteIfExists(pathFor(uuid));
-        } catch (Throwable t) {
-            plugin.getLogger().at(Level.WARNING).log(
-                    "Failed to delete player config for " + uuid
-                            + " [" + t.getClass().getSimpleName() + "]: "
-                            + t.getMessage()
-            );
-        }
-    }
-
-    public boolean isDirty(UUID uuid) {
-        return uuid != null && dirty.contains(uuid);
-    }
-
-    public void clearDirty(UUID uuid) {
-        if (uuid != null) {
-            dirty.remove(uuid);
         }
     }
 }

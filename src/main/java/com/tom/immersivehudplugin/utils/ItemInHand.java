@@ -6,9 +6,6 @@ import java.util.Set;
 
 public final class ItemInHand {
 
-    private ItemInHand() {
-    }
-
     private static final Set<String> RANGED_WEAPONS = Set.of("Bow", "Crossbow", "Staff", "Arrow");
 
     private static final Set<String> MELEE_WEAPONS = Set.of("Dagger", "Sword", "Axe", "Hammer", "Mace", "Spear");

@@ -20,6 +20,7 @@ public final class PlayerHudState {
     public final HudBarState healthBar = new HudBarState();
     public final HudBarState staminaBar = new HudBarState();
     public final HudBarState manaBar = new HudBarState();
+    public final HudBarState oxygenBar = new HudBarState();
 
     public volatile boolean staticHudInitialized;
     public volatile boolean staticDirty = true;
@@ -51,6 +52,7 @@ public final class PlayerHudState {
         healthBar.reset();
         staminaBar.reset();
         manaBar.reset();
+        oxygenBar.reset();
 
         staticHudInitialized = false;
         staticDirty = true;

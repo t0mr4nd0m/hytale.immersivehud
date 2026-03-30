@@ -1,9 +1,6 @@
 package com.tom.immersivehudplugin.config;
 
 import com.google.gson.annotations.SerializedName;
-import com.hypixel.hytale.codec.Codec;
-import com.hypixel.hytale.codec.KeyedCodec;
-import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import java.util.EnumSet;
@@ -11,23 +8,30 @@ import java.util.Objects;
 
 public final class DynamicHudRuleConfig {
 
+    private static final float DEFAULT_THRESHOLD = 100f;
+
     @SerializedName("Rules")
     private String[] ruleNames = new String[0];
+
+    @SerializedName("Threshold")
+    private Float threshold = DEFAULT_THRESHOLD;
 
     private transient EnumSet<DynamicHudTriggers> parsedRules;
     private transient boolean parsedRulesDirty = true;
 
-    private transient long rulesMask;
-    private transient boolean rulesMaskDirty = true;
+    //private transient long rulesMask;
+    //private transient boolean rulesMaskDirty = true;
 
     public String[] getRuleNames() {
         return ruleNames != null ? ruleNames.clone() : new String[0];
     }
 
-    public void setRuleNames(String[] values) {
-        ruleNames = normalizeRuleNames(values);
-        parsedRulesDirty = true;
-        rulesMaskDirty = true;
+    public float getThreshold() {
+        return sanitizeThreshold(threshold);
+    }
+
+    public void setThreshold(Float value) {
+        threshold = sanitizeThreshold(value);
     }
 
     public EnumSet<DynamicHudTriggers> getRules() {
@@ -37,24 +41,9 @@ public final class DynamicHudRuleConfig {
 
         parsedRules = parseRuleNames(ruleNames);
         parsedRulesDirty = false;
-        rulesMaskDirty = true;
+        //rulesMaskDirty = true;
 
         return EnumSet.copyOf(parsedRules);
-    }
-
-    public long getRulesMask() {
-        if (!rulesMaskDirty) {
-            return rulesMask;
-        }
-
-        if (parsedRulesDirty || parsedRules == null) {
-            parsedRules = parseRuleNames(ruleNames);
-            parsedRulesDirty = false;
-        }
-
-        rulesMask = DynamicHudTriggers.toMask(parsedRules);
-        rulesMaskDirty = false;
-        return rulesMask;
     }
 
     public void setRules(EnumSet<DynamicHudTriggers> rules) {
@@ -66,8 +55,8 @@ public final class DynamicHudRuleConfig {
         ruleNames = toRuleNames(safeRules);
         parsedRules = EnumSet.copyOf(safeRules);
         parsedRulesDirty = false;
-        rulesMask = DynamicHudTriggers.toMask(safeRules);
-        rulesMaskDirty = false;
+        //rulesMask = DynamicHudTriggers.toMask(safeRules);
+        //rulesMaskDirty = false;
     }
 
     public boolean addRule(DynamicHudTriggers rule) {
@@ -101,29 +90,38 @@ public final class DynamicHudRuleConfig {
     }
 
     public boolean sanitize() {
-        String[] normalized = toRuleNames(getRules());
+        boolean changed = false;
 
+        String[] normalized = toRuleNames(getRules());
         if (!sameContents(ruleNames, normalized)) {
             ruleNames = normalized;
             parsedRules = parseRuleNames(normalized);
             parsedRulesDirty = false;
-            rulesMask = DynamicHudTriggers.toMask(parsedRules);
-            rulesMaskDirty = false;
-            return true;
+            //rulesMask = DynamicHudTriggers.toMask(parsedRules);
+            //rulesMaskDirty = false;
+            changed = true;
         }
 
-        return false;
+        float sanitizedThreshold = sanitizeThreshold(threshold);
+        if (threshold == null || Float.compare(threshold, sanitizedThreshold) != 0) {
+            threshold = sanitizedThreshold;
+            changed = true;
+        }
+
+        return changed;
     }
 
     public DynamicHudRuleConfig copy() {
         DynamicHudRuleConfig c = new DynamicHudRuleConfig();
         c.setRules(getRules());
+        c.setThreshold(getThreshold());
         return c;
     }
 
     private static EnumSet<DynamicHudTriggers> parseRuleNames(String[] values) {
         EnumSet<DynamicHudTriggers> set = EnumSet.noneOf(DynamicHudTriggers.class);
 
+        //noinspection RedundantLengthCheck
         if (values == null || values.length == 0) {
             return set;
         }
@@ -148,10 +146,6 @@ public final class DynamicHudRuleConfig {
                 .toArray(String[]::new);
     }
 
-    private static String[] normalizeRuleNames(String[] values) {
-        return toRuleNames(parseRuleNames(values));
-    }
-
     private static boolean sameContents(String[] a, String[] b) {
         if (a == b) {
             return true;
@@ -167,5 +161,12 @@ public final class DynamicHudRuleConfig {
         }
 
         return true;
+    }
+
+    private static float sanitizeThreshold(Float value) {
+        if (value == null || Float.isNaN(value) || Float.isInfinite(value)) {
+            return DEFAULT_THRESHOLD;
+        }
+        return Math.max(0f, Math.min(100f, value));
     }
 }

@@ -2,14 +2,15 @@ package com.tom.immersivehudplugin.ui;
 
 public enum HudConfigView {
     PROFILES ("Profiles", """
-            Choose a profile to instantly apply a preset HUD experience.
+            1) Choose a profile to instantly apply a preset HUD experience.
             Profiles provide predefined configurations tailored for different playstyles."""),
     VISIBILITY ("Visibility", """
-            Toggle components to show or hide them on your HUD.
-            Note: Input binding HUD component visibility is a bit buggy. Use game Settings to hide it."""),
+            2) Toggle components to show or hide them on your HUD.
+            Note: The visibility of the Input Bindings HUD component may not work as expected due to limitations in
+            the current Hytale implementation. If you want to hide it permanently, please use the in-game settings."""),
     DYNAMIC_RULES ("Dynamic Rules", """
-            Choose a component, then select the triggers that control when it becomes visible.
-            If no rules are selected, the component behaves as static.
+            3) Select the triggers that control when a component becomes visible.
+            If no triggers are selected, the component behaves as static.
             Combine multiple triggers to customize its behavior.""");
 
     private final String label;

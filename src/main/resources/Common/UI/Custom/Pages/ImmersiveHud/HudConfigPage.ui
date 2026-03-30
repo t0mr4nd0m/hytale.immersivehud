@@ -1,6 +1,6 @@
 $C = "../../Common.ui";
 
-@HorizontalSpacer    = Group { Anchor: (Width:  4); };
+@HorizontalSpacer    = Group { Anchor: (Width:  16); };
 
 @CustomLabelStyle = LabelStyle ( FontSize: 15, TextColor: #bfcdd5, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center );
 
@@ -19,7 +19,7 @@ $C = "../../Common.ui";
 $C.@PageOverlay {
 
     $C.@Container {
-        Anchor: (Width: 760, Height: 760);
+        Anchor: (Width: 760, Height: 600);
 
         #Title {
             $C.@Title {
@@ -140,7 +140,7 @@ $C.@PageOverlay {
                     Text: "APPLY";
                 }
 
-                @HorizontalSpacer {}
+                $C.@ActionButtonSeparator {}
 
                 $C.@CancelTextButton #CancelButton {
                     Anchor: (Width: 130);

@@ -3,9 +3,7 @@ package com.tom.immersivehudplugin.config;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -107,12 +105,6 @@ public final class HudComponentsConfig {
         hiddenByKey.put(normalized, hidden);
     }
 
-    @Nonnull
-    public Map<String, Boolean> asMap() {
-        ensureAllEntries();
-        return Collections.unmodifiableMap(hiddenByKey);
-    }
-
     public boolean sanitize() {
         boolean changed = false;
 
@@ -154,7 +146,7 @@ public final class HudComponentsConfig {
     private void ensureAllEntries() {
         for (HudEntry entry : HudComponentRegistry.allList()) {
             String key = HudComponentRegistry.normalize(entry.key());
-            hiddenByKey.computeIfAbsent(key, k -> entry.defaultHidden());
+            hiddenByKey.computeIfAbsent(key, _ -> entry.defaultHidden());
         }
     }
 

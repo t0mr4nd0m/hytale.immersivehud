@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public final class DynamicHudConfig {
 
     private final Map<String, DynamicHudRuleConfig> rulesByKey = new LinkedHashMap<>();
@@ -71,10 +72,17 @@ public final class DynamicHudConfig {
     }
 
     @Nonnull
+    public DynamicHudRuleConfig getOxygen() {
+        return getByKey("oxygen");
+    }
+
+    public void setOxygen(@Nullable DynamicHudRuleConfig v) { setByKey("oxygen", v); }
+
+    @Nonnull
     public DynamicHudRuleConfig getByKey(@Nullable String key) {
         String normalized = HudComponentRegistry.normalize(key);
         ensureAllDynamicEntries();
-        return rulesByKey.computeIfAbsent(normalized, k -> new DynamicHudRuleConfig());
+        return rulesByKey.computeIfAbsent(normalized, _ -> new DynamicHudRuleConfig());
     }
 
     public void setByKey(@Nullable String key, @Nullable DynamicHudRuleConfig value) {
@@ -84,12 +92,6 @@ public final class DynamicHudConfig {
         }
 
         rulesByKey.put(normalized, value != null ? value : new DynamicHudRuleConfig());
-    }
-
-    @Nonnull
-    public Map<String, DynamicHudRuleConfig> asMap() {
-        ensureAllDynamicEntries();
-        return java.util.Collections.unmodifiableMap(rulesByKey);
     }
 
     public boolean sanitize() {
@@ -142,7 +144,7 @@ public final class DynamicHudConfig {
     private void ensureAllDynamicEntries() {
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
             String key = HudComponentRegistry.normalize(entry.key());
-            rulesByKey.computeIfAbsent(key, k -> new DynamicHudRuleConfig());
+            rulesByKey.computeIfAbsent(key, _ -> new DynamicHudRuleConfig());
         }
     }
 }

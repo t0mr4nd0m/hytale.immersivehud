@@ -67,12 +67,14 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         int healthState = DefaultEntityStatTypes.getHealth();
         int staminaState = DefaultEntityStatTypes.getStamina();
         int manaState = DefaultEntityStatTypes.getMana();
+        int oxygenState = DefaultEntityStatTypes.getOxygen();
 
         HudContextBuilder hudContextBuilder = new HudContextBuilder(
                 itemAssetMap,
                 healthState,
                 staminaState,
-                manaState
+                manaState,
+                oxygenState
         );
 
         HudVisibilityService hudVisibilityService = new HudVisibilityService();

@@ -14,18 +14,19 @@ public final class HudBarState {
         return max > 0f;
     }
 
-    public boolean isBelow(float d) {
-        return isValid() && current * d < max;
+    public float ratio() {
+        return isValid() ? (current / max) : 1f;
     }
 
-    public boolean isNotFull() {
-        return isValid() && current < max;
+    public float percent() {
+        return ratio() * 100f;
     }
 
-    public boolean isFull() { return isValid() && current >= max; }
+    public boolean isBelowPercent(float percent) {
+        return isValid() && percent() < percent;
+    }
 
     public void reset() {
-        current = 0f;
-        max = 0f;
+        current = max = 0f;
     }
 }
