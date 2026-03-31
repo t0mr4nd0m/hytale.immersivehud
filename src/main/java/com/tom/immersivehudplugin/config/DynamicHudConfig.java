@@ -5,8 +5,10 @@ import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public final class DynamicHudConfig {
@@ -86,15 +88,15 @@ public final class DynamicHudConfig {
     }
 
     public void setByKey(@Nullable String key, @Nullable DynamicHudRuleConfig value) {
+
         String normalized = HudComponentRegistry.normalize(key);
-        if (normalized.isEmpty()) {
-            return;
-        }
+        if (normalized.isEmpty()) { return; }
 
         rulesByKey.put(normalized, value != null ? value : new DynamicHudRuleConfig());
     }
 
     public boolean sanitize() {
+
         boolean changed = false;
 
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
@@ -109,12 +111,12 @@ public final class DynamicHudConfig {
             }
         }
 
-        java.util.Set<String> validKeys = HudComponentRegistry.dynamicList().stream()
+        Set<String> validKeys = HudComponentRegistry.dynamicList().stream()
                 .map(HudEntry::key)
                 .map(HudComponentRegistry::normalize)
                 .collect(java.util.stream.Collectors.toSet());
 
-        java.util.Iterator<Map.Entry<String, DynamicHudRuleConfig>> it = rulesByKey.entrySet().iterator();
+        Iterator<Map.Entry<String, DynamicHudRuleConfig>> it = rulesByKey.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, DynamicHudRuleConfig> entry = it.next();
             if (!validKeys.contains(entry.getKey())) {

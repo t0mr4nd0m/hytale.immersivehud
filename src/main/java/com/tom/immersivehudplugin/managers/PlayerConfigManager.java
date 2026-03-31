@@ -49,18 +49,19 @@ public final class PlayerConfigManager {
             UUID uuid,
             GlobalConfig globalCfg
     ) {
+
         PlayerConfig cached = cache.get(uuid);
-        if (cached != null) {
-            return cached;
-        }
+        if (cached != null) { return cached; }
 
         try {
+
             Files.createDirectories(playersDir);
 
             Path file = pathFor(uuid);
             PlayerConfig cfg;
 
             if (Files.exists(file)) {
+
                 com.google.gson.JsonElement root;
                 try (Reader reader = Files.newBufferedReader(file)) {
                     root = com.google.gson.JsonParser.parseReader(reader);
@@ -71,6 +72,7 @@ public final class PlayerConfigManager {
                 }
 
                 cfg = ConfigJsonMapper.fromJsonPlayer(root.getAsJsonObject());
+
             } else {
                 cfg = PlayerConfig.fromDefaults(
                         globalCfg.getDefaultHudComponents(),
@@ -87,7 +89,9 @@ public final class PlayerConfigManager {
             }
 
             return cfg;
+
         } catch (Throwable t) {
+
             plugin.getLogger().at(Level.WARNING).log(
                     "Failed to load player config for " + uuid
                             + " [" + t.getClass().getSimpleName() + "]: "
@@ -111,17 +115,14 @@ public final class PlayerConfigManager {
     }
 
     public void save(UUID uuid) {
-        if (uuid == null || !dirty.contains(uuid)) {
-            return;
-        }
+
+        if (uuid == null || !dirty.contains(uuid)) { return; }
 
         PlayerConfig cfg = cache.get(uuid);
-        if (cfg == null) {
-            dirty.remove(uuid);
-            return;
-        }
+        if (cfg == null) { dirty.remove(uuid); return; }
 
         try {
+
             Files.createDirectories(playersDir);
 
             Path file = pathFor(uuid);
@@ -132,6 +133,7 @@ public final class PlayerConfigManager {
             dirty.remove(uuid);
 
         } catch (Throwable t) {
+
             plugin.getLogger().at(Level.WARNING).log(
                     "Failed to save player config for " + uuid
                             + " [" + t.getClass().getSimpleName() + "]: "
@@ -141,10 +143,10 @@ public final class PlayerConfigManager {
     }
 
     private void backupBrokenPlayerFile(Path file) {
+
         try {
-            if (file == null || !Files.exists(file)) {
-                return;
-            }
+
+            if (file == null || !Files.exists(file)) { return; }
 
             String timestamp = java.time.LocalDateTime.now()
                     .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"));
@@ -155,7 +157,9 @@ public final class PlayerConfigManager {
             plugin.getLogger().at(Level.WARNING).log(
                     "Backed up invalid player config to " + backup
             );
+
         } catch (Throwable moveEx) {
+
             plugin.getLogger().at(Level.WARNING).log(
                     "Failed to back up broken player config "
                             + file
@@ -165,14 +169,7 @@ public final class PlayerConfigManager {
         }
     }
 
-    public void saveAndUnload(UUID uuid) {
-        save(uuid);
-        unload(uuid);
-    }
+    public void saveAndUnload(UUID uuid) { save(uuid); unload(uuid); }
 
-    public void markDirty(UUID uuid) {
-        if (uuid != null) {
-            dirty.add(uuid);
-        }
-    }
+    public void markDirty(UUID uuid) { if (uuid != null) { dirty.add(uuid); } }
 }

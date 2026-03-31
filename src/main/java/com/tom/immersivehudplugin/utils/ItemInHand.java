@@ -7,52 +7,32 @@ import java.util.Set;
 public final class ItemInHand {
 
     private static final Set<String> RANGED_WEAPONS = Set.of("Bow", "Crossbow", "Staff", "Arrow");
-
     private static final Set<String> MELEE_WEAPONS = Set.of("Dagger", "Sword", "Axe", "Hammer", "Mace", "Spear");
 
     public static boolean isRangedWeapon(Item item) {
-
-        if (item == null) {
-            return false;
-        }
-
-        String[] families = item.getData().getRawTags().get("Family");
-        if (families == null) {
-            return false;
-        }
-
-        for (String family : families) {
-
-            if (family == null) {
-                continue;
-            }
-
-            String s = family.trim();
-
-            return RANGED_WEAPONS.stream().anyMatch(s::equalsIgnoreCase);
-        }
-        return false;
+        return checkItemFamily(item, RANGED_WEAPONS);
     }
 
     public static boolean isMeleeWeapon(Item item) {
+        return checkItemFamily(item, MELEE_WEAPONS);
+    }
 
-        if (item == null) {
-            return false;
-        }
+    public static boolean checkItemFamily(Item item, Set<String> familiesList) {
+
+        if (item == null) { return false; }
 
         String[] families = item.getData().getRawTags().get("Family");
-        if (families == null) {
-            return false;
-        }
+        if (families == null) { return false; }
 
         for (String family : families) {
 
-            if (family == null) {
-                continue;
-            }
+            if (family == null) { continue; }
 
             String s = family.trim();
-            return MELEE_WEAPONS.stream().anyMatch(s::equalsIgnoreCase);
+            if (familiesList.stream().anyMatch(s::equalsIgnoreCase)) {
+                return true;
+            }
+
         }
         return false;
     }

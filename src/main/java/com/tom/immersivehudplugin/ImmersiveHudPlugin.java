@@ -122,7 +122,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
             globalConfig = ConfigJsonMapper.fromJsonGlobal(root.getAsJsonObject());
 
-            boolean changed = migrateGlobalConfigIfNeeded(globalConfig);
+            boolean changed = globalConfig.sanitize();
+            changed |= migrateGlobalConfigIfNeeded(globalConfig);
             if (changed) {
                 saveGlobalConfigSafely();
             }

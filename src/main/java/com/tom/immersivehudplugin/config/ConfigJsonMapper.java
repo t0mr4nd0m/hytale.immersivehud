@@ -11,10 +11,10 @@ import java.util.EnumSet;
 
 public final class ConfigJsonMapper {
 
-    private ConfigJsonMapper() {
-    }
+    private ConfigJsonMapper() {}
 
     public static JsonObject toJson(GlobalConfig cfg) {
+
         JsonObject root = new JsonObject();
 
         root.addProperty("ConfigVersion", cfg.getConfigVersion());
@@ -28,19 +28,27 @@ public final class ConfigJsonMapper {
     }
 
     public static GlobalConfig fromJsonGlobal(JsonObject root) {
+
         GlobalConfig cfg = new GlobalConfig();
 
-        cfg.setConfigVersion(root.get("ConfigVersion").getAsString());
-        cfg.setIntervalMs(root.get("IntervalMs").getAsInt());
-        cfg.setHideDelayMs(root.get("HideDelayMs").getAsInt());
-        cfg.setReticleTargetRange(root.get("ReticleTargetRange").getAsFloat());
-        cfg.setDefaultHudComponents(fromJsonHudComponents(root.getAsJsonObject("DefaultHudComponents")));
-        cfg.setDefaultDynamicHud(fromJsonDynamicHud(root.getAsJsonObject("DefaultDynamicHud")));
+        if (root == null) { return cfg; }
+
+        if (isString(root, "ConfigVersion")) { cfg.setConfigVersion(root.get("ConfigVersion").getAsString()); }
+        if (isNumber(root, "IntervalMs")) { cfg.setIntervalMs(root.get("IntervalMs").getAsInt()); }
+        if (isNumber(root, "HideDelayMs")) { cfg.setHideDelayMs(root.get("HideDelayMs").getAsInt()); }
+        if (isNumber(root, "ReticleTargetRange")) { cfg.setReticleTargetRange(root.get("ReticleTargetRange").getAsFloat()); }
+
+        JsonObject hudObj = getObject(root, "DefaultHudComponents");
+        if (hudObj != null) { cfg.setDefaultHudComponents(fromJsonHudComponents(hudObj)); }
+
+        JsonObject dynObj = getObject(root, "DefaultDynamicHud");
+        if (dynObj != null) { cfg.setDefaultDynamicHud(fromJsonDynamicHud(dynObj)); }
 
         return cfg;
     }
 
     public static JsonObject toJson(PlayerConfig cfg) {
+
         JsonObject root = new JsonObject();
         root.add("HudComponents", toJson(cfg.getHudComponents()));
         root.add("DynamicHud", toJson(cfg.getDynamicHud()));
@@ -48,13 +56,22 @@ public final class ConfigJsonMapper {
     }
 
     public static PlayerConfig fromJsonPlayer(JsonObject root) {
+
         PlayerConfig cfg = new PlayerConfig();
-        cfg.setHudComponents(fromJsonHudComponents(root.getAsJsonObject("HudComponents")));
-        cfg.setDynamicHud(fromJsonDynamicHud(root.getAsJsonObject("DynamicHud")));
+
+        if (root == null) { return cfg; }
+
+        JsonObject hudObj = getObject(root, "HudComponents");
+        if (hudObj != null) { cfg.setHudComponents(fromJsonHudComponents(hudObj)); }
+
+        JsonObject dynObj = getObject(root, "DynamicHud");
+        if (dynObj != null) { cfg.setDynamicHud(fromJsonDynamicHud(dynObj)); }
+
         return cfg;
     }
 
     public static JsonObject toJson(HudComponentsConfig cfg) {
+
         JsonObject obj = new JsonObject();
 
         for (HudEntry entry : HudComponentRegistry.allList()) {
@@ -65,126 +82,133 @@ public final class ConfigJsonMapper {
     }
 
     public static HudComponentsConfig fromJsonHudComponents(JsonObject obj) {
-        HudComponentsConfig cfg = HudComponentRegistry.buildDefaultHudComponents();
+
+        HudComponentsConfig cfg = new HudComponentsConfig();
+
+        if (obj == null) { return cfg; }
 
         for (HudEntry entry : HudComponentRegistry.allList()) {
-            boolean value = obj.get(entry.staticConfigKey()).getAsBoolean();
-            entry.staticSetter().set(cfg, value);
+            JsonElement el = obj.get(entry.staticConfigKey());
+
+            if (el != null
+                    && !el.isJsonNull()
+                    && el.isJsonPrimitive()
+                    && el.getAsJsonPrimitive().isBoolean()) {
+                entry.staticSetter().set(cfg, el.getAsBoolean());
+            }
         }
 
         return cfg;
     }
 
-    @SuppressWarnings("DataFlowIssue")
     public static JsonObject toJson(DynamicHudConfig cfg) {
+
         JsonObject obj = new JsonObject();
 
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
-            DynamicHudRuleConfig ruleCfg = entry.dynamicGetter().apply(cfg);
-            obj.add(entry.dynamicConfigKey(), toJson(ruleCfg, entry));
+            DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(cfg) : null;
+            if (entry.dynamicConfigKey() != null && ruleCfg != null) {
+                obj.add(entry.dynamicConfigKey(), toJson(ruleCfg));
+            }
         }
 
         return obj;
     }
 
     public static DynamicHudConfig fromJsonDynamicHud(JsonObject obj) {
-        DynamicHudConfig cfg = HudComponentRegistry.buildDefaultDynamicHud();
+
+        DynamicHudConfig cfg = new DynamicHudConfig();
+
+        if (obj == null) { return cfg; }
 
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
-            JsonElement el = obj.get(entry.dynamicConfigKey());
-            JsonObject rulesObj = el != null && el.isJsonObject() ? el.getAsJsonObject() : new JsonObject();
-            DynamicHudRuleConfig loaded = fromJsonDynamicHudRuleConfig(rulesObj);
+            if (entry.dynamicConfigKey() == null || entry.dynamicGetter() == null) { continue; }
 
-            DynamicHudRuleConfig target = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(cfg) : null;
-            if (target != null) {
-                target.setRules(loaded.getRules());
-                target.setThreshold(loaded.getThreshold());
-            }
+            JsonElement sectionEl = obj.get(entry.dynamicConfigKey());
+            if (sectionEl == null || sectionEl.isJsonNull() || !sectionEl.isJsonObject()) { continue; }
+
+            DynamicHudRuleConfig loaded = fromJsonDynamicHudRuleConfig(sectionEl.getAsJsonObject());
+            DynamicHudRuleConfig target = entry.dynamicGetter().apply(cfg);
+
+            if (target != null) { target.setRules(loaded.getRules()); }
         }
 
         return cfg;
     }
 
-    public static JsonObject toJson(DynamicHudRuleConfig cfg, HudEntry entry) {
+    public static JsonObject toJson(DynamicHudRuleConfig cfg) {
+
         JsonObject obj = new JsonObject();
         JsonArray arr = new JsonArray();
 
-        for (String name : cfg.getRuleNames()) {
-            arr.add(name);
-        }
+        for (String name : cfg.getRuleNames()) { arr.add(name); }
 
         obj.add("Rules", arr);
-
-        if (entry.supportsThreshold()) {
-            obj.addProperty("Threshold", cfg.getThreshold());
-        }
-
         return obj;
     }
 
     public static DynamicHudRuleConfig fromJsonDynamicHudRuleConfig(JsonObject obj) {
+
         DynamicHudRuleConfig cfg = new DynamicHudRuleConfig();
         EnumSet<DynamicHudTriggers> rules = EnumSet.noneOf(DynamicHudTriggers.class);
 
+        if (obj == null) { cfg.setRules(rules); return cfg; }
+
         JsonElement rulesEl = obj.get("Rules");
-        JsonElement thresholdEl = obj.get("Threshold");
 
-        Float migratedThreshold = null;
+        if (rulesEl == null || rulesEl.isJsonNull()) { cfg.setRules(rules); return cfg; }
 
-        if (rulesEl != null && rulesEl.isJsonArray()) {
+        if (rulesEl.isJsonPrimitive()) {
+
+            String csv = rulesEl.getAsString();
+
+            for (String ruleName : csv.split(",")) {
+                DynamicHudTriggers t = DynamicHudTriggers.fromString(ruleName.trim());
+                if (t != null) {
+                    rules.add(t);
+                }
+            }
+
+        } else if (rulesEl.isJsonArray()) {
+
             JsonArray arr = rulesEl.getAsJsonArray();
 
             for (JsonElement el : arr) {
-                if (!el.isJsonPrimitive()) {
-                    continue;
-                }
 
-                String raw = el.getAsString();
-                String normalized = raw == null ? "" : raw.trim().toUpperCase().replace('-', '_').replace(' ', '_');
+                if (el == null || el.isJsonNull() || !el.isJsonPrimitive()) { continue; }
 
-                switch (normalized) {
-                    case "HEALTH_NOT_FULL" -> {
-                        rules.add(DynamicHudTriggers.HEALTH_NOT_FULL);
-                        if (migratedThreshold == null) {
-                            migratedThreshold = 100f;
-                        }
-                    }
-                    case "STAMINA_NOT_FULL" -> {
-                        rules.add(DynamicHudTriggers.STAMINA_NOT_FULL);
-                        if (migratedThreshold == null) {
-                            migratedThreshold = 100f;
-                        }
-                    }
-                    case "MANA_NOT_FULL" -> {
-                        rules.add(DynamicHudTriggers.MANA_NOT_FULL);
-                        if (migratedThreshold == null) {
-                            migratedThreshold = 100f;
-                        }
-                        }
-                    case "OXYGEN_NOT_FULL" -> {
-                        rules.add(DynamicHudTriggers.OXYGEN_NOT_FULL);
-                        if (migratedThreshold == null) {
-                            migratedThreshold = 100f;
-                        }
-                    }
-                    default -> {
-                        DynamicHudTriggers trigger = DynamicHudTriggers.fromString(raw);
-                        if (trigger != null) {
-                            rules.add(trigger);
-                        }
-                    }
-                }
+                DynamicHudTriggers trigger = DynamicHudTriggers.fromString(el.getAsString());
+                if (trigger != null) { rules.add(trigger); }
             }
         }
 
         cfg.setRules(rules);
-
-        if (thresholdEl != null && thresholdEl.isJsonPrimitive()) {
-            cfg.setThreshold(thresholdEl.getAsFloat());
-        } else if (migratedThreshold != null) {
-            cfg.setThreshold(migratedThreshold);
-        }
-
         return cfg;
+    }
+
+    private static boolean isString(JsonObject obj, @SuppressWarnings("SameParameterValue") String key) {
+
+        JsonElement el = obj.get(key);
+        return el != null
+                && !el.isJsonNull()
+                && el.isJsonPrimitive()
+                && el.getAsJsonPrimitive().isString();
+    }
+
+    private static boolean isNumber(JsonObject obj, String key) {
+
+        JsonElement el = obj.get(key);
+        return el != null
+                && !el.isJsonNull()
+                && el.isJsonPrimitive()
+                && el.getAsJsonPrimitive().isNumber();
+    }
+
+    private static JsonObject getObject(JsonObject obj, String key) {
+
+        JsonElement el = obj.get(key);
+        return (el != null && !el.isJsonNull() && el.isJsonObject())
+                ? el.getAsJsonObject()
+                : null;
     }
 }
