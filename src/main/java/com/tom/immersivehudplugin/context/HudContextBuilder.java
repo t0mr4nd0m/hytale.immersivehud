@@ -37,6 +37,7 @@ public final class HudContextBuilder {
             int manaState,
             int oxygenState
     ) {
+
         this.itemAssetMap = itemAssetMap;
         this.healthState = healthState;
         this.staminaState = staminaState;
@@ -47,28 +48,30 @@ public final class HudContextBuilder {
     @Nullable
     public PlayerTickContext buildCtx(PlayerRef playerRef) {
         try {
+
             Ref<EntityStore> ref = playerRef.getReference();
-            if (ref == null) {
-                return null;
-            }
+            if (ref == null) { return null; }
 
             Store<EntityStore> store = ref.getStore();
 
             Player player = store.getComponent(ref, Player.getComponentType());
-            if (player == null) {
-                return null;
-            }
+            if (player == null) { return null; }
 
             EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
             MovementStatesComponent movement = store.getComponent(ref, MovementStatesComponent.getComponentType());
 
             return new PlayerTickContext(playerRef, ref, store, player, stats, movement);
+
         } catch (IllegalStateException ex) {
             return null;
         }
     }
 
-    public void refreshHeldItemStateIfNeeded(PlayerHudState st, PlayerTickContext ctx) {
+    public boolean shouldReconcileHeldItemFromInventory(PlayerHudState st) {
+        return !st.heldItemStateInitialized || st.heldItemRefreshRequested;
+    }
+
+    public void reconcileHeldItemStateFromInventory(PlayerHudState st, PlayerTickContext ctx) {
 
         Item heldItem = getHeldItemFromInventory(ctx);
         st.heldItem = heldItem;
@@ -85,13 +88,13 @@ public final class HudContextBuilder {
             GlobalConfig global,
             long now
     ) {
+
         int hideDelay = hideDelayMs(global);
         st.hideDelayMsHint = hideDelay;
 
         updateMovementSignals(st, ctx, now, hideDelay);
         updateReticleSignalsIfNeeded(st, world, ctx, global, now, hideDelay);
         updateBars(st, ctx);
-        refreshHeldItemStateIfNeeded(st, ctx);
         cleanupWeaponSignals(st);
 
         return createDynamicHudTriggerContext(st, now);
@@ -110,41 +113,37 @@ public final class HudContextBuilder {
     }
 
     private float getCurrentBar(PlayerTickContext ctx, int statIndex) {
-        if (ctx.stats() == null) {
-            return 0f;
-        }
+
+        if (ctx.stats() == null) { return 0f; }
         var c = ctx.stats().get(statIndex);
         return (c != null) ? c.get() : 0f;
     }
 
     private float getMaxBar(PlayerTickContext ctx, int statIndex) {
-        if (ctx.stats() == null) {
-            return 0f;
-        }
+
+        if (ctx.stats() == null) { return 0f; }
         var c = ctx.stats().get(statIndex);
         return (c != null) ? c.getMax() : 0f;
     }
 
     @Nullable
     private Item getHeldItemFromInventory(PlayerTickContext ctx) {
+
         try {
+
             var inventory = ctx.player().getInventory();
-            if (inventory == null) {
-                return null;
-            }
+            if (inventory == null) { return null; }
 
             var heldStack = inventory.getActiveHotbarItem();
-            if (heldStack == null) {
-                return null;
-            }
+            if (heldStack == null) { return null; }
 
             String itemId = heldStack.getItemId();
-            if (itemId.isBlank()) {
-                return null;
-            }
+            if (itemId.isBlank()) { return null; }
 
             return itemAssetMap.getAsset(itemId);
+
         } catch (Throwable ignored) {
+
             return null;
         }
     }
@@ -155,73 +154,41 @@ public final class HudContextBuilder {
             long now,
             int hideDelay
     ) {
-        var ms = ctx.movement() != null ? ctx.movement().getMovementStates() : null;
-        if (ms == null) {
-            clearMovementSignals(st);
-            return;
-        }
 
-        boolean moving = ms.walking
-                || ms.running
-                || ms.sprinting
-                || ms.swimming
-                || ms.mounting
-                || ms.flying
-                || ms.gliding
-                || ms.jumping
-                || ms.climbing
-                || ms.falling
-                || ms.rolling;
+        var movementStates = ctx.movement() != null ? ctx.movement().getMovementStates() : null;
+        if (movementStates == null) { return; }
 
-        setTimedState(st, HudSignal.PLAYER_MOVING, moving, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_WALKING, ms.walking, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_RUNNING, ms.running, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_SPRINTING, ms.sprinting, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_SWIMMING, ms.swimming, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_MOUNTING, ms.mounting, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_FLYING, ms.flying, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_GLIDING, ms.gliding, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_JUMPING, ms.jumping, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_CLIMBING, ms.climbing, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_FALLING, ms.falling, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_ROLLING, ms.rolling, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_CROUCHING, ms.crouching, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_SITTING, ms.sitting, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_IN_FLUID, ms.inFluid, now, hideDelay);
-        setTimedState(st, HudSignal.PLAYER_ON_GROUND, ms.onGround, now, hideDelay);
-    }
+        boolean isMoving =
+                movementStates.walking
+                        || movementStates.running
+                        || movementStates.sprinting
+                        || movementStates.swimming
+                        || movementStates.mounting
+                        || movementStates.flying
+                        || movementStates.gliding
+                        || movementStates.jumping
+                        || movementStates.climbing
+                        || movementStates.falling
+                        || movementStates.rolling;
 
-    private void setTimedState(
-            PlayerHudState st,
-            HudSignal signal,
-            boolean active,
-            long now,
-            int hideDelay
-    ) {
-        if (active) {
-            st.t.pulse(signal, now, hideDelay);
-        } else {
-            st.t.clear(signal);
-        }
-    }
-
-    private void clearMovementSignals(PlayerHudState st) {
-        st.t.clear(HudSignal.PLAYER_MOVING);
-        st.t.clear(HudSignal.PLAYER_WALKING);
-        st.t.clear(HudSignal.PLAYER_RUNNING);
-        st.t.clear(HudSignal.PLAYER_SPRINTING);
-        st.t.clear(HudSignal.PLAYER_SWIMMING);
-        st.t.clear(HudSignal.PLAYER_MOUNTING);
-        st.t.clear(HudSignal.PLAYER_FLYING);
-        st.t.clear(HudSignal.PLAYER_GLIDING);
-        st.t.clear(HudSignal.PLAYER_JUMPING);
-        st.t.clear(HudSignal.PLAYER_CLIMBING);
-        st.t.clear(HudSignal.PLAYER_FALLING);
-        st.t.clear(HudSignal.PLAYER_ROLLING);
-        st.t.clear(HudSignal.PLAYER_SITTING);
-        st.t.clear(HudSignal.PLAYER_CROUCHING);
-        st.t.clear(HudSignal.PLAYER_IN_FLUID);
-        st.t.clear(HudSignal.PLAYER_ON_GROUND);
+        if (isMoving) { st.t.pulse(HudSignal.PLAYER_MOVING, now, hideDelay); }
+        if (movementStates.walking) { st.t.pulse(HudSignal.PLAYER_WALKING, now, hideDelay); }
+        if (movementStates.running) { st.t.pulse(HudSignal.PLAYER_RUNNING, now, hideDelay); }
+        if (movementStates.sprinting) { st.t.pulse(HudSignal.PLAYER_SPRINTING, now, hideDelay); }
+        if (movementStates.swimming) { st.t.pulse(HudSignal.PLAYER_SWIMMING, now, hideDelay); }
+        if (movementStates.mounting) { st.t.pulse(HudSignal.PLAYER_MOUNTING, now, hideDelay); }
+        if (movementStates.flying) { st.t.pulse(HudSignal.PLAYER_FLYING, now, hideDelay); }
+        if (movementStates.gliding) { st.t.pulse(HudSignal.PLAYER_GLIDING, now, hideDelay); }
+        if (movementStates.jumping) { st.t.pulse(HudSignal.PLAYER_JUMPING, now, hideDelay); }
+        if (movementStates.climbing) { st.t.pulse(HudSignal.PLAYER_CLIMBING, now, hideDelay); }
+        if (movementStates.falling) { st.t.pulse(HudSignal.PLAYER_FALLING, now, hideDelay); }
+        if (movementStates.rolling) { st.t.pulse(HudSignal.PLAYER_ROLLING, now, hideDelay); }
+        if (movementStates.crouching) {st.t.pulse(HudSignal.PLAYER_CROUCHING, now, hideDelay); }
+        if (movementStates.idle) {st.t.pulse(HudSignal.PLAYER_IDLE, now, hideDelay); }
+        if (movementStates.sitting) {st.t.pulse(HudSignal.PLAYER_SITTING, now, hideDelay); }
+        if (movementStates.sleeping) {st.t.pulse(HudSignal.PLAYER_SLEEPING, now, hideDelay); }
+        if (movementStates.inFluid) {st.t.pulse(HudSignal.PLAYER_IN_FLUID, now, hideDelay); }
+        if (movementStates.onGround) {st.t.pulse(HudSignal.PLAYER_ON_GROUND, now, hideDelay); }
     }
 
     private void updateReticleSignalsIfNeeded(
@@ -232,18 +199,18 @@ public final class HudContextBuilder {
             long now,
             int hideDelay
     ) {
+
         int scanMs = Math.max(100, intervalMs(global));
         long lastScan = st.lastReticleScanMs;
 
-        if ((now - lastScan) < scanMs) {
-            return;
-        }
+        if ((now - lastScan) < scanMs) { return; }
 
         float targetRange = reticleTargetRange(global);
         ReticleScanResult scan = scanReticle(world, ctx, targetRange);
 
-        setTimedState(st, HudSignal.TARGET_ENTITY, scan.targetEntity(), now, hideDelay);
-        setTimedState(st, HudSignal.INTERACTABLE_BLOCK, scan.interactableBlock(), now, hideDelay);
+        if (scan.targetEntity()) { st.t.pulse(HudSignal.TARGET_ENTITY, now, hideDelay); }
+
+        if (scan.interactableBlock()) { st.t.pulse(HudSignal.INTERACTABLE_BLOCK, now, hideDelay); }
 
         st.lastReticleScanMs = now;
     }
@@ -253,11 +220,13 @@ public final class HudContextBuilder {
             PlayerTickContext ctx,
             float targetRange
     ) {
+
         Ref<EntityStore> target = TargetUtil.getTargetEntity(ctx.ref(), targetRange, ctx.store());
         boolean hasEntityTarget = target != null && !target.equals(ctx.ref());
 
         boolean lookingAtInteractable = false;
         Vector3i blockPos = TargetUtil.getTargetBlock(ctx.ref(), targetRange, ctx.store());
+
         if (blockPos != null) {
             BlockType bt = world.getBlockType(blockPos);
             var flags = bt != null ? bt.getFlags() : null;
@@ -276,23 +245,16 @@ public final class HudContextBuilder {
 
     private void cleanupWeaponSignals(PlayerHudState st) {
 
-        if (!st.meleeWeaponInHand) {
-            st.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
-        }
-
-        if (!st.rangedWeaponInHand) {
-            st.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
-        }
-
-        if (!st.meleeWeaponInHand && !st.rangedWeaponInHand) {
-            st.t.clear(HudSignal.CHARGING_WEAPON);
-        }
+        if (!st.meleeWeaponInHand) { st.t.clear(HudSignal.HOLDING_MELEE_WEAPON); }
+        if (!st.rangedWeaponInHand) { st.t.clear(HudSignal.HOLDING_RANGED_WEAPON); }
+        if (!st.meleeWeaponInHand && !st.rangedWeaponInHand) { st.t.clear(HudSignal.CHARGING_WEAPON); }
     }
 
     private DynamicHudTriggersContext createDynamicHudTriggerContext(
             PlayerHudState st,
             long now
     ) {
+
         boolean rangedWeaponInHand = st.rangedWeaponInHand;
         boolean meleeWeaponInHand = st.meleeWeaponInHand;
 
@@ -314,11 +276,13 @@ public final class HudContextBuilder {
                 st.t.active(HudSignal.PLAYER_JUMPING, now),
                 st.t.active(HudSignal.PLAYER_CROUCHING, now),
                 st.t.active(HudSignal.PLAYER_CLIMBING, now),
+                st.t.active(HudSignal.PLAYER_FALLING, now),
+                st.t.active(HudSignal.PLAYER_ROLLING, now),
+                st.t.active(HudSignal.PLAYER_IDLE, now),
+                st.t.active(HudSignal.PLAYER_SITTING, now),
+                st.t.active(HudSignal.PLAYER_SLEEPING, now),
                 st.t.active(HudSignal.PLAYER_IN_FLUID, now),
                 st.t.active(HudSignal.PLAYER_ON_GROUND, now),
-                st.t.active(HudSignal.PLAYER_FALLING, now),
-                st.t.active(HudSignal.PLAYER_SITTING, now),
-                st.t.active(HudSignal.PLAYER_ROLLING, now),
 
                 rangedWeaponInHand,
                 meleeWeaponInHand,

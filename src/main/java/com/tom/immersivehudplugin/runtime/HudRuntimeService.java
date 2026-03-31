@@ -259,44 +259,33 @@ public final class HudRuntimeService {
     }
 
     private void tickReadyPlayers() {
+
         Universe universe = Universe.get();
         long now = nowMs();
         GlobalConfig global = getGlobalConfig();
 
         for (Map.Entry<UUID, PlayerHudState> entry : playerState.entrySet()) {
+
             UUID uuid = entry.getKey();
             PlayerHudState st = entry.getValue();
 
             st.hideDelayMsHint = hideDelayMs(global);
 
-            if (st.t.active(HudSignal.READY_GRACE, now)) {
-                continue;
-            }
+            if (st.t.active(HudSignal.READY_GRACE, now)) { continue; }
 
             PlayerRef playerRef = universe.getPlayer(uuid);
-            if (playerRef == null || !playerRef.isValid()) {
-                playerState.remove(uuid, st);
-                continue;
-            }
+            if (playerRef == null || !playerRef.isValid()) { playerState.remove(uuid, st); continue; }
 
             UUID worldUuid = playerRef.getWorldUuid();
-            if (worldUuid == null) {
-                continue;
-            }
+            if (worldUuid == null) { continue; }
 
             World world = universe.getWorld(worldUuid);
-            if (world == null || !world.isAlive()) {
-                continue;
-            }
+            if (world == null || !world.isAlive()) { continue; }
 
             world.execute(() -> {
                 PlayerRef pr = Universe.get().getPlayer(uuid);
-                if (pr == null || !pr.isValid()) {
-                    return;
-                }
-                if (!worldUuid.equals(pr.getWorldUuid())) {
-                    return;
-                }
+                if (pr == null || !pr.isValid()) { return; }
+                if (!worldUuid.equals(pr.getWorldUuid())) { return; }
 
                 long tickNow = nowMs();
                 checkAndToggle(pr, world, global, tickNow);
@@ -310,10 +299,9 @@ public final class HudRuntimeService {
             GlobalConfig global,
             long now
     ) {
+
         PlayerTickContext ctx = hudContextBuilder.buildCtx(playerRef);
-        if (ctx == null) {
-            return;
-        }
+        if (ctx == null) { return; }
 
         UUID uuid = playerRef.getUuid();
         PlayerHudState st = stateFor(uuid);
@@ -328,6 +316,10 @@ public final class HudRuntimeService {
             hudVisibilityService.clearDynamicHiddenIfNeeded(st);
             hudVisibilityService.applyHudDelta(ctx, st);
             return;
+        }
+
+        if (hudContextBuilder.shouldReconcileHeldItemFromInventory(st)) {
+            hudContextBuilder.reconcileHeldItemStateFromInventory(st, ctx);
         }
 
         var dyn = hudContextBuilder.buildDynamicHudTriggerContext(st, world, ctx, global, now);
@@ -356,10 +348,12 @@ public final class HudRuntimeService {
     }
 
     private boolean isDynamicHudEnabled(PlayerHudState st, HudComponentsConfig hc) {
+
         if (!st.dynamicHudEnabledKnown) {
             st.dynamicHudEnabled = hudVisibilityService.hasAnyDynamicHudEnabled(hc);
             st.dynamicHudEnabledKnown = true;
         }
+
         return st.dynamicHudEnabled;
     }
 }

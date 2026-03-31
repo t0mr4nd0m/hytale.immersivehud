@@ -205,11 +205,13 @@ public final class HudComponentRegistry {
                         DynamicHudTriggers.PLAYER_JUMPING,
                         DynamicHudTriggers.PLAYER_CROUCHING,
                         DynamicHudTriggers.PLAYER_CLIMBING,
-                        DynamicHudTriggers.PLAYER_IN_FLUID,
-                        DynamicHudTriggers.PLAYER_ON_GROUND,
                         DynamicHudTriggers.PLAYER_FALLING,
+                        DynamicHudTriggers.PLAYER_ROLLING,
+                        DynamicHudTriggers.PLAYER_IDLE,
                         DynamicHudTriggers.PLAYER_SITTING,
-                        DynamicHudTriggers.PLAYER_ROLLING
+                        DynamicHudTriggers.PLAYER_SLEEPING,
+                        DynamicHudTriggers.PLAYER_IN_FLUID,
+                        DynamicHudTriggers.PLAYER_ON_GROUND
                 )
         ));
 
