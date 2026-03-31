@@ -66,7 +66,6 @@ public final class ConfigSchemaValidator {
      *   - null
      *   - a string (old CSV style)
      *   - an array
-     *
      * We intentionally do not reject unknown/invalid individual rule names here.
      * The mapper will ignore bad entries and keep loading the rest.
      */
@@ -102,6 +101,7 @@ public final class ConfigSchemaValidator {
                 && !(el.isJsonPrimitive() && el.getAsJsonPrimitive().isNumber());
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean isObject(JsonElement el) {
         return el != null && !el.isJsonNull() && el.isJsonObject();
     }
