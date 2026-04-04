@@ -108,7 +108,7 @@ public final class ConfigJsonMapper {
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(cfg) : null;
             if (entry.dynamicConfigKey() != null && ruleCfg != null) {
-                obj.add(entry.dynamicConfigKey(), toJson(ruleCfg));
+                obj.add(entry.dynamicConfigKey(), toJson(ruleCfg, entry));
             }
         }
 
@@ -130,13 +130,16 @@ public final class ConfigJsonMapper {
             DynamicHudRuleConfig loaded = fromJsonDynamicHudRuleConfig(sectionEl.getAsJsonObject());
             DynamicHudRuleConfig target = entry.dynamicGetter().apply(cfg);
 
-            if (target != null) { target.setRules(loaded.getRules()); }
+            if (target != null) {
+                target.setRules(loaded.getRules());
+                target.setThreshold(loaded.getThreshold());
+            }
         }
 
         return cfg;
     }
 
-    public static JsonObject toJson(DynamicHudRuleConfig cfg) {
+    public static JsonObject toJson(DynamicHudRuleConfig cfg, HudEntry entry) {
 
         JsonObject obj = new JsonObject();
         JsonArray arr = new JsonArray();
@@ -144,6 +147,11 @@ public final class ConfigJsonMapper {
         for (String name : cfg.getRuleNames()) { arr.add(name); }
 
         obj.add("Rules", arr);
+
+        if (entry.supportsThreshold()) {
+            obj.addProperty("Threshold", cfg.getThreshold());
+        }
+
         return obj;
     }
 
@@ -155,6 +163,7 @@ public final class ConfigJsonMapper {
         if (obj == null) { cfg.setRules(rules); return cfg; }
 
         JsonElement rulesEl = obj.get("Rules");
+        JsonElement thresholdEl = obj.get("Threshold");
 
         if (rulesEl == null || rulesEl.isJsonNull()) { cfg.setRules(rules); return cfg; }
 
@@ -178,11 +187,18 @@ public final class ConfigJsonMapper {
                 if (el == null || el.isJsonNull() || !el.isJsonPrimitive()) { continue; }
 
                 DynamicHudTriggers trigger = DynamicHudTriggers.fromString(el.getAsString());
-                if (trigger != null) { rules.add(trigger); }
+                if (trigger != null) {
+                    rules.add(trigger);
+                }
             }
         }
 
         cfg.setRules(rules);
+
+        if (thresholdEl != null && thresholdEl.isJsonPrimitive()) {
+            cfg.setThreshold(thresholdEl.getAsFloat());
+        }
+
         return cfg;
     }
 

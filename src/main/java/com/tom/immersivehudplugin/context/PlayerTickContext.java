@@ -1,4 +1,4 @@
-package com.tom.immersivehudplugin.runtime;
+package com.tom.immersivehudplugin.context;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;

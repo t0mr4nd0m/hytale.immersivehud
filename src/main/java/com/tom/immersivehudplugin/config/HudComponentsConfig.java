@@ -92,15 +92,12 @@ public final class HudComponentsConfig {
 
     public boolean getByKey(@Nullable String key) {
         String normalized = HudComponentRegistry.normalize(key);
-        ensureAllEntries();
         return hiddenByKey.computeIfAbsent(normalized, this::defaultHiddenFor);
     }
 
     public void setByKey(@Nullable String key, boolean hidden) {
         String normalized = HudComponentRegistry.normalize(key);
-        if (normalized.isEmpty()) {
-            return;
-        }
+        if (normalized.isEmpty()) return;
 
         hiddenByKey.put(normalized, hidden);
     }
@@ -109,7 +106,7 @@ public final class HudComponentsConfig {
         boolean changed = false;
 
         for (HudEntry entry : HudComponentRegistry.allList()) {
-            String key = HudComponentRegistry.normalize(entry.key());
+            String key = normalizeKey(entry.key());
             Boolean value = hiddenByKey.get(key);
 
             if (value == null) {
@@ -136,16 +133,16 @@ public final class HudComponentsConfig {
     }
 
     public HudComponentsConfig copy() {
-        HudComponentsConfig c = new HudComponentsConfig();
-        c.hiddenByKey.clear();
-        c.hiddenByKey.putAll(this.hiddenByKey);
-        c.ensureAllEntries();
-        return c;
+        HudComponentsConfig config = new HudComponentsConfig();
+        config.hiddenByKey.clear();
+        config.hiddenByKey.putAll(this.hiddenByKey);
+        config.ensureAllEntries();
+        return config;
     }
 
     private void ensureAllEntries() {
         for (HudEntry entry : HudComponentRegistry.allList()) {
-            String key = HudComponentRegistry.normalize(entry.key());
+            String key = normalizeKey(entry.key());
             hiddenByKey.computeIfAbsent(key, _ -> entry.defaultHidden());
         }
     }
@@ -153,5 +150,9 @@ public final class HudComponentsConfig {
     private boolean defaultHiddenFor(String normalizedKey) {
         HudEntry entry = HudComponentRegistry.find(normalizedKey);
         return entry != null && entry.defaultHidden();
+    }
+
+    private static String normalizeKey(String key) {
+        return HudComponentRegistry.normalize(key);
     }
 }

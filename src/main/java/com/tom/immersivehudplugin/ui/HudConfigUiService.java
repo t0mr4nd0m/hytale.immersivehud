@@ -6,8 +6,8 @@ import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.config.PlayerConfig;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,11 +17,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class HudConfigUiService {
 
-    private final ImmersiveHudPlugin plugin;
+    private final HudRuntimeService hudRuntimeService;
+
     private final Map<UUID, HudConfigUiSession> sessions = new ConcurrentHashMap<>();
 
-    public HudConfigUiService(@Nonnull ImmersiveHudPlugin plugin) {
-        this.plugin = plugin;
+    public HudConfigUiService(
+            @Nonnull HudRuntimeService hudRuntimeService
+    ) {
+        this.hudRuntimeService = hudRuntimeService;
     }
 
     public void open(
@@ -29,7 +32,7 @@ public final class HudConfigUiService {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store
     ) {
-        PlayerConfig playerCfg = plugin.requirePlayerConfig(playerRef);
+        PlayerConfig playerCfg = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
             return;
         }
@@ -41,7 +44,7 @@ public final class HudConfigUiService {
             return;
         }
 
-        player.getPageManager().openCustomPage(ref, store, new HudConfigPage(plugin, this, playerRef));
+        player.getPageManager().openCustomPage(ref, store, new HudConfigPage(this, playerRef));
     }
 
     @Nullable
@@ -60,7 +63,7 @@ public final class HudConfigUiService {
             return false;
         }
 
-        PlayerConfig live = plugin.requirePlayerConfig(playerRef);
+        PlayerConfig live = hudRuntimeService.requirePlayerConfig(playerRef);
         if (live == null) {
             return false;
         }
@@ -68,9 +71,7 @@ public final class HudConfigUiService {
         live.setHudComponents(session.getDraftHudComponents().copy());
         live.setDynamicHud(session.getDraftDynamicHud().copy());
 
-        plugin.markPlayerConfigDirty(playerRef.getUuid());
-        plugin.savePlayerConfigAsync(playerRef.getUuid());
-        plugin.markPlayerStaticHudDirty(playerRef);
+        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
 
         discard(playerRef);
         return true;

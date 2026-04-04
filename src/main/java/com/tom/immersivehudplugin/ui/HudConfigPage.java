@@ -14,7 +14,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
@@ -40,18 +39,14 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
     private static final String DYNAMIC_RULE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRuleRow.ui";
     private static final String DYNAMIC_MORE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRuleMoreRow.ui";
 
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private final ImmersiveHudPlugin plugin;
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
 
     public HudConfigPage(
-            @Nonnull ImmersiveHudPlugin plugin,
             @Nonnull HudConfigUiService uiService,
             @Nonnull PlayerRef playerRef
     ) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, PageEventData.CODEC);
-        this.plugin = plugin;
         this.uiService = uiService;
         this.playerRef = playerRef;
     }

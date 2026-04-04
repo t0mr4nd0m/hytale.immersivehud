@@ -14,11 +14,12 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
+import com.tom.immersivehudplugin.managers.PlayerConfigManager;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,11 +38,20 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static final Color ERROR_COLOR = Color.RED;
     private static final Color HIDE_COLOR = Color.RED;
 
-    public RulesCmd(ImmersiveHudPlugin plugin) {
+    private final HudRuntimeService hudRuntimeService;
+    private final PlayerConfigManager playerConfigManager;
+
+    public RulesCmd(
+            HudRuntimeService hudRuntimeService,
+            PlayerConfigManager playerConfigManager
+    ) {
         super("rules", "List, add, remove, clear or configure dynamic HUD rules.");
 
-        addUsageVariant(new TwoArgVariant(plugin));
-        addUsageVariant(new ThreeArgVariant(plugin));
+        this.hudRuntimeService = hudRuntimeService;
+        this.playerConfigManager = playerConfigManager;
+
+        addUsageVariant(new TwoArgVariant(hudRuntimeService, playerConfigManager));
+        addUsageVariant(new ThreeArgVariant(hudRuntimeService, playerConfigManager));
     }
 
     @Override
@@ -67,13 +77,18 @@ public final class RulesCmd extends AbstractPlayerCommand {
     }
 
     private static final class TwoArgVariant extends AbstractPlayerCommand {
-        private final ImmersiveHudPlugin plugin;
+        private final HudRuntimeService hudRuntimeService;
+        private final PlayerConfigManager playerConfigManager;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
 
-        TwoArgVariant(ImmersiveHudPlugin plugin) {
+        TwoArgVariant(
+                HudRuntimeService hudRuntimeService,
+                PlayerConfigManager playerConfigManager
+        ) {
             super("List or clear rules");
-            this.plugin = plugin;
+            this.hudRuntimeService = hudRuntimeService;
+            this.playerConfigManager = playerConfigManager;
 
             this.componentArg = dynamicComponentArg(this);
             this.actionArg = allowedArg(this, "action", "list/clear", "list", "clear");
@@ -92,7 +107,12 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 @Nonnull PlayerRef playerRef,
                 @Nonnull World world
         ) {
-            ResolvedRules resolved = resolveRules(plugin, playerRef, componentArg.get(context), context);
+            ResolvedRules resolved = resolveRules(
+                    hudRuntimeService,
+                    playerRef,
+                    componentArg.get(context),
+                    context
+            );
             if (resolved == null) {
                 return;
             }
@@ -131,7 +151,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 resolved.rules().setThreshold(defaultThreshold != null ? defaultThreshold : 100f);
             }
 
-            saveRulesChange(plugin, playerRef);
+            saveRulesChange(hudRuntimeService, playerRef);
 
             if (resolved.entry().supportsThreshold()) {
                 context.sendMessage(Message.raw(
@@ -149,14 +169,19 @@ public final class RulesCmd extends AbstractPlayerCommand {
     }
 
     private static final class ThreeArgVariant extends AbstractPlayerCommand {
-        private final ImmersiveHudPlugin plugin;
+        private final HudRuntimeService hudRuntimeService;
+        private final PlayerConfigManager playerConfigManager;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
         private final RequiredArg<String> valueArg;
 
-        ThreeArgVariant(ImmersiveHudPlugin plugin) {
+        ThreeArgVariant(
+                HudRuntimeService hudRuntimeService,
+                PlayerConfigManager playerConfigManager
+        ) {
             super("Add, remove rule or configure threshold");
-            this.plugin = plugin;
+            this.hudRuntimeService = hudRuntimeService;
+            this.playerConfigManager = playerConfigManager;
 
             this.componentArg = dynamicComponentArg(this);
             this.actionArg = allowedArg(this, "action", "add/remove/threshold", "add", "remove", "threshold");
@@ -176,7 +201,12 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 @Nonnull PlayerRef playerRef,
                 @Nonnull World world
         ) {
-            ResolvedRules resolved = resolveRules(plugin, playerRef, componentArg.get(context), context);
+            ResolvedRules resolved = resolveRules(
+                    hudRuntimeService,
+                    playerRef,
+                    componentArg.get(context),
+                    context
+            );
             if (resolved == null) {
                 return;
             }
@@ -201,7 +231,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 }
 
                 resolved.rules().setThreshold(threshold);
-                saveRulesChange(plugin, playerRef);
+                saveRulesChange(hudRuntimeService, playerRef);
 
                 if (!hasMatchingThresholdRule(resolved.entry(), resolved.rules())) {
                     context.sendMessage(Message.raw(
@@ -231,7 +261,6 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             if ("add".equals(action)) {
-
                 if (!resolved.entry().supportsRule(rule)) {
                     context.sendMessage(Message.raw(
                             "Rule " + rule.name() + " is not valid for " + resolved.entry().label() + "."
@@ -247,7 +276,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                     return;
                 }
 
-                saveRulesChange(plugin, playerRef);
+                saveRulesChange(hudRuntimeService, playerRef);
 
                 context.sendMessage(Message.join(
                         Message.raw(resolved.messagePrefix() + " Added rule ").color(INFO_COLOR),
@@ -265,7 +294,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            saveRulesChange(plugin, playerRef);
+            saveRulesChange(hudRuntimeService, playerRef);
 
             context.sendMessage(Message.join(
                     Message.raw(resolved.messagePrefix() + " Removed rule ").color(INFO_COLOR),
@@ -295,7 +324,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static RequiredArg<String> allowedArg(
             AbstractPlayerCommand cmd,
-            @SuppressWarnings("SameParameterValue") String name,
+            String name,
             String description,
             String... allowedValues
     ) {
@@ -305,7 +334,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     @Nullable
     private static ResolvedRules resolveRules(
-            ImmersiveHudPlugin plugin,
+            HudRuntimeService hudRuntimeService,
             PlayerRef playerRef,
             String rawComponent,
             CommandContext context
@@ -321,7 +350,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         }
 
         DynamicHudRuleConfig rules = resolveRulesConfig(
-                plugin,
+                hudRuntimeService,
                 playerRef,
                 entry.label(),
                 entry.dynamicGetter(),
@@ -335,20 +364,22 @@ public final class RulesCmd extends AbstractPlayerCommand {
         return new ResolvedRules(entry, rules);
     }
 
-    private static void saveRulesChange(ImmersiveHudPlugin plugin, PlayerRef playerRef) {
-        plugin.markPlayerConfigDirty(playerRef.getUuid());
-        plugin.savePlayerConfigAsync(playerRef.getUuid());
+    private static void saveRulesChange(
+            HudRuntimeService hudRuntimeService,
+            PlayerRef playerRef
+    ) {
+        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
     }
 
     @Nullable
     private static DynamicHudRuleConfig resolveRulesConfig(
-            ImmersiveHudPlugin plugin,
+            HudRuntimeService hudRuntimeService,
             PlayerRef playerRef,
             String label,
             java.util.function.Function<com.tom.immersivehudplugin.config.DynamicHudConfig, DynamicHudRuleConfig> getter,
             CommandContext context
     ) {
-        PlayerConfig playerCfg = plugin.requirePlayerConfig(playerRef);
+        PlayerConfig playerCfg = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return null;

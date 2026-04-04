@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public final class DynamicHudConfig {
@@ -24,8 +25,8 @@ public final class DynamicHudConfig {
         return getByKey("hotbar");
     }
 
-    public void setHotbar(@Nullable DynamicHudRuleConfig v) {
-        setByKey("hotbar", v);
+    public void setHotbar(@Nullable DynamicHudRuleConfig value) {
+        setByKey("hotbar", value);
     }
 
     @Nonnull
@@ -33,8 +34,8 @@ public final class DynamicHudConfig {
         return getByKey("reticle");
     }
 
-    public void setReticle(@Nullable DynamicHudRuleConfig v) {
-        setByKey("reticle", v);
+    public void setReticle(@Nullable DynamicHudRuleConfig value) {
+        setByKey("reticle", value);
     }
 
     @Nonnull
@@ -42,8 +43,8 @@ public final class DynamicHudConfig {
         return getByKey("compass");
     }
 
-    public void setCompass(@Nullable DynamicHudRuleConfig v) {
-        setByKey("compass", v);
+    public void setCompass(@Nullable DynamicHudRuleConfig value) {
+        setByKey("compass", value);
     }
 
     @Nonnull
@@ -51,8 +52,8 @@ public final class DynamicHudConfig {
         return getByKey("health");
     }
 
-    public void setHealth(@Nullable DynamicHudRuleConfig v) {
-        setByKey("health", v);
+    public void setHealth(@Nullable DynamicHudRuleConfig value) {
+        setByKey("health", value);
     }
 
     @Nonnull
@@ -60,8 +61,8 @@ public final class DynamicHudConfig {
         return getByKey("stamina");
     }
 
-    public void setStamina(@Nullable DynamicHudRuleConfig v) {
-        setByKey("stamina", v);
+    public void setStamina(@Nullable DynamicHudRuleConfig value) {
+        setByKey("stamina", value);
     }
 
     @Nonnull
@@ -69,8 +70,8 @@ public final class DynamicHudConfig {
         return getByKey("mana");
     }
 
-    public void setMana(@Nullable DynamicHudRuleConfig v) {
-        setByKey("mana", v);
+    public void setMana(@Nullable DynamicHudRuleConfig value) {
+        setByKey("mana", value);
     }
 
     @Nonnull
@@ -78,29 +79,33 @@ public final class DynamicHudConfig {
         return getByKey("oxygen");
     }
 
-    public void setOxygen(@Nullable DynamicHudRuleConfig v) { setByKey("oxygen", v); }
+    public void setOxygen(@Nullable DynamicHudRuleConfig value) {
+        setByKey("oxygen", value);
+    }
 
     @Nonnull
     public DynamicHudRuleConfig getByKey(@Nullable String key) {
-        String normalized = HudComponentRegistry.normalize(key);
-        ensureAllDynamicEntries();
-        return rulesByKey.computeIfAbsent(normalized, _ -> new DynamicHudRuleConfig());
+        String normalized = normalizeKey(key);
+        if (normalized.isEmpty()) {
+            return new DynamicHudRuleConfig();
+        }
+        return rulesByKey.computeIfAbsent(normalized, ignored -> new DynamicHudRuleConfig());
     }
 
     public void setByKey(@Nullable String key, @Nullable DynamicHudRuleConfig value) {
-
-        String normalized = HudComponentRegistry.normalize(key);
-        if (normalized.isEmpty()) { return; }
+        String normalized = normalizeKey(key);
+        if (normalized.isEmpty()) {
+            return;
+        }
 
         rulesByKey.put(normalized, value != null ? value : new DynamicHudRuleConfig());
     }
 
     public boolean sanitize() {
-
         boolean changed = false;
 
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
-            String key = HudComponentRegistry.normalize(entry.key());
+            String key = normalizeKey(entry.key());
             DynamicHudRuleConfig ruleCfg = rulesByKey.get(key);
 
             if (ruleCfg == null) {
@@ -111,10 +116,7 @@ public final class DynamicHudConfig {
             }
         }
 
-        Set<String> validKeys = HudComponentRegistry.dynamicList().stream()
-                .map(HudEntry::key)
-                .map(HudComponentRegistry::normalize)
-                .collect(java.util.stream.Collectors.toSet());
+        Set<String> validKeys = validDynamicKeys();
 
         Iterator<Map.Entry<String, DynamicHudRuleConfig>> it = rulesByKey.entrySet().iterator();
         while (it.hasNext()) {
@@ -129,24 +131,35 @@ public final class DynamicHudConfig {
     }
 
     public DynamicHudConfig copy() {
-        DynamicHudConfig c = new DynamicHudConfig();
-        c.rulesByKey.clear();
+        DynamicHudConfig copy = new DynamicHudConfig();
+        copy.rulesByKey.clear();
 
         for (Map.Entry<String, DynamicHudRuleConfig> entry : rulesByKey.entrySet()) {
-            c.rulesByKey.put(
+            copy.rulesByKey.put(
                     entry.getKey(),
                     entry.getValue() != null ? entry.getValue().copy() : new DynamicHudRuleConfig()
             );
         }
 
-        c.ensureAllDynamicEntries();
-        return c;
+        copy.ensureAllDynamicEntries();
+        return copy;
     }
 
     private void ensureAllDynamicEntries() {
         for (HudEntry entry : HudComponentRegistry.dynamicList()) {
-            String key = HudComponentRegistry.normalize(entry.key());
-            rulesByKey.computeIfAbsent(key, _ -> new DynamicHudRuleConfig());
+            String key = normalizeKey(entry.key());
+            rulesByKey.computeIfAbsent(key, ignored -> new DynamicHudRuleConfig());
         }
+    }
+
+    private static String normalizeKey(@Nullable String key) {
+        return HudComponentRegistry.normalize(key);
+    }
+
+    private static Set<String> validDynamicKeys() {
+        return HudComponentRegistry.dynamicList().stream()
+                .map(HudEntry::key)
+                .map(HudComponentRegistry::normalize)
+                .collect(Collectors.toSet());
     }
 }
