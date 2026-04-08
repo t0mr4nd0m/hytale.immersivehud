@@ -48,14 +48,12 @@ public final class HeldItemRuntimeSupport {
             }
         }
 
-        if (hotbarEvent) {
-            state.t.clear(HudSignal.CHARGING_WEAPON);
-        }
-
         if (chargingEnd) {
             state.t.clear(HudSignal.CHARGING_WEAPON);
         } else if (chargingStart) {
             state.t.pulse(HudSignal.CHARGING_WEAPON, now, state.hideDelayMsHint);
+        } else if (hotbarEvent) {
+            state.t.clear(HudSignal.CHARGING_WEAPON);
         }
     }
 
@@ -83,10 +81,6 @@ public final class HeldItemRuntimeSupport {
 
         if (!state.rangedWeaponInHand) {
             state.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
-        }
-
-        if (!state.isAnyWeaponInHand()) {
-            state.t.clear(HudSignal.CHARGING_WEAPON);
         }
     }
 
