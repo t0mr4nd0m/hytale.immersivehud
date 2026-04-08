@@ -12,6 +12,7 @@
 * Improved trigger consistency and naming
 * Better alignment between runtime context and rule evaluation
 * Reduced duplication in trigger sources (packet vs tick)
+* Added new triggers: PLAYER_IDLE and PLAYER_SLEEPING
 
 **Configuration**
 

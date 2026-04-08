@@ -3,6 +3,7 @@ package com.tom.immersivehudplugin.runtime;
 import com.hypixel.hytale.assetstore.AssetMap;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
+import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
 import com.tom.immersivehudplugin.utils.ItemInHand;
@@ -17,33 +18,44 @@ public final class HeldItemRuntimeSupport {
         this.itemAssetMap = itemAssetMap;
     }
 
-    public void applyPacketUpdate(
+    public void applyPacketBatch(
             PlayerHudState state,
-            SyncInteractionChain update,
+            SyncInteractionChains updates,
             long now
     ) {
-        boolean chargingStart = isChargingStart(update);
-        boolean chargingEnd = isChargingEnd(update);
-        boolean secondaryStart = isSecondaryStart(update);
+        boolean chargingStart = false;
+        boolean chargingEnd = false;
+        boolean hotbarEvent = false;
 
-        if (update.itemInHandId != null) {
-            applyHeldItemFromPacket(state, update.itemInHandId, secondaryStart, now);
-        }
+        for (SyncInteractionChain update : updates.updates) {
+            boolean secondaryStart = isSecondaryStart(update);
 
-        if (hasHotbarSlot(update)) {
-            boolean changedSlot = applyHotbarSlotUpdate(state, update.activeHotbarSlot, now);
-            if (changedSlot) {
-                chargingStart = false;
+            if (update.itemInHandId != null) {
+                handlePacketItemUseOnly(state, update.itemInHandId, secondaryStart, now);
+            }
+
+            if (hasHotbarSlot(update)) {
+                hotbarEvent = true;
+                applyHotbarSlotUpdate(state, update.activeHotbarSlot, now);
+            }
+
+            if (isChargingStart(update)) {
+                chargingStart = true;
+            }
+
+            if (isChargingEnd(update)) {
                 chargingEnd = true;
             }
         }
 
-        if (chargingStart && state.isAnyWeaponInHand()) {
-            state.t.pulse(HudSignal.CHARGING_WEAPON, now, state.hideDelayMsHint);
+        if (hotbarEvent) {
+            state.t.clear(HudSignal.CHARGING_WEAPON);
         }
 
         if (chargingEnd) {
             state.t.clear(HudSignal.CHARGING_WEAPON);
+        } else if (chargingStart) {
+            state.t.pulse(HudSignal.CHARGING_WEAPON, now, state.hideDelayMsHint);
         }
     }
 
@@ -78,7 +90,7 @@ public final class HeldItemRuntimeSupport {
         }
     }
 
-    private void applyHeldItemFromPacket(
+    private void handlePacketItemUseOnly(
             PlayerHudState state,
             String itemInHandId,
             boolean secondaryStart,
@@ -86,32 +98,23 @@ public final class HeldItemRuntimeSupport {
     ) {
         Item item = itemAssetMap.getAsset(itemInHandId);
 
-        state.applyHeldItemState(
-                item,
-                ItemInHand.isRangedWeapon(item),
-                ItemInHand.isMeleeWeapon(item)
-        );
-
         if (secondaryStart && item != null && item.isConsumable()) {
             state.t.pulse(HudSignal.CONSUMABLE_USE, now, state.hideDelayMsHint);
         }
     }
 
-    private boolean applyHotbarSlotUpdate(
+    private void applyHotbarSlotUpdate(
             PlayerHudState state,
             int slot,
             long now
     ) {
-        int previous = state.lastSeenActiveHotbarSlot;
         state.lastSeenActiveHotbarSlot = slot;
-
-        if (previous == -1 || slot == previous) {
-            return false;
-        }
-
         state.invalidateHeldItemStateForHotbarSwitch();
+
+        state.t.clear(HudSignal.CHARGING_WEAPON);
+        state.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
+        state.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
         state.t.pulse(HudSignal.HOTBAR_INPUT, now, state.hideDelayMsHint);
-        return true;
     }
 
     @Nullable
