@@ -102,7 +102,6 @@ public final class HeldItemRuntimeSupport {
             int slot,
             long now
     ) {
-        state.lastSeenActiveHotbarSlot = slot;
         state.invalidateHeldItemStateForHotbarSwitch();
 
         state.t.clear(HudSignal.CHARGING_WEAPON);

@@ -29,7 +29,6 @@ public final class PlayerHudState {
     public boolean staticDirty = true;
 
     public volatile long lastReticleScanMs;
-    public volatile int lastSeenActiveHotbarSlot = -1;
 
     public volatile boolean rangedWeaponInHand;
     public volatile boolean meleeWeaponInHand;
@@ -168,7 +167,6 @@ public final class PlayerHudState {
     private void resetTimersAndScans() {
         t.clearAll();
         lastReticleScanMs = 0L;
-        lastSeenActiveHotbarSlot = -1;
     }
 
     private void resetHeldItemState() {

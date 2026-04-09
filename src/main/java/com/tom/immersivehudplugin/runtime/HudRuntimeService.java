@@ -246,6 +246,7 @@ public final class HudRuntimeService {
 
         if (shouldEvaluateDynamicHud(evaluation.state(), evaluation.hudConfig())) {
             repairHeldItemIfNeeded(evaluation);
+            cleanupHeldItemSignals(evaluation);
             rebuildDynamicHud(evaluation, world, global, now);
         } else {
             clearDynamicHud(evaluation);
@@ -296,6 +297,10 @@ public final class HudRuntimeService {
 
     private void clearDynamicHud(TickEvaluation evaluation) {
         hudVisibilityService.clearDynamicHiddenIfNeeded(evaluation.state());
+    }
+
+    private void cleanupHeldItemSignals(TickEvaluation evaluation) {
+        heldItemRuntimeSupport.cleanupWeaponSignals(evaluation.state());
     }
 
     private void rebuildDynamicHud(
