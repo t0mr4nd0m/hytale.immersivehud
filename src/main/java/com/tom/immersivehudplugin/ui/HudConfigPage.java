@@ -42,6 +42,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
     private final HudConfigPresenter presenter = new HudConfigPresenter();
+    private final HudConfigRenderIndex renderIndex = new HudConfigRenderIndex();
 
     public HudConfigPage(
             @Nonnull HudConfigUiService uiService,
@@ -195,6 +196,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             return;
         }
 
+        renderIndex.clearAll();
+
         UICommandBuilder commands = new UICommandBuilder();
         UIEventBuilder events = new UIEventBuilder();
 
@@ -341,7 +344,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             @Nonnull HudConfigUiSession session,
             @Nonnull HudComponentRegistry.Group group
     ) {
-        Integer rowIndex = session.getVisibilitySectionRowIndex(group);
+        Integer rowIndex = renderIndex.getVisibilitySectionRowIndex(group);
         if (rowIndex == null) {
             return;
         }
@@ -364,7 +367,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             @Nonnull HudConfigUiSession session,
             @Nonnull String componentKey
     ) {
-        Integer rowIndex = session.getVisibilityRowIndex(componentKey);
+        Integer rowIndex = renderIndex.getVisibilityRowIndex(componentKey);
         if (rowIndex == null) {
             return;
         }
@@ -395,8 +398,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 Message.raw(session.getCurrentView().helpText())
         );
 
-        session.clearVisibilityRowIndexes();
-        session.clearVisibilitySectionRowIndexes();
+        renderIndex.clearVisibilityRowIndexes();
+        renderIndex.clearVisibilitySectionRowIndexes();
 
         int rowIndex = 0;
         HudComponentRegistry.Group expandedGroup = session.getExpandedVisibilityGroup();
@@ -424,7 +427,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             String openGroupSelector = sectionRootSelector + " #VisibilitySectionGroupOpen";
             String openCounterSelector = sectionRootSelector + " #VisibilitySectionCounterOpen";
 
-            session.putVisibilitySectionRowIndex(group, rowIndex);
+            renderIndex.putVisibilitySectionRowIndex(group, rowIndex);
 
             boolean expanded = group == expandedGroup;
 
@@ -472,7 +475,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 commands.append("#VisibilityList", VISIBILITY_ROW_UI);
 
                 int entryRowIndex = rowIndex;
-                session.putVisibilityRowIndex(entry.key(), entryRowIndex);
+                renderIndex.putVisibilityRowIndex(entry.key(), entryRowIndex);
 
                 String rowRootSelector = "#VisibilityList[" + entryRowIndex + "]";
                 String componentSelector = rowRootSelector + " #VisibilityComponentLabel";
@@ -499,14 +502,14 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             @Nonnull HudComponentRegistry.HudEntry entry,
             @Nonnull DynamicHudTriggers trigger
     ) {
-        Integer componentIndex = session.getDynamicComponentRowIndex(entry.key());
+        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
         if (componentIndex == null) {
             return;
         }
 
         boolean enabled = session.isRuleEnabled(entry, trigger);
 
-        Integer baseRowIndex = session.getDynamicRuleRowIndex(entry.key(), "base", trigger);
+        Integer baseRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "base", trigger);
         if (baseRowIndex != null) {
             String rulesListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicRulesList";
             String rowRootSelector = rulesListSelector + "[" + baseRowIndex + "]";
@@ -515,7 +518,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             return;
         }
 
-        Integer extraRowIndex = session.getDynamicRuleRowIndex(entry.key(), "extra", trigger);
+        Integer extraRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "extra", trigger);
         if (extraRowIndex != null) {
             String extraListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicExtraTriggersList";
             String rowRootSelector = extraListSelector + "[" + extraRowIndex + "]";
@@ -537,14 +540,14 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 Message.raw(session.getCurrentView().helpText())
         );
 
-        session.clearDynamicRuleRowIndexes();
-        session.clearDynamicComponentRowIndexes();
+        renderIndex.clearDynamicRuleRowIndexes();
+        renderIndex.clearDynamicComponentRowIndexes();
 
         int componentIndex = 0;
 
         for (HudComponentRegistry.HudEntry entry : session.getDynamicEntries()) {
             commands.append("#DynamicComponentsList", DYNAMIC_SECTION_UI);
-            session.putDynamicComponentRowIndex(entry.key(), componentIndex);
+            renderIndex.putDynamicComponentRowIndex(entry.key(), componentIndex);
 
             String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
             String titleSelector = componentRoot + " #DynamicComponentValueLabel";
@@ -644,7 +647,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         boolean enabled = session.isRuleEnabled(entry, trigger);
 
         commands.append(hostSelector, DYNAMIC_RULE_ROW_UI);
-        session.putDynamicRuleRowIndex(entry.key(), hostKey, trigger, rowIndex);
+        renderIndex.putDynamicRuleRowIndex(entry.key(), hostKey, trigger, rowIndex);
 
         String rowRootSelector = hostSelector + "[" + rowIndex + "]";
         String labelSelector = rowRootSelector + " #DynamicRuleLabel";
@@ -674,7 +677,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             @Nonnull HudConfigUiSession session,
             @Nonnull HudComponentRegistry.HudEntry entry
     ) {
-        Integer componentIndex = session.getDynamicComponentRowIndex(entry.key());
+        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
         if (componentIndex == null) {
             return;
         }
@@ -688,7 +691,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             @Nonnull HudConfigUiSession session,
             @Nonnull HudComponentRegistry.HudEntry entry
     ) {
-        Integer componentIndex = session.getDynamicComponentRowIndex(entry.key());
+        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
         if (componentIndex == null) {
             return;
         }
@@ -769,7 +772,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 PageEventData.action("VIEW_VISIBILITY"),
                 false
         );
-
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#ViewDynamicRulesBtn",
@@ -782,7 +784,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 PageEventData.action("VIEW_DYNAMIC_RULES"),
                 false
         );
-
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#ApplyButton",
