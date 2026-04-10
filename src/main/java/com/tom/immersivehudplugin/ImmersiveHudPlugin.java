@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.tom.immersivehudplugin.commands.CommandCollection;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.context.HudContextBuilder;
+import com.tom.immersivehudplugin.hud.HudSettingsService;
 import com.tom.immersivehudplugin.managers.ConfigSupport;
 import com.tom.immersivehudplugin.managers.GlobalConfigManager;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;
@@ -24,6 +25,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private HudRuntimeCoordinator hudRuntimeCoordinator;
     private HudConfigUiService hudConfigUiService;
+    private HudSettingsService hudSettingsService;
 
     public ImmersiveHudPlugin(JavaPluginInit init) {
         super(init);
@@ -63,12 +65,13 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private void startRuntimeServices() {
-        this.hudRuntimeCoordinator = createHudRuntimeService();
+        this.hudRuntimeCoordinator = createHudRuntimeCoordinator();
+        this.hudSettingsService = createHudSettingsService();
         this.hudConfigUiService = new HudConfigUiService(hudRuntimeCoordinator);
         hudRuntimeCoordinator.start();
     }
 
-    private HudRuntimeCoordinator createHudRuntimeService() {
+    private HudRuntimeCoordinator createHudRuntimeCoordinator() {
         HudContextBuilder hudContextBuilder = new HudContextBuilder(
                 DefaultEntityStatTypes.getHealth(),
                 DefaultEntityStatTypes.getStamina(),
@@ -84,6 +87,15 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
                 hudContextBuilder,
                 hudVisibilityService,
                 this::getImmersiveHudGlobalConfig
+        );
+    }
+
+    private HudSettingsService createHudSettingsService() {
+
+        return new HudSettingsService (
+                playerConfigManager,
+                hudRuntimeCoordinator,
+                globalConfigManager::get
         );
     }
 
