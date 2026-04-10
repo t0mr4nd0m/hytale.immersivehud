@@ -34,7 +34,7 @@ public final class HudRuntimeService {
     private final PlayerConfigManager playerConfigManager;
     private final HudContextBuilder hudContextBuilder;
     private final HudVisibilityService hudVisibilityService;
-    private final HeldItemRuntimeSupport heldItemRuntimeSupport;
+    private final HeldItemTracker heldItemTracker;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     private final Map<UUID, PlayerHudState> playerState = new ConcurrentHashMap<>();
@@ -54,7 +54,7 @@ public final class HudRuntimeService {
         this.playerConfigManager = playerConfigManager;
         this.hudContextBuilder = hudContextBuilder;
         this.hudVisibilityService = hudVisibilityService;
-        this.heldItemRuntimeSupport = new HeldItemRuntimeSupport();
+        this.heldItemTracker = new HeldItemTracker();
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
@@ -144,8 +144,8 @@ public final class HudRuntimeService {
             long now = nowMs();
             PlayerHudState state = stateFor(playerRef.getUuid());
 
-            heldItemRuntimeSupport.applyPacketBatch(state, updates, now);
-            heldItemRuntimeSupport.cleanupWeaponSignals(state);
+            heldItemTracker.applyPacketBatch(state, updates, now);
+            heldItemTracker.cleanupWeaponSignals(state);
         });
     }
 
@@ -279,7 +279,7 @@ public final class HudRuntimeService {
     }
 
     private void repairHeldItemIfNeeded(TickEvaluation evaluation) {
-        heldItemRuntimeSupport.repairFromInventoryIfNeeded(
+        heldItemTracker.repairFromInventoryIfNeeded(
                 evaluation.state(),
                 evaluation.tickContext()
         );
@@ -290,7 +290,7 @@ public final class HudRuntimeService {
     }
 
     private void cleanupHeldItemSignals(TickEvaluation evaluation) {
-        heldItemRuntimeSupport.cleanupWeaponSignals(evaluation.state());
+        heldItemTracker.cleanupWeaponSignals(evaluation.state());
     }
 
     private void rebuildDynamicHud(
@@ -299,7 +299,7 @@ public final class HudRuntimeService {
             GlobalConfig global,
             long now
     ) {
-        heldItemRuntimeSupport.cleanupWeaponSignals(evaluation.state());
+        heldItemTracker.cleanupWeaponSignals(evaluation.state());
 
         var dynamicContext = hudContextBuilder.buildDynamicHudTriggerContext(
                 evaluation.state(),
