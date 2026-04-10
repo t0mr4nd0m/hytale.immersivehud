@@ -2,20 +2,18 @@ package com.tom.immersivehudplugin.context;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
 import com.tom.immersivehudplugin.runtime.HudSignal;
 import com.tom.immersivehudplugin.runtime.MovementSignalTracker;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.ReticleTracker;
 
 import javax.annotation.Nullable;
 
@@ -27,6 +25,7 @@ public final class HudContextBuilder {
     private final int oxygenState;
 
     private final MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
+    private final ReticleTracker reticleTracker = new ReticleTracker();
 
     public HudContextBuilder(
             int healthState,
@@ -76,7 +75,7 @@ public final class HudContextBuilder {
         state.hideDelayMsHint = hideDelay;
 
         movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
-        updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
+        reticleTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
         updateBars(state, tickContext);
 
         return createDynamicHudTriggerContext(state, now);
@@ -84,14 +83,6 @@ public final class HudContextBuilder {
 
     private int hideDelayMs(GlobalConfig cfg) {
         return cfg != null ? cfg.getHideDelayMs() : GlobalConfig.HIDE_DELAY_MS;
-    }
-
-    private int intervalMs(GlobalConfig cfg) {
-        return cfg != null ? cfg.getIntervalMs() : GlobalConfig.INTERVAL_MS;
-    }
-
-    private float reticleTargetRange(GlobalConfig cfg) {
-        return cfg != null ? cfg.getReticleTargetRange() : GlobalConfig.RETICLE_TARGET_RANGE;
     }
 
     private float getCurrentBar(PlayerTickContext tickContext, int statIndex) {
@@ -110,76 +101,6 @@ public final class HudContextBuilder {
 
         var component = tickContext.stats().get(statIndex);
         return component != null ? component.getMax() : 0f;
-    }
-
-    private void updateReticleSignalsIfNeeded(
-            PlayerHudState state,
-            World world,
-            PlayerTickContext tickContext,
-            GlobalConfig global,
-            long now,
-            int hideDelay
-    ) {
-        if (!shouldScanReticle(state, global, now)) {
-            return;
-        }
-
-        float targetRange = reticleTargetRange(global);
-        ReticleScanResult scan = scanReticle(world, tickContext, targetRange);
-
-        if (scan.targetEntity()) {
-            state.t.pulse(HudSignal.TARGET_ENTITY, now, hideDelay);
-        }
-
-        if (scan.interactableBlock()) {
-            state.t.pulse(HudSignal.INTERACTABLE_BLOCK, now, hideDelay);
-        }
-
-        markReticleScanExecuted(state, now);
-    }
-
-    private boolean shouldScanReticle(
-            PlayerHudState state,
-            GlobalConfig global,
-            long now
-    ) {
-        return (now - state.lastReticleScanMs) >= reticleScanIntervalMs(global);
-    }
-
-    private int reticleScanIntervalMs(GlobalConfig global) {
-        return Math.max(100, intervalMs(global));
-    }
-
-    private void markReticleScanExecuted(PlayerHudState state, long now) {
-        state.lastReticleScanMs = now;
-    }
-
-    private ReticleScanResult scanReticle(
-            World world,
-            PlayerTickContext tickContext,
-            float targetRange
-    ) {
-        Ref<EntityStore> target = TargetUtil.getTargetEntity(
-                tickContext.ref(),
-                targetRange,
-                tickContext.store()
-        );
-        boolean hasEntityTarget = target != null && !target.equals(tickContext.ref());
-
-        boolean lookingAtInteractable = false;
-        Vector3i blockPos = TargetUtil.getTargetBlock(
-                tickContext.ref(),
-                targetRange,
-                tickContext.store()
-        );
-
-        if (blockPos != null) {
-            BlockType blockType = world.getBlockType(blockPos);
-            var flags = blockType != null ? blockType.getFlags() : null;
-            lookingAtInteractable = flags != null && flags.isUsable;
-        }
-
-        return new ReticleScanResult(hasEntityTarget, lookingAtInteractable);
     }
 
     private void updateBars(PlayerHudState state, PlayerTickContext tickContext) {
@@ -231,9 +152,4 @@ public final class HudContextBuilder {
                 state.oxygenBar
         );
     }
-
-    private record ReticleScanResult(
-            boolean targetEntity,
-            boolean interactableBlock
-    ) {}
 }
