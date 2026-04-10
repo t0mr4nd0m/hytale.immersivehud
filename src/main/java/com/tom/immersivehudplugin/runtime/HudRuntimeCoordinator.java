@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-public final class HudRuntimeService {
+public final class HudRuntimeCoordinator {
 
     private final JavaPlugin plugin;
     private final PlayerConfigManager playerConfigManager;
@@ -45,7 +45,7 @@ public final class HudRuntimeService {
     private volatile ScheduledFuture<?> tickTask;
     private volatile int runningIntervalMs = -1;
 
-    public HudRuntimeService(
+    public HudRuntimeCoordinator(
             JavaPlugin plugin,
             PlayerConfigManager playerConfigManager,
             HudContextBuilder hudContextBuilder,

@@ -4,7 +4,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractComman
 
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
 import java.util.function.Supplier;
@@ -12,18 +12,18 @@ import java.util.function.Supplier;
 public final class CommandCollection extends AbstractCommandCollection {
 
     public CommandCollection(
-            HudRuntimeService hudRuntimeService,
+            HudRuntimeCoordinator hudRuntimeCoordinator,
             PlayerConfigManager playerConfigManager,
             HudConfigUiService hudConfigUiService,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
         super("immersivehud", "ImmersiveHud plugin commands");
         addAliases("ihud");
-        addSubCommand(new StatusCmd(hudRuntimeService, globalConfigSupplier));
-        addSubCommand(new ToggleCmd(hudRuntimeService, playerConfigManager));
-        addSubCommand(new RulesCmd(hudRuntimeService, playerConfigManager));
-        addSubCommand(new ProfileCmd(hudRuntimeService, playerConfigManager));
-        addSubCommand(new ConfigUICmd(hudRuntimeService, hudConfigUiService));
+        addSubCommand(new StatusCmd(hudRuntimeCoordinator, globalConfigSupplier));
+        addSubCommand(new ToggleCmd(hudRuntimeCoordinator, playerConfigManager));
+        addSubCommand(new RulesCmd(hudRuntimeCoordinator, playerConfigManager));
+        addSubCommand(new ProfileCmd(hudRuntimeCoordinator, playerConfigManager));
+        addSubCommand(new ConfigUICmd(hudRuntimeCoordinator, hudConfigUiService));
     }
 
     @Override

@@ -11,7 +11,7 @@ import com.tom.immersivehudplugin.context.HudContextBuilder;
 import com.tom.immersivehudplugin.managers.ConfigSupport;
 import com.tom.immersivehudplugin.managers.GlobalConfigManager;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 import com.tom.immersivehudplugin.visibility.HudVisibilityService;
 
@@ -22,7 +22,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     private GlobalConfigManager globalConfigManager;
     private PlayerConfigManager playerConfigManager;
 
-    private HudRuntimeService hudRuntimeService;
+    private HudRuntimeCoordinator hudRuntimeCoordinator;
     private HudConfigUiService hudConfigUiService;
 
     public ImmersiveHudPlugin(JavaPluginInit init) {
@@ -42,7 +42,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     @Override
     public void shutdown() {
-        if (hudRuntimeService != null) { hudRuntimeService.shutdown(); }
+        if (hudRuntimeCoordinator != null) { hudRuntimeCoordinator.shutdown(); }
     }
 
     private void setupConfigServices() {
@@ -63,12 +63,12 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private void startRuntimeServices() {
-        this.hudRuntimeService = createHudRuntimeService();
-        this.hudConfigUiService = new HudConfigUiService(hudRuntimeService);
-        hudRuntimeService.start();
+        this.hudRuntimeCoordinator = createHudRuntimeService();
+        this.hudConfigUiService = new HudConfigUiService(hudRuntimeCoordinator);
+        hudRuntimeCoordinator.start();
     }
 
-    private HudRuntimeService createHudRuntimeService() {
+    private HudRuntimeCoordinator createHudRuntimeService() {
         HudContextBuilder hudContextBuilder = new HudContextBuilder(
                 DefaultEntityStatTypes.getHealth(),
                 DefaultEntityStatTypes.getStamina(),
@@ -78,7 +78,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
         HudVisibilityService hudVisibilityService = new HudVisibilityService();
 
-        return new HudRuntimeService(
+        return new HudRuntimeCoordinator(
                 this,
                 playerConfigManager,
                 hudContextBuilder,
@@ -89,7 +89,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private void registerCommands() {
         this.getCommandRegistry().registerCommand(new CommandCollection(
-                hudRuntimeService,
+                hudRuntimeCoordinator,
                 playerConfigManager,
                 hudConfigUiService,
                 this::getImmersiveHudGlobalConfig

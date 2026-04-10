@@ -15,7 +15,7 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,15 +36,15 @@ public final class StatusCmd extends AbstractPlayerCommand {
     private static final Color HIDE_COLOR = Color.RED;
     private static final Color ERROR_COLOR = Color.RED;
 
-    private final HudRuntimeService hudRuntimeService;
+    private final HudRuntimeCoordinator hudRuntimeCoordinator;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     public StatusCmd(
-            HudRuntimeService hudRuntimeService,
+            HudRuntimeCoordinator hudRuntimeCoordinator,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
         super("status", "Show your ImmersiveHud settings");
-        this.hudRuntimeService = hudRuntimeService;
+        this.hudRuntimeCoordinator = hudRuntimeCoordinator;
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
@@ -61,7 +61,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        PlayerConfig playerCfg = getPlayerConfig(hudRuntimeService, playerRef, context);
+        PlayerConfig playerCfg = getPlayerConfig(hudRuntimeCoordinator, playerRef, context);
         if (playerCfg == null) { return; }
 
         GlobalConfig global = globalConfigSupplier.get();
@@ -76,11 +76,11 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
     @Nullable
     private static PlayerConfig getPlayerConfig(
-            @Nonnull HudRuntimeService hudRuntimeService,
+            @Nonnull HudRuntimeCoordinator hudRuntimeCoordinator,
             @Nonnull PlayerRef playerRef,
             @Nonnull CommandContext context
     ) {
-        PlayerConfig playerConfig = hudRuntimeService.requirePlayerConfig(playerRef);
+        PlayerConfig playerConfig = hudRuntimeCoordinator.requirePlayerConfig(playerRef);
         if (playerConfig == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return null;
