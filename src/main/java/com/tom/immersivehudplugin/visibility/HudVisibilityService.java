@@ -1,6 +1,5 @@
 package com.tom.immersivehudplugin.visibility;
 
-import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
@@ -21,6 +20,8 @@ public final class HudVisibilityService {
     private static final List<HudEntry> STATIC_ENTRIES = ALL_ENTRIES.stream()
             .filter(entry -> !entry.supportsDynamicRules())
             .toList();
+
+    private final HudDeltaApplier hudDeltaApplier = new HudDeltaApplier();
 
     public boolean hasAnyDynamicHudEnabled(HudComponentsConfig hudConfig) {
         for (HudEntry entry : DYNAMIC_ENTRIES) {
@@ -79,27 +80,7 @@ public final class HudVisibilityService {
     }
 
     public void applyHudDelta(PlayerTickContext tickContext, PlayerHudState state) {
-        PlayerHudState.HudDelta delta = state.prepareHudDelta();
-
-        if (!delta.changed()) {
-            return;
-        }
-
-        if (!delta.toHide().isEmpty()) {
-            tickContext.player().getHudManager().hideHudComponents(
-                    tickContext.playerRef(),
-                    delta.toHide().toArray(HudComponent[]::new)
-            );
-        }
-
-        if (!delta.toShow().isEmpty()) {
-            tickContext.player().getHudManager().showHudComponents(
-                    tickContext.playerRef(),
-                    delta.toShow().toArray(HudComponent[]::new)
-            );
-        }
-
-        state.commitAppliedHidden(delta.effectiveHidden());
+        hudDeltaApplier.apply(tickContext, state);
     }
 
     private boolean shouldShowDynamic(
