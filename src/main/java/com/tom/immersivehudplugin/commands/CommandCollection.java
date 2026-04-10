@@ -23,7 +23,7 @@ public final class CommandCollection extends AbstractCommandCollection {
         addAliases("ihud");
         addSubCommand(new StatusCmd(hudRuntimeCoordinator, globalConfigSupplier));
         addSubCommand(new ToggleCmd(hudSettingsService));
-        addSubCommand(new RulesCmd(hudRuntimeCoordinator, playerConfigManager));
+        addSubCommand(new RulesCmd(hudSettingsService));
         addSubCommand(new ProfileCmd(hudRuntimeCoordinator, playerConfigManager));
         addSubCommand(new ConfigUICmd(hudRuntimeCoordinator, hudConfigUiService));
     }
