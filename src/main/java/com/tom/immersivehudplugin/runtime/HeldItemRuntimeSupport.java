@@ -1,6 +1,5 @@
 package com.tom.immersivehudplugin.runtime;
 
-import com.hypixel.hytale.assetstore.AssetMap;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
@@ -12,11 +11,7 @@ import javax.annotation.Nullable;
 
 public final class HeldItemRuntimeSupport {
 
-    private final AssetMap<String, Item> itemAssetMap;
-
-    public HeldItemRuntimeSupport(AssetMap<String, Item> itemAssetMap) {
-        this.itemAssetMap = itemAssetMap;
-    }
+    public HeldItemRuntimeSupport() {}
 
     public void applyPacketBatch(
             PlayerHudState state,
@@ -30,22 +25,16 @@ public final class HeldItemRuntimeSupport {
         for (SyncInteractionChain update : updates.updates) {
             boolean secondaryStart = isSecondaryStart(update);
 
-            if (update.itemInHandId != null) {
-                handlePacketItemUseOnly(state, update.itemInHandId, secondaryStart, now);
+            if (update.itemInHandId != null && secondaryStart) {
+                handleSecondaryInteractionType(state, update.itemInHandId, now);
             }
 
-            if (hasHotbarSlot(update)) {
-                hotbarEvent = true;
-                applyHotbarSlotUpdate(state, update.activeHotbarSlot, now);
+            if (hasHotbarSlot(state, update)) {
+                hotbarEvent |= applyHotbarSlotUpdate(state, now);
             }
 
-            if (isChargingStart(update)) {
-                chargingStart = true;
-            }
-
-            if (isChargingEnd(update)) {
-                chargingEnd = true;
-            }
+            chargingStart |= isChargingStart(update);
+            chargingEnd |= isChargingEnd(update);
         }
 
         if (chargingEnd) {
@@ -65,12 +54,12 @@ public final class HeldItemRuntimeSupport {
             return;
         }
 
-        Item heldItem = getHeldItemFromInventory(tickContext);
+        Item heldItem = getHeldItemFromInventory(state, tickContext);
 
         state.applyHeldItemState(
-                heldItem,
                 ItemInHand.isRangedWeapon(heldItem),
-                ItemInHand.isMeleeWeapon(heldItem)
+                ItemInHand.isMeleeWeapon(heldItem),
+                ItemInHand.isConsumable(heldItem)
         );
     }
 
@@ -84,22 +73,20 @@ public final class HeldItemRuntimeSupport {
         }
     }
 
-    private void handlePacketItemUseOnly(
+    private void handleSecondaryInteractionType(
             PlayerHudState state,
             String itemInHandId,
-            boolean secondaryStart,
             long now
     ) {
-        Item item = itemAssetMap.getAsset(itemInHandId);
+        Item item = Item.getAssetMap().getAsset(itemInHandId);
 
-        if (secondaryStart && item != null && item.isConsumable()) {
+        if (ItemInHand.isConsumable(item)) {
             state.t.pulse(HudSignal.CONSUMABLE_USE, now, state.hideDelayMsHint);
         }
     }
 
-    private void applyHotbarSlotUpdate(
+    private boolean applyHotbarSlotUpdate(
             PlayerHudState state,
-            int slot,
             long now
     ) {
         state.invalidateHeldItemStateForHotbarSwitch();
@@ -108,27 +95,33 @@ public final class HeldItemRuntimeSupport {
         state.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
         state.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
         state.t.pulse(HudSignal.HOTBAR_INPUT, now, state.hideDelayMsHint);
+        return true;
     }
 
     @Nullable
-    private Item getHeldItemFromInventory(PlayerTickContext tickContext) {
+    private Item getHeldItemFromInventory(
+            PlayerHudState state,
+            PlayerTickContext tickContext
+    ) {
         try {
             var inventory = tickContext.player().getInventory();
-            if (inventory == null) {
-                return null;
-            }
+            if (inventory == null) { return null; }
 
             var heldStack = inventory.getActiveHotbarItem();
-            if (heldStack == null) {
-                return null;
-            }
+            if (heldStack == null) { return null; }
 
             String itemId = heldStack.getItemId();
-            if (itemId == null || itemId.isBlank()) {
-                return null;
+            if (itemId.isBlank()) { return null; }
+
+            if (state.lastActiveHotbarSlot == -1) {
+
+                int slot = inventory.getActiveHotbarSlot();
+                if (slot >= 0 && slot <= 8) {
+                    state.lastActiveHotbarSlot = slot;
+                }
             }
 
-            return itemAssetMap.getAsset(itemId);
+            return Item.getAssetMap().getAsset(itemId);
 
         } catch (Throwable ignored) {
             return null;
@@ -149,7 +142,23 @@ public final class HeldItemRuntimeSupport {
         return update.interactionType == InteractionType.Secondary;
     }
 
-    private static boolean hasHotbarSlot(SyncInteractionChain update) {
-        return update.activeHotbarSlot >= 0 && update.activeHotbarSlot <= 8;
+    private static boolean hasHotbarSlot(
+            PlayerHudState state,
+            SyncInteractionChain update
+    ) {
+        int slot = update.activeHotbarSlot;
+        if (slot < 0 || slot > 8) { return false; }
+
+        if (state.lastActiveHotbarSlot == -1) {
+            state.lastActiveHotbarSlot = slot;
+            return false;
+        }
+
+        if (state.lastActiveHotbarSlot != slot) {
+            state.lastActiveHotbarSlot = slot;
+            return true;
+        }
+
+        return false;
     }
 }

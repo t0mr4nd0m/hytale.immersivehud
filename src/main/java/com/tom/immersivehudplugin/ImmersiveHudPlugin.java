@@ -2,8 +2,6 @@ package com.tom.immersivehudplugin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.hypixel.hytale.assetstore.AssetMap;
-import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -21,9 +19,6 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private String pluginVersion;
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private final AssetMap<String, Item> itemAssetMap = Item.getAssetMap();
-
     private GlobalConfigManager globalConfigManager;
     private PlayerConfigManager playerConfigManager;
 
@@ -37,48 +32,40 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     @Override
     protected void setup() {
         setupConfigServices();
-        loadConfiguration();
     }
 
     @Override
     public void start() {
-        setupRuntimeServices();
+        startRuntimeServices();
         registerCommands();
-        hudRuntimeService.start();
     }
 
     @Override
     public void shutdown() {
-        if (hudRuntimeService != null) {
-            hudRuntimeService.shutdown();
-        }
+        if (hudRuntimeService != null) { hudRuntimeService.shutdown(); }
     }
 
     private void setupConfigServices() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         ConfigSupport configSupport = new ConfigSupport(this, gson);
         this.pluginVersion = this.getManifest().getVersion().toString();
         this.globalConfigManager = new GlobalConfigManager(this, configSupport);
         this.playerConfigManager = new PlayerConfigManager(this, configSupport);
+        globalConfigManager.load();
     }
 
-    private void loadConfiguration() {
-        globalConfigManager.loadSafely();
+    public String getPluginVersion() {
+        return pluginVersion;
     }
 
-    private void setupRuntimeServices() {
+    public GlobalConfig getImmersiveHudGlobalConfig() {
+        return globalConfigManager.get();
+    }
+
+    private void startRuntimeServices() {
         this.hudRuntimeService = createHudRuntimeService();
-        this.hudConfigUiService = new HudConfigUiService(
-                hudRuntimeService
-        );
-    }
-
-    private void registerCommands() {
-        this.getCommandRegistry().registerCommand(new CommandCollection(
-                hudRuntimeService,
-                playerConfigManager,
-                hudConfigUiService,
-                this::getImmersiveHudGlobalConfig
-        ));
+        this.hudConfigUiService = new HudConfigUiService(hudRuntimeService);
+        hudRuntimeService.start();
     }
 
     private HudRuntimeService createHudRuntimeService() {
@@ -96,16 +83,16 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
                 playerConfigManager,
                 hudContextBuilder,
                 hudVisibilityService,
-                itemAssetMap,
                 this::getImmersiveHudGlobalConfig
         );
     }
 
-    public GlobalConfig getImmersiveHudGlobalConfig() {
-        return globalConfigManager.get();
-    }
-
-    public String getPluginVersion() {
-        return pluginVersion;
+    private void registerCommands() {
+        this.getCommandRegistry().registerCommand(new CommandCollection(
+                hudRuntimeService,
+                playerConfigManager,
+                hudConfigUiService,
+                this::getImmersiveHudGlobalConfig
+        ));
     }
 }

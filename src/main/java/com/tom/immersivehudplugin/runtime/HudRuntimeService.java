@@ -1,9 +1,7 @@
 package com.tom.immersivehudplugin.runtime;
 
-import com.hypixel.hytale.assetstore.AssetMap;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.HytaleServer;
-import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
@@ -50,14 +48,13 @@ public final class HudRuntimeService {
             PlayerConfigManager playerConfigManager,
             HudContextBuilder hudContextBuilder,
             HudVisibilityService hudVisibilityService,
-            AssetMap<String, Item> itemAssetMap,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
         this.plugin = plugin;
         this.playerConfigManager = playerConfigManager;
         this.hudContextBuilder = hudContextBuilder;
         this.hudVisibilityService = hudVisibilityService;
-        this.heldItemRuntimeSupport = new HeldItemRuntimeSupport(itemAssetMap);
+        this.heldItemRuntimeSupport = new HeldItemRuntimeSupport();
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
@@ -104,34 +101,27 @@ public final class HudRuntimeService {
     }
 
     public void markPlayerStaticHudDirty(@Nullable PlayerRef playerRef) {
-
         if (playerRef == null) { return; }
-
         PlayerHudState state = stateFor(playerRef.getUuid());
         state.markStaticHudDirty();
         state.invalidateDynamicHudEnabledCache();
     }
 
     public void markPlayerConfigDirty(UUID uuid) {
-
         playerConfigManager.markDirty(uuid);
-
         PlayerHudState state = playerState.get(uuid);
         if (state != null) { state.invalidateDynamicHudEnabledCache(); }
     }
 
     @Nullable
     public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
-
         if (playerRef == null) { return null; }
-
         return getOrLoadPlayerConfig(playerRef.getUuid());
     }
 
     public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
         PlayerConfig cached = playerConfigManager.getCached(uuid);
         if (cached != null) { return cached; }
-
         return playerConfigManager.loadOrCreate(uuid, getGlobalConfig());
     }
 
@@ -212,7 +202,7 @@ public final class HudRuntimeService {
         if (state.t.active(HudSignal.READY_GRACE, now)) { return; }
 
         ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
-        if (resolved == null) { playerState.remove(uuid, state); return; }
+        if (resolved == null) { return; }
 
         resolved.world().execute(() ->
                 processReadyPlayerTickOnWorldThread(resolved.uuid(), resolved.worldUuid(), global)

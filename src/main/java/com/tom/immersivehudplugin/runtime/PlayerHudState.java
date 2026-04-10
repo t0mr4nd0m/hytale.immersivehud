@@ -1,11 +1,9 @@
 package com.tom.immersivehudplugin.runtime;
 
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
-import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.utils.HudBarState;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 public final class PlayerHudState {
@@ -32,9 +30,11 @@ public final class PlayerHudState {
 
     public volatile boolean rangedWeaponInHand;
     public volatile boolean meleeWeaponInHand;
-    public volatile @Nullable Item heldItem;
+    public volatile boolean consumableInHand;
     public volatile boolean heldItemStateInitialized;
     public volatile boolean heldItemRefreshRequested;
+
+    public volatile int lastActiveHotbarSlot = -1;
 
     public boolean dynamicHudEnabledKnown;
     public boolean dynamicHudEnabled;
@@ -74,32 +74,15 @@ public final class PlayerHudState {
     }
 
     public void applyHeldItemState(
-            @Nullable Item item,
             boolean rangedWeapon,
-            boolean meleeWeapon
+            boolean meleeWeapon,
+            boolean consumableItem
     ) {
-        heldItem = item;
         rangedWeaponInHand = rangedWeapon;
         meleeWeaponInHand = meleeWeapon;
+        consumableInHand = consumableItem;
         heldItemStateInitialized = true;
         heldItemRefreshRequested = false;
-    }
-
-    public void requestHeldItemRefresh() {
-        heldItemRefreshRequested = true;
-        heldItemStateInitialized = false;
-    }
-
-    public void clearHeldItemState() {
-        heldItem = null;
-        rangedWeaponInHand = false;
-        meleeWeaponInHand = false;
-        heldItemStateInitialized = false;
-        heldItemRefreshRequested = true;
-    }
-
-    public boolean isAnyWeaponInHand() {
-        return rangedWeaponInHand || meleeWeaponInHand;
     }
 
     public void clearStaticHidden() {
@@ -170,9 +153,9 @@ public final class PlayerHudState {
     }
 
     private void resetHeldItemState() {
-        heldItem = null;
         rangedWeaponInHand = false;
         meleeWeaponInHand = false;
+        consumableInHand = false;
         heldItemStateInitialized = false;
         heldItemRefreshRequested = true;
     }
@@ -194,10 +177,6 @@ public final class PlayerHudState {
     }
 
     public void invalidateHeldItemStateForHotbarSwitch() {
-        heldItem = null;
-        rangedWeaponInHand = false;
-        meleeWeaponInHand = false;
-        heldItemStateInitialized = false;
-        heldItemRefreshRequested = true;
+        resetHeldItemState();
     }
 }

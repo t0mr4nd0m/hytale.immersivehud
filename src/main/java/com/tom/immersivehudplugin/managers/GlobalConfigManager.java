@@ -30,7 +30,7 @@ public final class GlobalConfigManager {
         return globalConfig;
     }
 
-    public void loadSafely() {
+    public void load() {
 
         ConfigSupport.LoadResult<GlobalConfig> result = configSupport.loadOrCreate(
                 configPath,
@@ -47,10 +47,10 @@ public final class GlobalConfigManager {
 
         globalConfig = result.config();
 
-        if (result.changed()) { saveSafely(); }
+        if (result.changed()) { save(); }
     }
 
-    public void saveSafely() {
+    public void save() {
         try {
             configSupport.writeJson(configPath, ConfigJsonMapper.toJson(globalConfig));
         } catch (Throwable t) {
