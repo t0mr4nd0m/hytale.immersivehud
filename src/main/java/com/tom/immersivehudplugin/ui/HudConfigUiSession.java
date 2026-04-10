@@ -23,21 +23,31 @@ public final class HudConfigUiSession {
 
     private final Map<String, Boolean> moreTriggersExpandedByComponent = new HashMap<>();
 
+    private final Map<String, Integer> visibilitySectionRowIndexes = new HashMap<>();
+    private final Map<String, Integer> visibilityRowIndexes = new HashMap<>();
+    private final Map<DynamicRuleRowKey, Integer> dynamicRuleRowIndexes = new HashMap<>();
+    private final Map<DynamicComponentRowKey, Integer> dynamicComponentRowIndexes = new HashMap<>();
+
+    private boolean dirty;
+
+    private HudConfigView currentView = HudConfigView.PROFILES;
+    private Profile selectedProfile = Profile.DEFAULT;
+
+    @Nullable
+    private HudComponentRegistry.Group expandedVisibilityGroup = HudComponentRegistry.Group.CORE;
+
+    private HudComponentsConfig draftHudComponents;
+    private DynamicHudConfig draftDynamicHud;
+
     public HudConfigUiSession(@Nonnull PlayerConfig source) {
         this.draftHudComponents = source.getHudComponents().copy();
         this.draftDynamicHud = source.getDynamicHud().copy();
     }
 
-    private boolean dirty;
-
     @SuppressWarnings("unused")
     public boolean isDirty() {
         return dirty;
     }
-
-    // VIEWS =====================================================
-
-    private HudConfigView currentView = HudConfigView.PROFILES;
 
     public HudConfigView getCurrentView() {
         return currentView;
@@ -57,14 +67,9 @@ public final class HudConfigUiSession {
         currentView = HudConfigView.DYNAMIC_RULES;
     }
 
-    // PROFILES =====================================================
-
-    private Profile selectedProfile = Profile.DEFAULT;
-
     @Nonnull
     public Profile getSelectedProfile() {
-        this.selectedProfile = resolveCurrentProfile();
-        return this.selectedProfile;
+        return selectedProfile;
     }
 
     public void selectProfile(@Nonnull Profile profile) {
@@ -80,85 +85,12 @@ public final class HudConfigUiSession {
         this.dirty = true;
     }
 
-    @Nonnull
-    private Profile resolveCurrentProfile() {
-        for (Profile profile : Profile.values()) {
-            if (profile == Profile.CUSTOM) {
-                continue;
-            }
-
-            if (matchesProfile(profile)) {
-                return profile;
-            }
-        }
-
-        return Profile.CUSTOM;
-    }
-
-    private boolean matchesProfile(@Nonnull Profile profile) {
-        PlayerConfig temp = new PlayerConfig();
-        ProfilePresets.applyTo(temp, profile);
-
-        HudComponentsConfig presetHudComponents = temp.getHudComponents();
-        DynamicHudConfig presetDynamicHud = temp.getDynamicHud();
-
-        return hudComponentsEqual(draftHudComponents, presetHudComponents)
-                && dynamicHudEqual(draftDynamicHud, presetDynamicHud);
-    }
-
-    private boolean hudComponentsEqual(
-            @Nonnull HudComponentsConfig a,
-            @Nonnull HudComponentsConfig b
-    ) {
-        for (HudComponentRegistry.HudEntry entry : HudComponentRegistry.allList()) {
-            boolean aHidden = entry.staticGetter().get(a);
-            boolean bHidden = entry.staticGetter().get(b);
-
-            if (aHidden != bHidden) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean dynamicHudEqual(
-            @Nonnull DynamicHudConfig a,
-            @Nonnull DynamicHudConfig b
-    ) {
-        for (HudComponentRegistry.HudEntry entry : HudComponentRegistry.allList()) {
-            if (!entry.supportsDynamicRules() || entry.dynamicGetter() == null) {
-                continue;
-            }
-
-            DynamicHudRuleConfig aRuleConfig = entry.dynamicGetter().apply(a);
-            DynamicHudRuleConfig bRuleConfig = entry.dynamicGetter().apply(b);
-
-            if (!aRuleConfig.getRules().equals(bRuleConfig.getRules())) {
-                return false;
-            }
-
-            if (entry.supportsThreshold()
-                    && Float.compare(aRuleConfig.getThreshold(), bRuleConfig.getThreshold()) != 0) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    // HUD COMPONENTS VISIBILITY =====================================================
-
-    private final Map<String, Integer> visibilitySectionRowIndexes = new HashMap<>();
-    private final Map<String, Integer> visibilityRowIndexes = new HashMap<>();
-
-    @Nullable
-    private HudComponentRegistry.Group expandedVisibilityGroup = HudComponentRegistry.Group.CORE;
-
-    private HudComponentsConfig draftHudComponents;
-
     public HudComponentsConfig getDraftHudComponents() {
         return draftHudComponents;
+    }
+
+    public DynamicHudConfig getDraftDynamicHud() {
+        return draftDynamicHud;
     }
 
     public void clearVisibilitySectionRowIndexes() {
@@ -177,42 +109,6 @@ public final class HudConfigUiSession {
         return visibilitySectionRowIndexes.get(group.name());
     }
 
-    public boolean isHidden(@Nonnull HudComponentRegistry.HudEntry entry) {
-        return entry.staticGetter().get(draftHudComponents);
-    }
-
-    public int getGroupTotal(@Nonnull HudComponentRegistry.Group group) {
-        return (int) HudComponentRegistry.allList().stream()
-                .filter(entry -> entry.group() == group)
-                .count();
-    }
-
-    public int getGroupHiddenCount(@Nonnull HudComponentRegistry.Group group) {
-        return (int) HudComponentRegistry.allList().stream()
-                .filter(entry -> entry.group() == group)
-                .filter(this::isHidden)
-                .count();
-    }
-
-    @Nonnull
-    public String getVisibilityGroupCounterLabel(@Nonnull HudComponentRegistry.Group group) {
-        int hidden = getGroupHiddenCount(group);
-        int total = getGroupTotal(group);
-        int shown = total - hidden;
-        return "visible [" + shown + "/" + total + "] total";
-    }
-
-    public void toggleVisibility(@Nonnull String componentKey) {
-        HudComponentRegistry.HudEntry entry = HudComponentRegistry.find(componentKey);
-        if (entry == null) {
-            return;
-        }
-
-        boolean hidden = entry.staticGetter().get(draftHudComponents);
-        entry.staticSetter().set(draftHudComponents, !hidden);
-        dirty = true;
-    }
-
     public void clearVisibilityRowIndexes() {
         visibilityRowIndexes.clear();
     }
@@ -226,6 +122,21 @@ public final class HudConfigUiSession {
         return visibilityRowIndexes.get(componentKey);
     }
 
+    public boolean isHidden(@Nonnull HudComponentRegistry.HudEntry entry) {
+        return entry.staticGetter().get(draftHudComponents);
+    }
+
+    public void toggleVisibility(@Nonnull String componentKey) {
+        HudComponentRegistry.HudEntry entry = HudComponentRegistry.find(componentKey);
+        if (entry == null) {
+            return;
+        }
+
+        boolean hidden = entry.staticGetter().get(draftHudComponents);
+        entry.staticSetter().set(draftHudComponents, !hidden);
+        dirty = true;
+    }
+
     @Nullable
     public HudComponentRegistry.Group getExpandedVisibilityGroup() {
         return expandedVisibilityGroup;
@@ -237,17 +148,6 @@ public final class HudConfigUiSession {
         } else {
             expandedVisibilityGroup = group;
         }
-    }
-
-    // DYNAMIC RULES =====================================================
-
-    private final Map<DynamicRuleRowKey, Integer> dynamicRuleRowIndexes = new HashMap<>();
-    private final Map<DynamicComponentRowKey, Integer> dynamicComponentRowIndexes = new HashMap<>();
-
-    private DynamicHudConfig draftDynamicHud;
-
-    public DynamicHudConfig getDraftDynamicHud() {
-        return draftDynamicHud;
     }
 
     @Nonnull

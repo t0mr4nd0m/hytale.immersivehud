@@ -41,6 +41,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
+    private final HudConfigPresenter presenter = new HudConfigPresenter();
 
     public HudConfigPage(
             @Nonnull HudConfigUiService uiService,
@@ -263,11 +264,16 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 .filter(profile -> profile != Profile.CUSTOM)
                 .toList();
 
+        Profile currentProfile = presenter.resolveCurrentProfile(
+                session.getDraftHudComponents(),
+                session.getDraftDynamicHud()
+        );
+
         int rowIndex = 0;
         boolean isSelected;
 
         for (Profile profile : profiles) {
-            isSelected = session.getSelectedProfile() == profile;
+            isSelected = currentProfile == profile;
 
             commands.append("#ProfilesList", PROFILE_ROW_UI);
 
@@ -296,7 +302,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             rowIndex++;
         }
 
-        isSelected = session.getSelectedProfile() == Profile.CUSTOM;
+        isSelected = currentProfile == Profile.CUSTOM;
 
         if (isSelected) {
             commands.append("#ProfilesList", PROFILE_ROW_UI);
@@ -344,7 +350,10 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         String closedCounterSelector = sectionRootSelector + " #VisibilitySectionCounterClosed";
         String openCounterSelector = sectionRootSelector + " #VisibilitySectionCounterOpen";
 
-        String groupCounter = session.getVisibilityGroupCounterLabel(group);
+        String groupCounter = presenter.getVisibilityGroupCounterLabel(
+                group,
+                session.getDraftHudComponents()
+        );
 
         commands.set(closedCounterSelector + ".TextSpans", Message.raw(groupCounter));
         commands.set(openCounterSelector + ".TextSpans", Message.raw(groupCounter));
@@ -420,7 +429,10 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             boolean expanded = group == expandedGroup;
 
             String groupTitle = group.label().toUpperCase();
-            String groupCounter = session.getVisibilityGroupCounterLabel(group);
+            String groupCounter = presenter.getVisibilityGroupCounterLabel(
+                    group,
+                    session.getDraftHudComponents()
+            );
 
             commands.set(closedGroupSelector + ".TextSpans", Message.raw(groupTitle));
             commands.set(openGroupSelector + ".TextSpans", Message.raw(groupTitle));
