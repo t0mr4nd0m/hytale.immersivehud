@@ -1,6 +1,5 @@
 package com.tom.immersivehudplugin.config;
 
-import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 
 public final class GlobalConfig {
@@ -9,7 +8,7 @@ public final class GlobalConfig {
     public static final int HIDE_DELAY_MS = 2000;
     public static final float RETICLE_TARGET_RANGE = 8.0f;
 
-    private String configVersion = ImmersiveHudPlugin.getPluginVersion();
+    private String configVersion = "";
     private int intervalMs = INTERVAL_MS;
     private int hideDelayMs = HIDE_DELAY_MS;
     private float reticleTargetRange = RETICLE_TARGET_RANGE;
@@ -105,6 +104,11 @@ public final class GlobalConfig {
             changed = true;
         } else {
             changed |= defaultDynamicHud.sanitize();
+        }
+
+        if (configVersion == null) {
+            configVersion = "";
+            changed = true;
         }
 
         return changed;

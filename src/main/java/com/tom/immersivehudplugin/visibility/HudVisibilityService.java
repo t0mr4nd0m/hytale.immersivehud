@@ -5,165 +5,148 @@ import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
-import com.tom.immersivehudplugin.runtime.PlayerTickContext;
+import com.tom.immersivehudplugin.context.PlayerTickContext;
 
 import java.util.EnumSet;
-import java.util.function.Function;
+import java.util.List;
 
 public final class HudVisibilityService {
 
-    private record ManagedHudRuntimeDef(
-            HudComponent component,
-            Function<HudComponentsConfig, Boolean> hideFlag,
-            Function<DynamicHudConfig, DynamicHudRuleConfig> ruleGetter
-    ) {}
+    private static final List<HudEntry> ALL_ENTRIES = HudComponentRegistry.allList();
+    private static final List<HudEntry> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
+    private static final List<HudEntry> STATIC_ENTRIES = ALL_ENTRIES.stream()
+            .filter(entry -> !entry.supportsDynamicRules())
+            .toList();
 
-    private record StaticHudRuntimeRule(
-            HudComponent component,
-            Function<HudComponentsConfig, Boolean> hiddenFlag
-    ) {}
-
-    private static final ManagedHudRuntimeDef[] MANAGED_HUD_COMPONENTS =
-            HudComponentRegistry.all().values().stream()
-                    .filter(HudComponentRegistry.HudEntry::supportsDynamicRules)
-                    .map(entry -> new ManagedHudRuntimeDef(
-                            entry.hudComponent(),
-                            hc -> entry.staticGetter().get(hc),
-                            entry.dynamicGetter()
-                    ))
-                    .toArray(ManagedHudRuntimeDef[]::new);
-
-    private static final StaticHudRuntimeRule[] STATIC_HUD_RULES =
-            HudComponentRegistry.all().values().stream()
-                    .filter(entry -> !entry.supportsDynamicRules())
-                    .map(entry -> new StaticHudRuntimeRule(
-                            entry.hudComponent(),
-                            hc -> entry.staticGetter().get(hc)
-                    ))
-                    .toArray(StaticHudRuntimeRule[]::new);
-
-    public boolean hasAnyDynamicHudEnabled(HudComponentsConfig hc) {
-        for (ManagedHudRuntimeDef def : MANAGED_HUD_COMPONENTS) {
-            if (Boolean.TRUE.equals(def.hideFlag().apply(hc))) {
+    public boolean hasAnyDynamicHudEnabled(HudComponentsConfig hudConfig) {
+        for (HudEntry entry : DYNAMIC_ENTRIES) {
+            if (entry.staticGetter().get(hudConfig)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void ensureStaticHudBuilt(PlayerHudState st, HudComponentsConfig hc) {
-        if (!st.staticHudInitialized || st.staticDirty) {
-            rebuildStaticHidden(st, hc);
+    public void ensureStaticHudBuilt(PlayerHudState state, HudComponentsConfig hudConfig) {
+        if (!state.staticHudInitialized || state.staticDirty) {
+            rebuildStaticHidden(state, hudConfig);
         }
     }
 
-    public void clearDynamicHiddenIfNeeded(PlayerHudState st) {
-        if (!st.dynamicHidden.isEmpty()) {
-            st.dynamicHidden.clear();
+    public void clearDynamicHiddenIfNeeded(PlayerHudState state) {
+        if (state.hasDynamicHidden()) {
+            state.clearDynamicHidden();
         }
     }
 
-    public void rebuildStaticHidden(PlayerHudState st, HudComponentsConfig hc) {
-        st.staticHidden.clear();
+    public void rebuildStaticHidden(PlayerHudState state, HudComponentsConfig hudConfig) {
+        state.clearStaticHidden();
 
-        for (StaticHudRuntimeRule rule : STATIC_HUD_RULES) {
-            if (Boolean.TRUE.equals(rule.hiddenFlag().apply(hc))) {
-                st.staticHidden.add(rule.component());
+        for (HudEntry entry : STATIC_ENTRIES) {
+            if (entry.staticGetter().get(hudConfig)) {
+                state.addStaticHidden(entry.hudComponent());
             }
         }
 
-        st.staticHudInitialized = true;
-        st.staticDirty = false;
+        state.staticHudInitialized = true;
+        state.staticDirty = false;
     }
 
     public void rebuildDynamicHidden(
-            PlayerHudState st,
-            HudComponentsConfig hc,
-            DynamicHudConfig dh,
-            DynamicHudTriggersContext dyn
+            PlayerHudState state,
+            HudComponentsConfig hudConfig,
+            DynamicHudConfig dynamicConfig,
+            DynamicHudTriggersContext triggersContext
     ) {
-        st.dynamicHidden.clear();
+        state.clearDynamicHidden();
 
-        long requiredMask = 0L;
-
-        for (ManagedHudRuntimeDef def : MANAGED_HUD_COMPONENTS) {
-            if (!Boolean.TRUE.equals(def.hideFlag().apply(hc))) {
+        for (HudEntry entry : DYNAMIC_ENTRIES) {
+            if (!entry.staticGetter().get(hudConfig)) {
                 continue;
             }
 
-            DynamicHudRuleConfig rule = def.ruleGetter().apply(dh);
+            DynamicHudRuleConfig ruleConfig = entry.dynamicGetter().apply(dynamicConfig);
+            boolean shouldShow = shouldShowDynamic(ruleConfig, triggersContext);
 
-            if (rule != null) {
-                requiredMask |= rule.getRulesMask();
-            }
-        }
-
-        long activeMask = DynamicHudTriggers.activeMask(dyn, requiredMask);
-
-        for (ManagedHudRuntimeDef def : MANAGED_HUD_COMPONENTS) {
-            if (!Boolean.TRUE.equals(def.hideFlag().apply(hc))) {
-                continue;
-            }
-
-            DynamicHudRuleConfig rule = def.ruleGetter().apply(dh);
-
-            boolean hidden = !shouldShowDynamic(rule, activeMask);
-
-            if (hidden) {
-                st.dynamicHidden.add(def.component());
+            if (!shouldShow) {
+                state.addDynamicHidden(entry.hudComponent());
             }
         }
     }
 
-    public void applyHudDelta(PlayerTickContext ctx, PlayerHudState st) {
-        EnumSet<HudComponent> effectiveHidden = st.tempHidden;
-        effectiveHidden.clear();
-        effectiveHidden.addAll(st.staticHidden);
-        effectiveHidden.addAll(st.dynamicHidden);
+    public void applyHudDelta(PlayerTickContext tickContext, PlayerHudState state) {
+        PlayerHudState.HudDelta delta = state.prepareHudDelta();
 
-        if (effectiveHidden.equals(st.lastAppliedHidden)) {
+        if (!delta.changed()) {
             return;
         }
 
-        EnumSet<HudComponent> toHide = st.tempToHide;
-        toHide.clear();
-        toHide.addAll(effectiveHidden);
-        toHide.removeAll(st.lastAppliedHidden);
-
-        EnumSet<HudComponent> toShow = st.tempToShow;
-        toShow.clear();
-        toShow.addAll(st.lastAppliedHidden);
-        toShow.removeAll(effectiveHidden);
-
-        if (!toHide.isEmpty()) {
-            ctx.player().getHudManager().hideHudComponents(
-                    ctx.playerRef(),
-                    toHide.toArray(HudComponent[]::new)
+        if (!delta.toHide().isEmpty()) {
+            tickContext.player().getHudManager().hideHudComponents(
+                    tickContext.playerRef(),
+                    delta.toHide().toArray(HudComponent[]::new)
             );
         }
 
-        if (!toShow.isEmpty()) {
-            ctx.player().getHudManager().showHudComponents(
-                    ctx.playerRef(),
-                    toShow.toArray(HudComponent[]::new)
+        if (!delta.toShow().isEmpty()) {
+            tickContext.player().getHudManager().showHudComponents(
+                    tickContext.playerRef(),
+                    delta.toShow().toArray(HudComponent[]::new)
             );
         }
 
-        st.lastAppliedHidden.clear();
-        st.lastAppliedHidden.addAll(effectiveHidden);
+        state.commitAppliedHidden(delta.effectiveHidden());
     }
 
     private boolean shouldShowDynamic(
-            DynamicHudRuleConfig rule,
-            long activeMask
+            DynamicHudRuleConfig ruleConfig,
+            DynamicHudTriggersContext triggersContext
     ) {
-        if (rule == null) {
+        if (ruleConfig == null) {
             return false;
         }
 
-        return (rule.getRulesMask() & activeMask) != 0L;
+        EnumSet<DynamicHudTriggers> rules = ruleConfig.getRules();
+        if (rules.isEmpty()) {
+            return false;
+        }
+
+        for (DynamicHudTriggers trigger : rules) {
+            if (matchesTrigger(trigger, ruleConfig, triggersContext)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean matchesTrigger(
+            DynamicHudTriggers trigger,
+            DynamicHudRuleConfig ruleConfig,
+            DynamicHudTriggersContext triggersContext
+    ) {
+        return switch (trigger) {
+            case HEALTH_NOT_FULL ->
+                    triggersContext.healthBar() != null
+                            && triggersContext.healthBar().isBelowPercent(ruleConfig.getThreshold());
+
+            case STAMINA_NOT_FULL ->
+                    triggersContext.staminaBar() != null
+                            && triggersContext.staminaBar().isBelowPercent(ruleConfig.getThreshold());
+
+            case MANA_NOT_FULL ->
+                    triggersContext.manaBar() != null
+                            && triggersContext.manaBar().isBelowPercent(ruleConfig.getThreshold());
+
+            case OXYGEN_NOT_FULL ->
+                    triggersContext.oxygenBar() != null
+                            && triggersContext.oxygenBar().isBelowPercent(ruleConfig.getThreshold());
+
+            default -> trigger.test(triggersContext);
+        };
     }
 }

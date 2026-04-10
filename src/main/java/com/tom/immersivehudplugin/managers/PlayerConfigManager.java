@@ -1,16 +1,13 @@
 package com.tom.immersivehudplugin.managers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.hypixel.hytale.server.core.HytaleServer;
+
 import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.config.ConfigJsonMapper;
 import com.tom.immersivehudplugin.config.ConfigSchemaValidator;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
@@ -22,19 +19,18 @@ public final class PlayerConfigManager {
 
     private final ImmersiveHudPlugin plugin;
     private final Path playersDir;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final ConfigSupport configSupport;
 
-    private final Set<UUID> dirty = java.util.concurrent.ConcurrentHashMap.newKeySet();
-
+    private final Set<UUID> dirty = ConcurrentHashMap.newKeySet();
     private final Map<UUID, PlayerConfig> cache = new ConcurrentHashMap<>();
 
-    public PlayerConfigManager(ImmersiveHudPlugin plugin) {
+    public PlayerConfigManager(
+            ImmersiveHudPlugin plugin,
+            ConfigSupport configSupport
+    ) {
         this.plugin = plugin;
         this.playersDir = plugin.getDataDirectory().resolve("players");
-    }
-
-    public Path playersDir() {
-        return playersDir;
+        this.configSupport = configSupport;
     }
 
     public Path pathFor(UUID uuid) {
@@ -45,77 +41,37 @@ public final class PlayerConfigManager {
         return cache.get(uuid);
     }
 
-    public void put(UUID uuid, PlayerConfig cfg) {
-        cache.put(uuid, cfg);
-    }
-
     public void unload(UUID uuid) {
         cache.remove(uuid);
+        dirty.remove(uuid);
     }
 
-    public PlayerConfig loadOrCreate(
-            UUID uuid,
-            GlobalConfig globalCfg
-    ) {
+    public PlayerConfig loadOrCreate(UUID uuid, GlobalConfig globalCfg) {
         PlayerConfig cached = cache.get(uuid);
         if (cached != null) {
             return cached;
         }
 
-        try {
-            Files.createDirectories(playersDir);
+        Path file = pathFor(uuid);
 
-            Path file = pathFor(uuid);
-            PlayerConfig cfg;
+        ConfigSupport.LoadResult<PlayerConfig> result = configSupport.loadOrCreate(
+                file,
+                () -> createDefaultPlayerConfig(globalCfg),
+                ConfigSchemaValidator::isValidPlayerConfig,
+                ConfigJsonMapper::fromJsonPlayer,
+                PlayerConfig::sanitize,
+                "player config does not match expected schema"
+        );
 
-            if (Files.exists(file)) {
-                com.google.gson.JsonElement root;
-                try (Reader reader = Files.newBufferedReader(file)) {
-                    root = com.google.gson.JsonParser.parseReader(reader);
-                }
+        PlayerConfig cfg = result.config();
+        cache.put(uuid, cfg);
 
-                if (!ConfigSchemaValidator.isValidPlayerConfig(root)) {
-                    throw new IllegalStateException("player config does not match expected schema");
-                }
-
-                cfg = ConfigJsonMapper.fromJsonPlayer(root.getAsJsonObject());
-            } else {
-                cfg = PlayerConfig.fromDefaults(
-                        globalCfg.getDefaultHudComponents(),
-                        globalCfg.getDefaultDynamicHud()
-                );
-            }
-
-            boolean changed = cfg.sanitize();
-            cache.put(uuid, cfg);
-
-            if (!Files.exists(file) || changed) {
-                markDirty(uuid);
-                save(uuid);
-            }
-
-            return cfg;
-        } catch (Throwable t) {
-            plugin.getLogger().at(Level.WARNING).log(
-                    "Failed to load player config for " + uuid
-                            + " [" + t.getClass().getSimpleName() + "]: "
-                            + t.getMessage()
-            );
-
-            Path file = pathFor(uuid);
-            backupBrokenPlayerFile(file);
-
-            PlayerConfig fallback = PlayerConfig.fromDefaults(
-                    globalCfg.getDefaultHudComponents(),
-                    globalCfg.getDefaultDynamicHud()
-            );
-
-            cache.put(uuid, fallback);
+        if (result.changed()) {
             markDirty(uuid);
             save(uuid);
-
-            return fallback;
         }
+
+        return cfg;
     }
 
     public void save(UUID uuid) {
@@ -130,47 +86,24 @@ public final class PlayerConfigManager {
         }
 
         try {
-            Files.createDirectories(playersDir);
-
             Path file = pathFor(uuid);
-            try (Writer writer = Files.newBufferedWriter(file)) {
-                gson.toJson(ConfigJsonMapper.toJson(cfg), writer);
-            }
-
+            configSupport.writeJson(file, ConfigJsonMapper.toJson(cfg));
             dirty.remove(uuid);
 
         } catch (Throwable t) {
             plugin.getLogger().at(Level.WARNING).log(
-                    "Failed to save player config for " + uuid
-                            + " [" + t.getClass().getSimpleName() + "]: "
-                            + t.getMessage()
+                    " Failed to save player config for {} [{}]: {}",
+                    uuid,
+                    t.getClass().getSimpleName(),
+                    t.getMessage()
             );
         }
     }
 
-    private void backupBrokenPlayerFile(Path file) {
-        try {
-            if (file == null || !Files.exists(file)) {
-                return;
-            }
+    public void saveAsync(UUID uuid) {
 
-            String timestamp = java.time.LocalDateTime.now()
-                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"));
-
-            Path backup = file.resolveSibling(file.getFileName().toString() + ".broken-" + timestamp);
-            Files.move(file, backup, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-            plugin.getLogger().at(Level.WARNING).log(
-                    "Backed up invalid player config to " + backup
-            );
-        } catch (Throwable moveEx) {
-            plugin.getLogger().at(Level.WARNING).log(
-                    "Failed to back up broken player config "
-                            + file
-                            + " [" + moveEx.getClass().getSimpleName() + "]: "
-                            + moveEx.getMessage()
-            );
-        }
+        if (uuid == null) { return; }
+        HytaleServer.SCHEDULED_EXECUTOR.execute(() -> save(uuid));
     }
 
     public void saveAndUnload(UUID uuid) {
@@ -184,32 +117,10 @@ public final class PlayerConfigManager {
         }
     }
 
-    public void reset(UUID uuid) {
-        if (uuid == null) {
-            return;
-        }
-
-        cache.remove(uuid);
-        dirty.remove(uuid);
-
-        try {
-            Files.deleteIfExists(pathFor(uuid));
-        } catch (Throwable t) {
-            plugin.getLogger().at(Level.WARNING).log(
-                    "Failed to delete player config for " + uuid
-                            + " [" + t.getClass().getSimpleName() + "]: "
-                            + t.getMessage()
-            );
-        }
-    }
-
-    public boolean isDirty(UUID uuid) {
-        return uuid != null && dirty.contains(uuid);
-    }
-
-    public void clearDirty(UUID uuid) {
-        if (uuid != null) {
-            dirty.remove(uuid);
-        }
+    private static PlayerConfig createDefaultPlayerConfig(GlobalConfig globalCfg) {
+        return PlayerConfig.fromDefaults(
+                globalCfg.getDefaultHudComponents(),
+                globalCfg.getDefaultDynamicHud()
+        );
     }
 }

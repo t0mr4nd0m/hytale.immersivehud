@@ -1,5 +1,7 @@
 $C = "../../../Common.ui";
 
+@ComponentValueStyle = LabelStyle( FontSize: 15, TextColor: $C.@ColorGoldHighlight, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
+
 @VisibilitySectionButtonClosedStyle = TextButtonStyle(
   Default : ( Background: #38424c,       LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #7f91a3 )),
   Hovered : ( Background: #38424c(0.35), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #bfcdd5 )),
@@ -8,21 +10,21 @@ $C = "../../../Common.ui";
 );
 
 @VisibilitySectionButtonOpenStyle = TextButtonStyle(
-  Default : ( Background: #93844c(0.35), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #93844c )),
-  Hovered : ( Background: #93844c(0.45), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #cdbb75 )),
-  Pressed : ( Background: #93844c(0.55), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #ffffff )),
+  Default : ( Background: #93844c(0.35), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: $C.@ColorGoldHighlight )),
+  Hovered : ( Background: #93844c(0.45), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: $C.@ColorGoldHighlight )),
+  Pressed : ( Background: #93844c(0.55), LabelStyle: ( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: $C.@ColorGoldHighlight )),
   Sounds  : $C.@ButtonSounds
 );
 
 @VisibilitySectionClosedLabelStyle  = LabelStyle( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #7f91a3 );
-@VisibilitySectionOpenLabelStyle    = LabelStyle( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: #93844c );
+@VisibilitySectionOpenLabelStyle    = LabelStyle( FontSize: 15, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, TextColor: $C.@ColorGoldHighlight );
 @VisibilitySectionClosedSymbolStyle = LabelStyle( FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: #7f91a3 );
-@VisibilitySectionOpenSymbolStyle   = LabelStyle( FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: #93844c );
+@VisibilitySectionOpenSymbolStyle   = LabelStyle( FontSize: 18, RenderBold: true, RenderUppercase: false, VerticalAlignment: Center, HorizontalAlignment: Center, TextColor: $C.@ColorGoldHighlight );
 
 Group #VisibilitySectionRow {
   LayoutMode: Full;
   Anchor: (Height: 48);
-  Padding: (Top: 8, Bottom: 4);
+  Padding: (Top: 8);
 
   TextButton #VisibilitySectionButtonClosed {
     Anchor: (Full: 0);
@@ -46,12 +48,11 @@ Group #VisibilitySectionRow {
 
     Label #VisibilitySectionGroupClosed {
       FlexWeight: 1;
-      Text: "SECTION";
+      Text: "#VisibilitySectionGroupClosed";
       Style: @VisibilitySectionClosedLabelStyle;
     }
 
     Group {
-      Anchor: (Width: 92);
       LayoutMode: Right;
 
       Label #VisibilitySectionCounterClosed {
@@ -60,14 +61,10 @@ Group #VisibilitySectionRow {
       }
     }
 
-    Group {
-      Anchor: (Width: 48);
+    Group #VisibilitySectionSymbolClosed {
+      Anchor: (Width: 24, Height: 14, Left: 16, Right: 8);
       LayoutMode: CenterMiddle;
-
-      Label #VisibilitySectionSymbolClosed {
-        Text: ">";
-        Style: @VisibilitySectionClosedSymbolStyle;
-      }
+      Background: (TexturePath: "../AltDropdownCaretDown.png");
     }
   }
 
@@ -79,12 +76,11 @@ Group #VisibilitySectionRow {
 
     Label #VisibilitySectionGroupOpen {
       FlexWeight: 1;
-      Text: "SECTION";
+      Text: "#VisibilitySectionGroupOpen";
       Style: @VisibilitySectionOpenLabelStyle;
     }
 
     Group {
-      Anchor: (Width: 92);
       LayoutMode: Right;
 
       Label #VisibilitySectionCounterOpen {
@@ -93,14 +89,10 @@ Group #VisibilitySectionRow {
       }
     }
 
-    Group {
-      Anchor: (Width: 48);
+    Group #VisibilitySectionSymbolOpen {
+      Anchor: (Width: 24, Height: 14, Left: 16, Right: 8);
       LayoutMode: CenterMiddle;
-
-      Label #VisibilitySectionSymbolOpen {
-        Text: "v";
-        Style: @VisibilitySectionOpenSymbolStyle;
-      }
+      Background: (TexturePath: "../AltDropdownCaretUp.png");
     }
   }
 }

@@ -8,7 +8,6 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
@@ -16,6 +15,7 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,22 +24,28 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class StatusCmd extends AbstractPlayerCommand {
 
-    private static final Color SECTION_COLOR = Color.YELLOW;
+    private static final Color SECTION_COLOR = Color.ORANGE;
     private static final Color LABEL_COLOR = Color.LIGHT_GRAY;
     private static final Color VALUE_COLOR = Color.WHITE;
     private static final Color SHOW_COLOR = Color.GREEN;
     private static final Color HIDE_COLOR = Color.RED;
     private static final Color ERROR_COLOR = Color.RED;
 
-    private final ImmersiveHudPlugin plugin;
+    private final HudRuntimeService hudRuntimeService;
+    private final Supplier<GlobalConfig> globalConfigSupplier;
 
-    public StatusCmd(ImmersiveHudPlugin plugin) {
+    public StatusCmd(
+            HudRuntimeService hudRuntimeService,
+            Supplier<GlobalConfig> globalConfigSupplier
+    ) {
         super("status", "Show your ImmersiveHud settings");
-        this.plugin = plugin;
+        this.hudRuntimeService = hudRuntimeService;
+        this.globalConfigSupplier = globalConfigSupplier;
     }
 
     @Override
@@ -55,12 +61,10 @@ public final class StatusCmd extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        PlayerConfig playerCfg = requirePlayerConfig(plugin, playerRef, context);
-        if (playerCfg == null) {
-            return;
-        }
+        PlayerConfig playerCfg = getPlayerConfig(hudRuntimeService, playerRef, context);
+        if (playerCfg == null) { return; }
 
-        GlobalConfig global = plugin.getImmersiveHudGlobalConfig();
+        GlobalConfig global = globalConfigSupplier.get();
         HudComponentsConfig hud = playerCfg.getHudComponents();
         DynamicHudConfig dynamic = playerCfg.getDynamicHud();
 
@@ -71,12 +75,12 @@ public final class StatusCmd extends AbstractPlayerCommand {
     }
 
     @Nullable
-    private static PlayerConfig requirePlayerConfig(
-            @Nonnull ImmersiveHudPlugin plugin,
+    private static PlayerConfig getPlayerConfig(
+            @Nonnull HudRuntimeService hudRuntimeService,
             @Nonnull PlayerRef playerRef,
             @Nonnull CommandContext context
     ) {
-        PlayerConfig playerConfig = plugin.requirePlayerConfig(playerRef);
+        PlayerConfig playerConfig = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerConfig == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return null;
@@ -86,7 +90,6 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
     private static void sendGlobalSettings(@Nonnull CommandContext context, @Nonnull GlobalConfig cfg) {
         sendSectionHeader(context, "Global");
-
         sendSettingLine(context, "configSchemaVersion", cfg.getConfigVersion(), VALUE_COLOR);
         sendSettingLine(context, "intervalMs", cfg.getIntervalMs(), VALUE_COLOR);
         sendSettingLine(context, "hideDelayMs", cfg.getHideDelayMs(), VALUE_COLOR);
@@ -108,10 +111,9 @@ public final class StatusCmd extends AbstractPlayerCommand {
                 ));
 
         for (HudComponentRegistry.Group group : HudComponentRegistry.Group.values()) {
+
             List<HudEntry> entries = byGroup.get(group);
-            if (entries == null || entries.isEmpty()) {
-                continue;
-            }
+            if (entries == null || entries.isEmpty()) { continue; }
 
             sendSectionHeader(context, group.label);
 
@@ -134,7 +136,10 @@ public final class StatusCmd extends AbstractPlayerCommand {
             return;
         }
 
-        DynamicHudRuleConfig rule = entry.dynamicGetter().apply(dynamic);
+        DynamicHudRuleConfig rule = null;
+        if (entry.dynamicGetter() != null) {
+            rule = entry.dynamicGetter().apply(dynamic);
+        }
         sendDynamicComponentLine(context, entry.label(), hiddenNow, rule);
     }
 
@@ -169,18 +174,19 @@ public final class StatusCmd extends AbstractPlayerCommand {
     }
 
     private static String renderRules(@Nullable DynamicHudRuleConfig rule) {
-        if (rule == null) {
-            return "<null>";
-        }
+        if (rule == null) { return "<null>"; }
 
         var triggers = rule.getRules();
-        if (triggers.isEmpty()) {
-            return "[]";
-        }
+        if (triggers.isEmpty()) { return "[]"; }
 
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
         for (var trigger : triggers) {
-            joiner.add(trigger.name().toLowerCase(Locale.ROOT));
+            switch (trigger) {
+                case HEALTH_NOT_FULL, STAMINA_NOT_FULL, MANA_NOT_FULL, OXYGEN_NOT_FULL ->
+                        joiner.add(trigger.name().toLowerCase(Locale.ROOT) + "(" + rule.getThreshold() + "%)");
+                default ->
+                        joiner.add(trigger.name().toLowerCase(Locale.ROOT));
+            }
         }
         return joiner.toString();
     }
@@ -189,6 +195,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw("[" + label + "]").color(SECTION_COLOR));
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static void sendSettingLine(
             @Nonnull CommandContext context,
             @Nonnull String label,

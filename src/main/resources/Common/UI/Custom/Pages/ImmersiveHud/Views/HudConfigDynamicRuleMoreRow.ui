@@ -1,0 +1,26 @@
+$C = "../../../Common.ui";
+
+@MoreLabelStyle = LabelStyle( FontSize: 14, TextColor: $C.@ColorGoldHighlight, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+
+Group #DynamicMoreTriggersRow {
+  LayoutMode: Left;
+  Anchor: (Height: 38);
+  Padding: (Vertical: 3);
+  Background: #1a2533(0.6);
+  OutlineColor: #3a4a5a(0.35);
+  OutlineSize: 1;
+
+  Button #DynamicMoreTriggersButton {
+    FlexWeight: 1;
+    Anchor: (Height: 32);
+    Padding: (Horizontal: 12);
+    Background: #000000(0);
+    OutlineSize: 0;
+
+    Label #DynamicMoreTriggersLabel {
+      FlexWeight: 1;
+      Text: "MORE TRIGGERS";
+      Style: @MoreLabelStyle;
+    }
+  }
+}

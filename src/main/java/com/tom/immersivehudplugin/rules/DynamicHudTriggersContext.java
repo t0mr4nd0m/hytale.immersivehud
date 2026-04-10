@@ -20,17 +20,19 @@ public record DynamicHudTriggersContext(
         boolean playerJumping,
         boolean playerCrouching,
         boolean playerClimbing,
+        boolean playerFalling,
+        boolean playerRolling,
+        boolean playerIdle,
+        boolean playerSitting,
+        boolean playerSleeping,
         boolean playerInFluid,
         boolean playerOnGround,
-        boolean playerFalling,
-        boolean playerSitting,
-        boolean playerRolling,
 
         boolean holdingRangedWeapon,
         boolean holdingMeleeWeapon,
 
         HudBarState healthBar,
         HudBarState staminaBar,
-        HudBarState manaBar
-) {
-}
+        HudBarState manaBar,
+        HudBarState oxygenBar
+) { }

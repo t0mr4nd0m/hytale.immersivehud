@@ -28,6 +28,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 - Built-in config profiles (default, immersive, disabled)
 - Per-player configuration
 - Lightweight and performance-friendly
+- Custom config UI
 
 ---
 
@@ -60,7 +61,7 @@ The HUD will now dynamically hide and show based on gameplay actions and conditi
 
 ---
 
-💡 Tip: Use `/ihud status` to inspect your current HUD configuration.
+💡 Tip: Use `/ihud config` to customize your HUD configuration.
 
 ---
 
@@ -107,17 +108,18 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 - are persisted automatically
 - override the global config
 
-| Command   | Parameters                        | Description                                                 | Example                                 |
-|-----------|-----------------------------------|-------------------------------------------------------------|-----------------------------------------|
-| `config`  | none                              | Opens config UI                                             | /ihud config                            |
-| `status`  | none                              | Displays the current visibility state of all HUD components | /ihud status                            |
-| `toggle`  | `<component>`                     | Toggles visibility of a specific HUD component              | /ihud toggle health                     |
-| `toggle`  | `<component>` `<state>`           | Hides/Shows a component                                     | /ihud toggle health hide                |
-| `toggle`  | `<group>` `<state>`               | Hides/Shows all components in a group                       | /ihud toggle ui hide                    |
-| `rules`   | `<component>` list                | List rules from a component                                 | /ihud rules health list                 |
-| `rules`   | `<component>` clear               | Clear rules from a component                                | /ihud rules health clear                |
-| `rules`   | `<component>` add/remove `<rule>` | Add or remove rules to/from component                       | /ihud rules health add  HEALTH_CRITICAL |
-| `profile` | `<profile>`                       | Apply quick IHud configuration based on different profiles  | /ihud profile immersive                 |
+| Command   | Parameters                         | Description                                                 | Example                                 |
+|-----------|------------------------------------|-------------------------------------------------------------|-----------------------------------------|
+| `config`  | none                               | Opens config UI                                             | /ihud config                            |
+| `status`  | none                               | Displays the current visibility state of all HUD components | /ihud status                            |
+| `toggle`  | `<component>`                      | Toggles visibility of a specific HUD component              | /ihud toggle health                     |
+| `toggle`  | `<component>` `<state>`            | Hides/Shows a component                                     | /ihud toggle health hide                |
+| `toggle`  | `<group>` `<state>`                | Hides/Shows all components in a group                       | /ihud toggle ui hide                    |
+| `rules`   | `<component>` list                 | List rules from a component                                 | /ihud rules health list                 |
+| `rules`   | `<component>` clear                | Clear rules from a component                                | /ihud rules health clear                |
+| `rules`   | `<component>` add/remove `<rule>`  | Add or remove rules to/from component                       | /ihud rules health add  HEALTH_CRITICAL |
+| `rules`   | `<component>` threshold `<value>`  | Set the threshold from which the bar will be visible        | /ihud rules health threshold 75         |
+| `profile` | `<profile>`                        | Apply quick IHud configuration based on different profiles  | /ihud profile immersive                 |
 
 | Parameter     | Description           | Values                                 |
 |---------------|-----------------------|----------------------------------------|
@@ -137,32 +139,32 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 
 HUD components supported by ImmersiveHUD
 
-| Component                         | Group   | Type    | Default state | Default rules                                                                                   |
-|-----------------------------------|---------|---------|---------------|-------------------------------------------------------------------------------------------------|
-| hotbar                            | Core    | Dynamic | Hidden        | `HOTBAR_INPUT`                                                                                  |
-| compass                           | Core    | Dynamic | Hidden        | `PLAYER_MOVING`                                                                                 |
-| reticle                           | Core    | Dynamic | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
-| health                            | Bars    | Dynamic | Hidden        | `HEALTH_NOT_FULL`                                                                               |
-| stamina                           | Bars    | Dynamic | Hidden        | `STAMINA_CRITICAL`                                                                              |
-| mana                              | Bars    | Dynamic | Hidden        | `MANA_CRITICAL`                                                                                 |
-| oxygen                            | UI      | Static  | Visible       | —                                                                                               |
-| inputbindings                     | UI      | Static  | Hidden        | —                                                                                               |
-| notifications                     | UI      | Static  | Hidden        | —                                                                                               |
-| statusicons                       | UI      | Static  | Visible       | —                                                                                               |
-| speedometer                       | UI      | Static  | Visible       | —                                                                                               |
-| ammo                              | UI      | Static  | Visible       | —                                                                                               |
-| utilityslotselector               | UI      | Static  | Visible       | —                                                                                               |
-| chat                              | Social  | Static  | Visible       | —                                                                                               |
-| requests                          | Social  | Static  | Visible       | —                                                                                               |
-| killfeed                          | Social  | Static  | Visible       | —                                                                                               |
-| playerlist                        | Social  | Static  | Visible       | —                                                                                               |
-| eventtitle                        | Panels  | Static  | Visible       | —                                                                                               |
-| objectivepanel                    | Panels  | Static  | Visible       | —                                                                                               |
-| portalpanel                       | Panels  | Static  | Visible       | —                                                                                               |
-| sleep                             | Panels  | Static  | Visible       | —                                                                                               |
-| blockvariantselector              | Builder | Static  | Visible       | —                                                                                               |
-| buildertoolslegend                | Builder | Static  | Visible       | —                                                                                               |
-| buildertoolsmaterialslotselector  | Builder | Static  | Visible       | —                                                                                               |
+| Component                         | Group   | Type     | Default state | Default rules                                                                                   |
+|-----------------------------------|---------|----------|---------------|-------------------------------------------------------------------------------------------------|
+| hotbar                            | Core    | Dynamic  | Hidden        | `HOTBAR_INPUT`                                                                                  |
+| compass                           | Core    | Dynamic  | Hidden        | `PLAYER_MOVING`                                                                                 |
+| reticle                           | Core    | Dynamic  | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
+| health                            | Bars    | Dynamic  | Hidden        | `HEALTH_NOT_FULL`                                                                               |
+| stamina                           | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL`                                                                              |
+| mana                              | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL`                                                                                 |
+| oxygen                            | Bars    | Dynamic  | Hidden        | —                                                                                               |
+| inputbindings                     | UI      | Static   | Hidden        | —                                                                                               |
+| notifications                     | UI      | Static   | Hidden        | —                                                                                               |
+| statusicons                       | UI      | Static   | Visible       | —                                                                                               |
+| speedometer                       | UI      | Static   | Visible       | —                                                                                               |
+| ammo                              | UI      | Static   | Visible       | —                                                                                               |
+| utilityslotselector               | UI      | Static   | Visible       | —                                                                                               |
+| chat                              | Social  | Static   | Visible       | —                                                                                               |
+| requests                          | Social  | Static   | Visible       | —                                                                                               |
+| killfeed                          | Social  | Static   | Visible       | —                                                                                               |
+| playerlist                        | Social  | Static   | Visible       | —                                                                                               |
+| eventtitle                        | Panels  | Static   | Visible       | —                                                                                               |
+| objectivepanel                    | Panels  | Static   | Visible       | —                                                                                               |
+| portalpanel                       | Panels  | Static   | Visible       | —                                                                                               |
+| sleep                             | Panels  | Static   | Visible       | —                                                                                               |
+| blockvariantselector              | Builder | Static   | Visible       | —                                                                                               |
+| buildertoolslegend                | Builder | Static   | Visible       | —                                                                                               |
+| buildertoolsmaterialslotselector  | Builder | Static   | Visible       | —                                                                                               |
 
 ---
 
@@ -170,39 +172,36 @@ HUD components supported by ImmersiveHUD
 
 Rules to define the visibility behaviour of dynamic HUD components
 
-| Rule                    | Trigger condition                          |
-|-------------------------|--------------------------------------------|
-| `HOTBAR_INPUT`          | Player changes hotbar selection            |
-| `CHARGING_WEAPON`       | Player is aiming or charging a weapon      |
-| `CONSUMABLE_USE`        | Player is consuming food or potion         |
-| `TARGET_ENTITY`         | Player is targeting an entity              |
-| `INTERACTABLE_BLOCK`    | Player is looking at interactable blocks   |
-| `PLAYER_MOVING`         | Player is moving                           |
-| `PLAYER_WALKING`        | Player is walking                          |
-| `PLAYER_RUNNING`        | Player is running                          |
-| `PLAYER_SPRINTING`      | Player is sprinting                        |
-| `PLAYER_MOUNTING`       | Player is mounting                         |
-| `PLAYER_FLYING`         | Player is flying                           |
-| `PLAYER_GLIDING`        | Player is gliding                          |
-| `PLAYER_JUMPING`        | Player is jumping                          |
-| `PLAYER_CROUCHING`      | Player is crouching                        |
-| `PLAYER_CLIMBING`       | Player is climbing                         |
-| `PLAYER_IN_FLUID`       | Player is in fluid                         |
-| `PLAYER_ON_GROUND`      | Player is on ground                        |
-| `PLAYER_FALLING`        | Player is falling                          |
-| `PLAYER_SITTING`        | Player is sitting                          |
-| `PLAYER_ROLLING`        | Player is rolling                          |
-| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon           |
-| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon          |
-| `HEALTH_NOT_FULL`       | Health bar is not full                     |
-| `HEALTH_LOW`            | Health bar is below 50%                    |
-| `HEALTH_CRITICAL`       | Health bar is below 25%                    |
-| `STAMINA_NOT_FULL`      | Stamina bar is not full                    |
-| `STAMINA_LOW`           | Stamina bar is below 50%                   |
-| `STAMINA_CRITICAL`      | Stamina bar is below 25%                   |
-| `MANA_NOT_FULL`         | Mana bar is not full                       |
-| `MANA_LOW`              | Mana bar is below 50%                      |
-| `MANA_CRITICAL`         | Mana bar is below 25%                      |
+| Rule                    | Trigger condition                        |
+|-------------------------|------------------------------------------|
+| `HOTBAR_INPUT`          | Player changes hotbar selection          |
+| `CHARGING_WEAPON`       | Player is aiming or charging a weapon    |
+| `CONSUMABLE_USE`        | Player is consuming food or potion       |
+| `TARGET_ENTITY`         | Player is targeting an entity            |
+| `INTERACTABLE_BLOCK`    | Player is looking at interactable blocks |
+| `PLAYER_MOVING`         | Player is moving                         |
+| `PLAYER_WALKING`        | Player is walking                        |
+| `PLAYER_RUNNING`        | Player is running                        |
+| `PLAYER_SPRINTING`      | Player is sprinting                      |
+| `PLAYER_MOUNTING`       | Player is mounting                       |
+| `PLAYER_FLYING`         | Player is flying                         |
+| `PLAYER_GLIDING`        | Player is gliding                        |
+| `PLAYER_JUMPING`        | Player is jumping                        |
+| `PLAYER_CROUCHING`      | Player is crouching                      |
+| `PLAYER_CLIMBING`       | Player is climbing                       |
+| `PLAYER_IN_FLUID`       | Player is in fluid                       |
+| `PLAYER_ON_GROUND`      | Player is on ground                      |
+| `PLAYER_FALLING`        | Player is falling                        |
+| `PLAYER_SITTING`        | Player is sitting                        |
+| `PLAYER_ROLLING`        | Player is rolling                        |
+| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon         |
+| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon        |
+| `HEALTH_NOT_FULL`       | Health bar is not full                   |
+| `STAMINA_NOT_FULL`      | Stamina bar is not full                  |
+| `MANA_NOT_FULL`         | Mana bar is not full                     |
+| `OXYGEN_NOT_FULL`       | Oxygen bar is not full                   |
+
+When activating any rule bar `_NOT_FULL`, use `Threshold` to specify the bar level at which the component becomes visible.
 
 ---
 
@@ -250,51 +249,60 @@ Example:
 
 ```json
 {
-  "ConfigVersion": "1.0.1",
+  "ConfigVersion": "1.2.0",
   "IntervalMs": 250,
   "HideDelayMs": 2000,
   "ReticleTargetRange": 8.0,
   "DefaultHudComponents": {
-    "HideHealthHud": true,
-    "HideStaminaHud": true,
-    "HideManaHud": true,
-    "HideCompassHud": true,
-    "HideHotbarHud": true,
-    "HideReticleHud": true,
-    "HideInputBindingsHud": true,
-    "HideNotificationsHud": true,
-    "HideStatusIconsHud": false,
-    "HideSpeedometerHud": true,
-    "HideAmmoIndicatorHud": false,
-    "HideOxygenHud": false,
-    "HideChatHud": false,
-    "HideRequestsHud": false,
-    "HideKillFeedHud": false,
-    "HidePlayerListHud": false,
-    "HideEventTitleHud": false,
-    "HideObjectivePanelHud": false,
-    "HidePortalPanelHud": false,
-    "HideSleepHud": false,
-    "HideUtilitySlotSelectorHud": false,
-    "HideBlockVariantSelectorHud": false,
-    "HideBuilderToolsLegendHud": false,
-    "HideBuilderToolsMaterialSlotSelectorHud": false
+    "HideHealth": true,
+    "HideStamina": true,
+    "HideMana": true,
+    "HideOxygen": false,
+    "HideCompass": true,
+    "HideHotbar": true,
+    "HideReticle": true,
+    "HideInputBindings": true,
+    "HideNotifications": true,
+    "HideStatusIcons": false,
+    "HideSpeedometer": false,
+    "HideAmmoIndicator": false,
+    "HideUtilitySlotSelector": false,
+    "HideChat": false,
+    "HideRequests": false,
+    "HideKillFeed": false,
+    "HidePlayerList": false,
+    "HideEventTitle": false,
+    "HideObjectivePanel": false,
+    "HidePortalPanel": false,
+    "HideSleep": false,
+    "HideBlockVariantSelector": false,
+    "HideBuilderToolsLegend": false,
+    "HideBuilderToolsMaterialSlotSelector": false
   },
   "DefaultDynamicHud": {
     "Health": {
       "Rules": [
         "HEALTH_NOT_FULL"
-      ]
+      ],
+      "Threshold": 100.0
     },
     "Stamina": {
       "Rules": [
-        "STAMINA_CRITICAL"
-      ]
+        "STAMINA_NOT_FULL"
+      ],
+      "Threshold": 100.0
     },
     "Mana": {
       "Rules": [
-        "MANA_CRITICAL"
-      ]
+        "MANA_NOT_FULL"
+      ],
+      "Threshold": 100.0
+    },
+    "Oxygen": {
+      "Rules": [
+        "OXYGEN_NOT_FULL"
+      ],
+      "Threshold": 100.0
     },
     "Compass": {
       "Rules": [
@@ -343,46 +351,59 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
 ```json
 {
   "HudComponents": {
-    "HideHealthHud": true,
-    "HideStaminaHud": true,
-    "HideManaHud": true,
-    "HideCompassHud": true,
-    "HideHotbarHud": true,
-    "HideReticleHud": true,
-    "HideInputBindingsHud": true,
-    "HideNotificationsHud": true,
-    "HideStatusIconsHud": false,
-    "HideSpeedometerHud": false,
-    "HideAmmoIndicatorHud": false,
-    "HideOxygenHud": false,
-    "HideChatHud": false,
-    "HideRequestsHud": true,
-    "HideKillFeedHud": true,
-    "HidePlayerListHud": true,
-    "HideEventTitleHud": false,
-    "HideObjectivePanelHud": false,
-    "HidePortalPanelHud": false,
-    "HideSleepHud": false,
-    "HideUtilitySlotSelectorHud": false,
-    "HideBlockVariantSelectorHud": false,
-    "HideBuilderToolsLegendHud": false,
-    "HideBuilderToolsMaterialSlotSelectorHud": false
+    "HideHealth": true,
+    "HideStamina": true,
+    "HideMana": true,
+    "HideOxygen": true,
+    "HideCompass": true,
+    "HideHotbar": true,
+    "HideReticle": true,
+    "HideInputBindings": true,
+    "HideNotifications": true,
+    "HideStatusIcons": false,
+    "HideSpeedometer": false,
+    "HideAmmoIndicator": false,
+    "HideUtilitySlotSelector": false,
+    "HideChat": false,
+    "HideRequests": false,
+    "HideKillFeed": false,
+    "HidePlayerList": false,
+    "HideEventTitle": false,
+    "HideObjectivePanel": false,
+    "HidePortalPanel": false,
+    "HideSleep": false,
+    "HideBlockVariantSelector": false,
+    "HideBuilderToolsLegend": false,
+    "HideBuilderToolsMaterialSlotSelector": false
   },
   "DynamicHud": {
     "Health": {
-      "Rules": []
+      "Rules": [
+        "HEALTH_NOT_FULL"
+      ],
+      "Threshold": 25.0
     },
     "Stamina": {
-      "Rules": []
+      "Rules": [
+        "STAMINA_NOT_FULL"
+      ],
+      "Threshold": 25.0
     },
     "Mana": {
-      "Rules": []
+      "Rules": [
+        "MANA_NOT_FULL"
+      ],
+      "Threshold": 25.0
+    },
+    "Oxygen": {
+      "Rules": [
+        "OXYGEN_NOT_FULL"
+      ],
+      "Threshold": 25.0
     },
     "Compass": {
       "Rules": [
-        "PLAYER_RUNNING",
-        "PLAYER_MOUNTING",
-        "PLAYER_SWIMMING"
+        "PLAYER_CROUCHING"
       ]
     },
     "Hotbar": {
@@ -395,6 +416,7 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
         "CHARGING_WEAPON",
         "CONSUMABLE_USE",
         "TARGET_ENTITY",
+        "INTERACTABLE_BLOCK",
         "HOLDING_RANGED_WEAPON"
       ]
     }
@@ -487,10 +509,10 @@ visibility/
 ## 🚧 Roadmap
 
 Possible future improvements:
-~~- GUI configuration menu~~
+- ~~GUI configuration menu~~
 - Additional dynamic triggers:
-  ~~- PLAYER_FLYING~~
-  ~~- PLAYER_GLIDING~~
+  - ~~PLAYER_FLYING~~
+  - ~~PLAYER_GLIDING~~
   - IN_COMBAT
 - Import / export custom config profiles
 - Support for future Hud components

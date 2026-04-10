@@ -14,10 +14,11 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
+import com.tom.immersivehudplugin.managers.PlayerConfigManager;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,11 +37,20 @@ public final class ToggleCmd extends AbstractPlayerCommand {
     private static final Color SHOW_COLOR = Color.GREEN;
     private static final Color HIDE_COLOR = Color.RED;
 
-    public ToggleCmd(ImmersiveHudPlugin plugin) {
+    private final HudRuntimeService hudRuntimeService;
+    private final PlayerConfigManager playerConfigManager;
+
+    public ToggleCmd(
+            HudRuntimeService hudRuntimeService,
+            PlayerConfigManager playerConfigManager
+    ) {
         super("toggle", "Toggle your HUD components; set component/group hide|show");
 
-        addUsageVariant(new ToggleOneVariant(plugin));
-        addUsageVariant(new SetStateVariant(plugin));
+        this.hudRuntimeService = hudRuntimeService;
+        this.playerConfigManager = playerConfigManager;
+
+        addUsageVariant(new ToggleOneVariant(hudRuntimeService, playerConfigManager));
+        addUsageVariant(new SetStateVariant(hudRuntimeService, playerConfigManager));
     }
 
     @Override
@@ -71,11 +81,11 @@ public final class ToggleCmd extends AbstractPlayerCommand {
 
     @Nullable
     private static PlayerConfig requirePlayerConfig(
-            @Nonnull ImmersiveHudPlugin plugin,
+            @Nonnull HudRuntimeService hudRuntimeService,
             @Nonnull PlayerRef playerRef,
             @Nonnull CommandContext context
     ) {
-        PlayerConfig playerConfig = plugin.requirePlayerConfig(playerRef);
+        PlayerConfig playerConfig = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerConfig == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return null;
@@ -84,13 +94,11 @@ public final class ToggleCmd extends AbstractPlayerCommand {
     }
 
     private static void persistPlayerHudChanges(
-            @Nonnull ImmersiveHudPlugin plugin,
+            @Nonnull HudRuntimeService hudRuntimeService,
+            @Nonnull PlayerConfigManager playerConfigManager,
             @Nonnull PlayerRef playerRef
     ) {
-        UUID uuid = playerRef.getUuid();
-        plugin.markPlayerConfigDirty(uuid);
-        plugin.savePlayerConfigAsync(uuid);
-        plugin.markPlayerStaticHudDirty(playerRef);
+        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
     }
 
     private static RequiredArg<String> componentOnlyArg(AbstractPlayerCommand cmd) {
@@ -172,12 +180,17 @@ public final class ToggleCmd extends AbstractPlayerCommand {
     }
 
     private static final class ToggleOneVariant extends AbstractPlayerCommand {
-        private final ImmersiveHudPlugin plugin;
+        private final HudRuntimeService hudRuntimeService;
+        private final PlayerConfigManager playerConfigManager;
         private final RequiredArg<String> targetArg;
 
-        ToggleOneVariant(ImmersiveHudPlugin plugin) {
+        ToggleOneVariant(
+                HudRuntimeService hudRuntimeService,
+                PlayerConfigManager playerConfigManager
+        ) {
             super("Toggle a component");
-            this.plugin = plugin;
+            this.hudRuntimeService = hudRuntimeService;
+            this.playerConfigManager = playerConfigManager;
             this.targetArg = componentOnlyArg(this);
         }
 
@@ -202,7 +215,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            PlayerConfig playerCfg = requirePlayerConfig(plugin, playerRef, context);
+            PlayerConfig playerCfg = requirePlayerConfig(hudRuntimeService, playerRef, context);
             if (playerCfg == null) {
                 return;
             }
@@ -213,19 +226,24 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             boolean nextHidden = !currentHidden;
             entry.staticSetter().set(hud, nextHidden);
 
-            persistPlayerHudChanges(plugin, playerRef);
+            persistPlayerHudChanges(hudRuntimeService, playerConfigManager, playerRef);
             sendSingleResult(context, entry.label(), nextHidden);
         }
     }
 
     private static final class SetStateVariant extends AbstractPlayerCommand {
-        private final ImmersiveHudPlugin plugin;
+        private final HudRuntimeService hudRuntimeService;
+        private final PlayerConfigManager playerConfigManager;
         private final RequiredArg<String> targetArg;
         private final RequiredArg<String> stateArg;
 
-        SetStateVariant(ImmersiveHudPlugin plugin) {
+        SetStateVariant(
+                HudRuntimeService hudRuntimeService,
+                PlayerConfigManager playerConfigManager
+        ) {
             super("Set state");
-            this.plugin = plugin;
+            this.hudRuntimeService = hudRuntimeService;
+            this.playerConfigManager = playerConfigManager;
             this.targetArg = componentOrGroupArg(this);
             this.stateArg = hideShowArg(this);
         }
@@ -246,7 +264,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             String target = normalize(targetArg.get(context));
             boolean desiredHidden = toHidden(stateArg.get(context));
 
-            PlayerConfig playerCfg = requirePlayerConfig(plugin, playerRef, context);
+            PlayerConfig playerCfg = requirePlayerConfig(hudRuntimeService, playerRef, context);
             if (playerCfg == null) {
                 return;
             }
@@ -268,7 +286,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                     }
                 }
 
-                persistPlayerHudChanges(plugin, playerRef);
+                persistPlayerHudChanges(hudRuntimeService, playerConfigManager, playerRef);
                 sendGroupResult(context, group.label, desiredHidden, changed);
                 return;
             }
@@ -290,7 +308,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
 
             entry.staticSetter().set(hud, desiredHidden);
 
-            persistPlayerHudChanges(plugin, playerRef);
+            persistPlayerHudChanges(hudRuntimeService, playerConfigManager, playerRef);
             sendSingleResult(context, entry.label(), desiredHidden);
         }
     }

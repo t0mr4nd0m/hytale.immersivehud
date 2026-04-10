@@ -1,17 +1,10 @@
 $C = "../../../Common.ui";
 
-@RuleLabelStyle = LabelStyle(
-  FontSize: 14,
-  TextColor: #bfcdd5,
-  RenderBold: true,
-  RenderUppercase: true,
-  VerticalAlignment: Center
-);
+@RuleLabelStyle = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
 
 Group #DynamicRuleRow {
   LayoutMode: Left;
-  Anchor: (Height: 38);
-  Padding: (Vertical: 3);
+  Padding: (Vertical: 4, Horizontal: 16);
   Background: #1a2533(0.6);
   OutlineColor: #3a4a5a(0.35);
   OutlineSize: 1;
@@ -19,7 +12,6 @@ Group #DynamicRuleRow {
   Label #DynamicRuleLabel {
     FlexWeight: 1;
     Anchor: (Height: 32);
-    Padding: (Left: 12, Right: 12);
     Text: "RULE";
     Style: @RuleLabelStyle;
   }
