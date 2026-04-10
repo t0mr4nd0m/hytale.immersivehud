@@ -102,7 +102,6 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     private void registerCommands() {
         this.getCommandRegistry().registerCommand(new CommandCollection(
                 hudRuntimeCoordinator,
-                playerConfigManager,
                 hudConfigUiService,
                 this::getImmersiveHudGlobalConfig,
                 hudSettingsService

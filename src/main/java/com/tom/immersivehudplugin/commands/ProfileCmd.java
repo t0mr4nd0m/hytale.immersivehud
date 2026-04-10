@@ -15,10 +15,9 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
+import com.tom.immersivehudplugin.hud.HudSettingsService;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
-import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,17 +34,15 @@ public final class ProfileCmd extends AbstractPlayerCommand {
     private static final Color ERROR_COLOR = Color.RED;
     private static final Color SUCCESS_COLOR = Color.GREEN;
 
-    private final HudRuntimeCoordinator hudRuntimeCoordinator;
-    private final PlayerConfigManager playerConfigManager;
     private final RequiredArg<String> profileArg;
 
+    private final HudSettingsService hudSettingsService;
+
     public ProfileCmd(
-            HudRuntimeCoordinator hudRuntimeCoordinator,
-            PlayerConfigManager playerConfigManager
+            HudSettingsService hudSettingsService
     ) {
         super("profile", "Apply a predefined ImmersiveHud profile.");
-        this.hudRuntimeCoordinator = hudRuntimeCoordinator;
-        this.playerConfigManager = playerConfigManager;
+        this.hudSettingsService = hudSettingsService;
 
         this.profileArg = withRequiredArg("profile", "Profile name", ArgTypes.STRING)
                 .addValidator(new HudProfileValidator());
@@ -70,43 +67,18 @@ public final class ProfileCmd extends AbstractPlayerCommand {
             return;
         }
 
-        PlayerConfig playerCfg = requirePlayerConfig(hudRuntimeCoordinator, playerRef, context);
+        PlayerConfig playerCfg = hudSettingsService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
+            context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return;
         }
 
-        applyProfile(hudRuntimeCoordinator, playerConfigManager, playerRef, playerCfg, profile);
+        hudSettingsService.updatePlayerConfig(playerRef, cfg -> ProfilePresets.applyTo(cfg, profile));
 
         context.sendMessage(Message.join(
                 Message.raw("Applied ImmersiveHud profile: ").color(INFO_COLOR),
                 Message.raw(profile.name().toLowerCase(Locale.ROOT)).color(SUCCESS_COLOR)
         ));
-    }
-
-    @Nullable
-    private static PlayerConfig requirePlayerConfig(
-            @Nonnull HudRuntimeCoordinator hudRuntimeCoordinator,
-            @Nonnull PlayerRef playerRef,
-            @Nonnull CommandContext context
-    ) {
-        PlayerConfig playerConfig = hudRuntimeCoordinator.requirePlayerConfig(playerRef);
-        if (playerConfig == null) {
-            context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
-            return null;
-        }
-        return playerConfig;
-    }
-
-    private static void applyProfile(
-            @Nonnull HudRuntimeCoordinator hudRuntimeCoordinator,
-            @Nonnull PlayerConfigManager playerConfigManager,
-            @Nonnull PlayerRef playerRef,
-            @Nonnull PlayerConfig playerCfg,
-            @Nonnull Profile profile
-    ) {
-        ProfilePresets.applyTo(playerCfg, profile);
-        hudRuntimeCoordinator.applyAndSavePlayerConfig(playerRef);
-        hudRuntimeCoordinator.restartTickTaskIfNeeded();
     }
 
     private static String normalize(@Nullable String s) {
