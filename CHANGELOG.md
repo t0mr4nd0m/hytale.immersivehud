@@ -41,6 +41,11 @@
 * Improved naming consistency
 * Better separation of responsibilities (config, runtime, UI)
 
+**Bug Fixes**
+
+* Trigger logic CHARGING_WEAPON reticle not hiding when hotbar swap interrupt charging weapon
+* Trigger logic HOTBAR_INPUT missing first slot swap
+
 ## v1.2.0
 
 * Added Oxygen bar to dynamic components
