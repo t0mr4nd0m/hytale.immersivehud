@@ -104,7 +104,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
                 hudRuntimeCoordinator,
                 playerConfigManager,
                 hudConfigUiService,
-                this::getImmersiveHudGlobalConfig
+                this::getImmersiveHudGlobalConfig,
+                hudSettingsService
         ));
     }
 }

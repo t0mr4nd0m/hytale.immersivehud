@@ -3,6 +3,7 @@ package com.tom.immersivehudplugin.commands;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 
 import com.tom.immersivehudplugin.config.GlobalConfig;
+import com.tom.immersivehudplugin.hud.HudSettingsService;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;
 import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
@@ -15,12 +16,13 @@ public final class CommandCollection extends AbstractCommandCollection {
             HudRuntimeCoordinator hudRuntimeCoordinator,
             PlayerConfigManager playerConfigManager,
             HudConfigUiService hudConfigUiService,
-            Supplier<GlobalConfig> globalConfigSupplier
+            Supplier<GlobalConfig> globalConfigSupplier,
+            HudSettingsService hudSettingsService
     ) {
         super("immersivehud", "ImmersiveHud plugin commands");
         addAliases("ihud");
         addSubCommand(new StatusCmd(hudRuntimeCoordinator, globalConfigSupplier));
-        addSubCommand(new ToggleCmd(hudRuntimeCoordinator, playerConfigManager));
+        addSubCommand(new ToggleCmd(hudSettingsService));
         addSubCommand(new RulesCmd(hudRuntimeCoordinator, playerConfigManager));
         addSubCommand(new ProfileCmd(hudRuntimeCoordinator, playerConfigManager));
         addSubCommand(new ConfigUICmd(hudRuntimeCoordinator, hudConfigUiService));
