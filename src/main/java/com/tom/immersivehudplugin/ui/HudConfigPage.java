@@ -30,19 +30,13 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
     private static final String PROFILES_UI = "Pages/ImmersiveHud/Views/HudConfigProfilesView.ui";
     private static final String PROFILE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigProfileRow.ui";
 
-    private static final String VISIBILITY_UI = "Pages/ImmersiveHud/Views/HudConfigVisibilityView.ui";
-    private static final String VISIBILITY_SECTION_UI = "Pages/ImmersiveHud/Views/HudConfigVisibilitySection.ui";
-    private static final String VISIBILITY_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigVisibilityRow.ui";
-
-    private static final String DYNAMIC_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRulesView.ui";
-    private static final String DYNAMIC_SECTION_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRulesSection.ui";
-    private static final String DYNAMIC_RULE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRuleRow.ui";
-    private static final String DYNAMIC_MORE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRuleMoreRow.ui";
-
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
     private final HudConfigPresenter presenter = new HudConfigPresenter();
     private final HudConfigRenderIndex renderIndex = new HudConfigRenderIndex();
+
+    private final HudConfigVisibilityRenderer visibilityRenderer;
+    private final HudConfigDynamicRulesRenderer dynamicRulesRenderer;
 
     public HudConfigPage(
             @Nonnull HudConfigUiService uiService,
@@ -51,6 +45,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, PageEventData.CODEC);
         this.uiService = uiService;
         this.playerRef = playerRef;
+        this.visibilityRenderer = new HudConfigVisibilityRenderer(presenter, renderIndex);
+        this.dynamicRulesRenderer = new HudConfigDynamicRulesRenderer(renderIndex);
     }
 
     @Override
@@ -120,8 +116,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                     session.toggleVisibility(data.getValue());
 
                     UICommandBuilder commands = new UICommandBuilder();
-                    updateVisibilityRow(commands, session, data.getValue());
-                    updateVisibilitySection(commands, session, entry.group());
+                    visibilityRenderer.updateVisibilityRow(commands, session, data.getValue());
+                    visibilityRenderer.updateVisibilitySection(commands, session, entry.group());
                     sendUpdate(commands, new UIEventBuilder(), false);
                 }
             }
@@ -142,8 +138,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                     session.toggleRule(entry, rule);
 
                     UICommandBuilder commands = new UICommandBuilder();
-                    updateDynamicRuleRow(commands, session, entry, rule);
-                    updateDynamicThresholdControls(commands, session, entry);
+                    dynamicRulesRenderer.updateDynamicRuleRow(commands, session, entry, rule);
+                    dynamicRulesRenderer.updateDynamicThresholdControls(commands, session, entry);
                     sendUpdate(commands, new UIEventBuilder(), false);
                 }
             }
@@ -158,7 +154,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 session.setDynamicThreshold(entry, threshold);
 
                 UICommandBuilder commands = new UICommandBuilder();
-                updateDynamicThresholdControls(commands, session, entry);
+                dynamicRulesRenderer.updateDynamicThresholdControls(commands, session, entry);
                 sendUpdate(commands, new UIEventBuilder(), false);
             }
 
@@ -172,7 +168,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                     UICommandBuilder commands = new UICommandBuilder();
                     UIEventBuilder events = new UIEventBuilder();
 
-                    updateDynamicExtraTriggers(commands, events, session, entry);
+                    dynamicRulesRenderer.updateDynamicExtraTriggers(commands, events, session, entry);
                     sendUpdate(commands, events, false);
                 }
             }
@@ -222,8 +218,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
         switch (session.getCurrentView()) {
             case PROFILES -> renderProfilesView(commands, events, session);
-            case VISIBILITY -> renderVisibilityView(commands, events, session);
-            case DYNAMIC_RULES -> renderDynamicRulesView(commands, events, session);
+            case VISIBILITY -> visibilityRenderer.renderVisibilityView(commands, events, session);
+            case DYNAMIC_RULES -> dynamicRulesRenderer.renderDynamicRulesView(commands, events, session);
         }
     }
 
@@ -337,414 +333,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         } catch (IllegalArgumentException ex) {
             return null;
         }
-    }
-
-    private void updateVisibilitySection(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.Group group
-    ) {
-        Integer rowIndex = renderIndex.getVisibilitySectionRowIndex(group);
-        if (rowIndex == null) {
-            return;
-        }
-
-        String sectionRootSelector = "#VisibilityList[" + rowIndex + "]";
-        String closedCounterSelector = sectionRootSelector + " #VisibilitySectionCounterClosed";
-        String openCounterSelector = sectionRootSelector + " #VisibilitySectionCounterOpen";
-
-        String groupCounter = presenter.getVisibilityGroupCounterLabel(
-                group,
-                session.getDraftHudComponents()
-        );
-
-        commands.set(closedCounterSelector + ".TextSpans", Message.raw(groupCounter));
-        commands.set(openCounterSelector + ".TextSpans", Message.raw(groupCounter));
-    }
-
-    private void updateVisibilityRow(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull String componentKey
-    ) {
-        Integer rowIndex = renderIndex.getVisibilityRowIndex(componentKey);
-        if (rowIndex == null) {
-            return;
-        }
-
-        HudComponentRegistry.HudEntry entry = HudComponentRegistry.find(componentKey);
-        if (entry == null) {
-            return;
-        }
-
-        boolean hidden = session.isHidden(entry);
-
-        String rowRootSelector = "#VisibilityList[" + rowIndex + "]";
-        String checkBoxSelector = rowRootSelector + " #VisibilityToggleCheckBox";
-
-        commands.set(checkBoxSelector + ".Value", !hidden);
-    }
-
-    private void renderVisibilityView(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session
-    ) {
-        commands.append("#ContentHost", VISIBILITY_UI);
-        commands.clear("#VisibilityList");
-
-        commands.set(
-                "#ViewHelpText.TextSpans",
-                Message.raw(session.getCurrentView().helpText())
-        );
-
-        renderIndex.clearVisibilityRowIndexes();
-        renderIndex.clearVisibilitySectionRowIndexes();
-
-        int rowIndex = 0;
-        HudComponentRegistry.Group expandedGroup = session.getExpandedVisibilityGroup();
-
-        for (HudComponentRegistry.Group group : HudComponentRegistry.groupOrder) {
-            List<HudComponentRegistry.HudEntry> entries = HudComponentRegistry.allList().stream()
-                    .filter(entry -> entry.group() == group)
-                    .toList();
-
-            if (entries.isEmpty()) {
-                continue;
-            }
-
-            commands.append("#VisibilityList", VISIBILITY_SECTION_UI);
-
-            String sectionRootSelector = "#VisibilityList[" + rowIndex + "]";
-            String closedButtonSelector = sectionRootSelector + " #VisibilitySectionButtonClosed";
-            String openButtonSelector = sectionRootSelector + " #VisibilitySectionButtonOpen";
-
-            String closedContentSelector = sectionRootSelector + " #VisibilitySectionContentClosed";
-            String closedGroupSelector = sectionRootSelector + " #VisibilitySectionGroupClosed";
-            String closedCounterSelector = sectionRootSelector + " #VisibilitySectionCounterClosed";
-
-            String openContentSelector = sectionRootSelector + " #VisibilitySectionContentOpen";
-            String openGroupSelector = sectionRootSelector + " #VisibilitySectionGroupOpen";
-            String openCounterSelector = sectionRootSelector + " #VisibilitySectionCounterOpen";
-
-            renderIndex.putVisibilitySectionRowIndex(group, rowIndex);
-
-            boolean expanded = group == expandedGroup;
-
-            String groupTitle = group.label().toUpperCase();
-            String groupCounter = presenter.getVisibilityGroupCounterLabel(
-                    group,
-                    session.getDraftHudComponents()
-            );
-
-            commands.set(closedGroupSelector + ".TextSpans", Message.raw(groupTitle));
-            commands.set(openGroupSelector + ".TextSpans", Message.raw(groupTitle));
-
-            commands.set(closedCounterSelector + ".TextSpans", Message.raw(groupCounter));
-            commands.set(openCounterSelector + ".TextSpans", Message.raw(groupCounter));
-
-            commands.set(closedButtonSelector + ".Visible", !expanded);
-            commands.set(openButtonSelector + ".Visible", expanded);
-
-            commands.set(closedContentSelector + ".Visible", !expanded);
-            commands.set(openContentSelector + ".Visible", expanded);
-
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    closedButtonSelector,
-                    PageEventData.action("VIS_TOGGLE_GROUP").append("Value", group.name()),
-                    false
-            );
-
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    openButtonSelector,
-                    PageEventData.action("VIS_TOGGLE_GROUP").append("Value", group.name()),
-                    false
-            );
-
-            rowIndex++;
-
-            if (!expanded) {
-                continue;
-            }
-
-            for (HudComponentRegistry.HudEntry entry : entries) {
-                boolean hidden = session.isHidden(entry);
-
-                commands.append("#VisibilityList", VISIBILITY_ROW_UI);
-
-                int entryRowIndex = rowIndex;
-                renderIndex.putVisibilityRowIndex(entry.key(), entryRowIndex);
-
-                String rowRootSelector = "#VisibilityList[" + entryRowIndex + "]";
-                String componentSelector = rowRootSelector + " #VisibilityComponentLabel";
-                String checkBoxSelector = rowRootSelector + " #VisibilityToggleCheckBox";
-
-                commands.set(componentSelector + ".TextSpans", Message.raw(entry.label().toUpperCase()));
-                commands.set(checkBoxSelector + ".Value", !hidden);
-
-                events.addEventBinding(
-                        CustomUIEventBindingType.ValueChanged,
-                        checkBoxSelector,
-                        PageEventData.action("TOGGLE_VISIBILITY").append("Value", entry.key()),
-                        false
-                );
-
-                rowIndex++;
-            }
-        }
-    }
-
-    private void updateDynamicRuleRow(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry,
-            @Nonnull DynamicHudTriggers trigger
-    ) {
-        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) {
-            return;
-        }
-
-        boolean enabled = session.isRuleEnabled(entry, trigger);
-
-        Integer baseRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "base", trigger);
-        if (baseRowIndex != null) {
-            String rulesListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicRulesList";
-            String rowRootSelector = rulesListSelector + "[" + baseRowIndex + "]";
-            String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
-            commands.set(checkBoxSelector + ".Value", enabled);
-            return;
-        }
-
-        Integer extraRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "extra", trigger);
-        if (extraRowIndex != null) {
-            String extraListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicExtraTriggersList";
-            String rowRootSelector = extraListSelector + "[" + extraRowIndex + "]";
-            String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
-            commands.set(checkBoxSelector + ".Value", enabled);
-        }
-    }
-
-    private void renderDynamicRulesView(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session
-    ) {
-        commands.append("#ContentHost", DYNAMIC_UI);
-        commands.clear("#DynamicComponentsList");
-
-        commands.set(
-                "#ViewHelpText.TextSpans",
-                Message.raw(session.getCurrentView().helpText())
-        );
-
-        renderIndex.clearDynamicRuleRowIndexes();
-        renderIndex.clearDynamicComponentRowIndexes();
-
-        int componentIndex = 0;
-
-        for (HudComponentRegistry.HudEntry entry : session.getDynamicEntries()) {
-            commands.append("#DynamicComponentsList", DYNAMIC_SECTION_UI);
-            renderIndex.putDynamicComponentRowIndex(entry.key(), componentIndex);
-
-            String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
-            String titleSelector = componentRoot + " #DynamicComponentValueLabel";
-            String visibilitySelector = componentRoot + " #DynamicComponentVisibilityLabel";
-            String rulesListSelector = componentRoot + " #DynamicRulesList";
-
-            commands.set(titleSelector + ".TextSpans", Message.raw(entry.label().toUpperCase()));
-            commands.set(
-                    visibilitySelector + ".TextSpans",
-                    Message.raw(session.getDynamicComponentVisibilityLabel(entry))
-            );
-
-            renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
-            renderDynamicThresholdControls(commands, events, session, entry, componentRoot);
-            renderDynamicExtraTriggers(commands, events, session, entry, componentRoot);
-
-            componentIndex++;
-        }
-    }
-
-    private void renderDynamicRulesList(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry,
-            @Nonnull String rulesListSelector
-    ) {
-        int rowIndex = 0;
-
-        for (DynamicHudTriggers trigger : session.getBaseRulesInDisplayOrder(entry)) {
-            rowIndex = renderDynamicRuleRow(commands, events, session, entry, rulesListSelector, "base", rowIndex, trigger);
-        }
-    }
-
-    private void renderDynamicExtraTriggers(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry,
-            @Nonnull String componentRoot
-    ) {
-        List<DynamicHudTriggers> extraRules = session.getExtraRulesInDisplayOrder(entry);
-        boolean revealed = session.isMoreTriggersRevealed(entry.key());
-
-        String extraHostSelector = componentRoot + " #DynamicExtraTriggersList";
-        commands.clear(extraHostSelector);
-
-        if (extraRules.isEmpty()) {
-            return;
-        }
-
-        int rowIndex = 0;
-
-        if (!revealed) {
-            commands.append(extraHostSelector, DYNAMIC_MORE_ROW_UI);
-
-            String rowRootSelector = extraHostSelector + "[" + rowIndex + "]";
-            String buttonSelector = rowRootSelector + " #DynamicMoreTriggersButton";
-            String labelSelector = rowRootSelector + " #DynamicMoreTriggersLabel";
-
-            commands.set(labelSelector + ".TextSpans", Message.raw("MORE TRIGGERS"));
-
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    buttonSelector,
-                    PageEventData.action("DYN_REVEAL_MORE")
-                            .append("Component", entry.key()),
-                    false
-            );
-            return;
-        }
-
-        for (DynamicHudTriggers trigger : extraRules) {
-            rowIndex = renderDynamicRuleRow(
-                    commands,
-                    events,
-                    session,
-                    entry,
-                    extraHostSelector,
-                    "extra",
-                    rowIndex,
-                    trigger
-            );
-        }
-    }
-
-    private int renderDynamicRuleRow(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry,
-            @Nonnull String hostSelector,
-            @Nonnull String hostKey,
-            int rowIndex,
-            @Nonnull DynamicHudTriggers trigger
-    ) {
-        boolean enabled = session.isRuleEnabled(entry, trigger);
-
-        commands.append(hostSelector, DYNAMIC_RULE_ROW_UI);
-        renderIndex.putDynamicRuleRowIndex(entry.key(), hostKey, trigger, rowIndex);
-
-        String rowRootSelector = hostSelector + "[" + rowIndex + "]";
-        String labelSelector = rowRootSelector + " #DynamicRuleLabel";
-        String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
-
-        commands.set(
-                labelSelector + ".TextSpans",
-                Message.raw(DynamicHudTriggers.prettyName(trigger).toUpperCase())
-        );
-        commands.set(checkBoxSelector + ".Value", enabled);
-
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
-                checkBoxSelector,
-                PageEventData.action("TOGGLE_RULE")
-                        .append("Component", entry.key())
-                        .append("Value", trigger.name()),
-                false
-        );
-
-        return rowIndex + 1;
-    }
-
-    private void updateDynamicExtraTriggers(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry
-    ) {
-        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) {
-            return;
-        }
-
-        String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
-        renderDynamicExtraTriggers(commands, events, session, entry, componentRoot);
-    }
-
-    private void updateDynamicThresholdControls(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry
-    ) {
-        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) {
-            return;
-        }
-
-        String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
-        String thresholdHostSelector = componentRoot + " #DynamicThresholdHost";
-        String sliderSelector = componentRoot + " #DynamicThresholdSlider";
-
-        boolean visible = entry.supportsThreshold();
-        boolean enabled = session.isDynamicThresholdEnabled(entry);
-
-        commands.set(thresholdHostSelector + ".Visible", visible);
-
-        if (!visible) {
-            return;
-        }
-
-        int threshold = Math.round(session.getDynamicThreshold(entry));
-        commands.set(sliderSelector + ".Value", threshold);
-        commands.set(thresholdHostSelector + ".Visible", enabled);
-    }
-
-    private void renderDynamicThresholdControls(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponentRegistry.HudEntry entry,
-            @Nonnull String componentRoot
-    ) {
-        String thresholdHostSelector = componentRoot + " #DynamicThresholdHost";
-        String sliderSelector = componentRoot + " #DynamicThresholdSlider";
-
-        boolean visible = entry.supportsThreshold();
-        boolean enabled = session.isDynamicThresholdEnabled(entry);
-
-        commands.set(thresholdHostSelector + ".Visible", visible);
-
-        if (!visible) {
-            return;
-        }
-
-        int threshold = Math.round(session.getDynamicThreshold(entry));
-        commands.set(sliderSelector + ".Value", threshold);
-        commands.set(thresholdHostSelector + ".Visible", enabled);
-
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
-                sliderSelector,
-                EventData.of("Action", "DYN_SET_THRESHOLD")
-                        .append("Component", entry.key())
-                        .append("@DynamicThreshold", sliderSelector + ".Value"),
-                false
-        );
     }
 
     private void bindChromeEvents(@Nonnull UIEventBuilder events) {
