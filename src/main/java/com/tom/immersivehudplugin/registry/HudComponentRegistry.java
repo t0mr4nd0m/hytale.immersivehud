@@ -6,7 +6,6 @@ import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -99,10 +98,6 @@ public final class HudComponentRegistry {
 
         public boolean supportsThreshold() {
             return defaultThreshold != null;
-        }
-
-        public boolean supportsRule(@Nonnull DynamicHudTriggers rule) {
-            return allowedRules.contains(rule);
         }
 
     }
@@ -498,10 +493,6 @@ public final class HudComponentRegistry {
 
     private static void register(HudEntry entry) {
         REGISTRY.put(normalize(entry.key()), entry);
-    }
-
-    public static Map<String, HudEntry> all() {
-        return Collections.unmodifiableMap(REGISTRY);
     }
 
     public static List<HudEntry> allList() {

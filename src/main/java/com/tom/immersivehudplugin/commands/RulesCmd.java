@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudRuleCatalog;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.hud.HudSettingsService;
 
@@ -251,7 +252,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             if ("add".equals(action)) {
-                if (!resolved.entry().supportsRule(rule)) {
+                if (!HudRuleCatalog.supportsRule(resolved.entry(), rule)) {
                     context.sendMessage(Message.raw(
                             "Rule " + rule.name() + " is not valid for " + resolved.entry().label() + "."
                     ).color(ERROR_COLOR));

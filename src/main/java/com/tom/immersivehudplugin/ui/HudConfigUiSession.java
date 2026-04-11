@@ -8,6 +8,7 @@ import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudConfigAccess;
+import com.tom.immersivehudplugin.registry.HudRuleCatalog;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import javax.annotation.Nonnull;
@@ -194,7 +195,7 @@ public final class HudConfigUiSession {
         return DynamicHudTriggers.displayCategoryOrder().stream()
                 .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
                         .filter(trigger -> trigger.category() == category)
-                        .filter(entry::supportsRule))
+                        .filter(trigger -> HudRuleCatalog.supportsRule(entry, trigger)))
                 .toList();
     }
 
@@ -205,7 +206,7 @@ public final class HudConfigUiSession {
         return DynamicHudTriggers.displayCategoryOrder().stream()
                 .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
                         .filter(trigger -> trigger.category() == category)
-                        .filter(trigger -> !entry.supportsRule(trigger))
+                        .filter(trigger -> !HudRuleCatalog.supportsRule(entry, trigger))
                         .filter(trigger -> trigger != DynamicHudTriggers.HEALTH_NOT_FULL)
                         .filter(trigger -> trigger != DynamicHudTriggers.STAMINA_NOT_FULL)
                         .filter(trigger -> trigger != DynamicHudTriggers.MANA_NOT_FULL)
