@@ -23,25 +23,29 @@ public final class HeldItemTracker {
         boolean hotbarEvent = false;
 
         for (SyncInteractionChain update : updates.updates) {
-            boolean secondaryStart = isSecondaryStart(update);
 
-            if (update.itemInHandId != null && secondaryStart) {
+            if (update.itemInHandId != null && isSecondaryStart(update)) {
                 handleSecondaryInteractionType(state, update.itemInHandId, now);
             }
 
-            if (hasHotbarSlot(state, update)) {
-                hotbarEvent |= applyHotbarSlotUpdate(state, now);
-            }
-
-            chargingStart |= isChargingStart(update);
             chargingEnd |= isChargingEnd(update);
+
+            chargingStart |= (isChargingStart(update) || (!chargingEnd && isPrimaryStart(update)));
+
+            hotbarEvent |= isSwapStart(update);
         }
 
         if (chargingEnd) {
             state.t.clear(HudSignal.CHARGING_WEAPON);
-        } else if (chargingStart) {
+        }
+
+        if (chargingStart) {
             state.t.pulse(HudSignal.CHARGING_WEAPON, now, state.hideDelayMsHint);
-        } else if (hotbarEvent) {
+        }
+
+        if (hotbarEvent) {
+            state.heldItemRefreshRequested = true;
+            state.t.pulse(HudSignal.HOTBAR_INPUT, now, state.hideDelayMsHint);
             state.t.clear(HudSignal.CHARGING_WEAPON);
         }
     }
@@ -71,6 +75,10 @@ public final class HeldItemTracker {
         if (!state.rangedWeaponInHand) {
             state.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
         }
+
+        if (!state.meleeWeaponInHand && !state.rangedWeaponInHand) {
+            state.t.clear(HudSignal.CHARGING_WEAPON);
+        }
     }
 
     private void handleSecondaryInteractionType(
@@ -83,19 +91,6 @@ public final class HeldItemTracker {
         if (ItemInHand.isConsumable(item)) {
             state.t.pulse(HudSignal.CONSUMABLE_USE, now, state.hideDelayMsHint);
         }
-    }
-
-    private boolean applyHotbarSlotUpdate(
-            PlayerHudState state,
-            long now
-    ) {
-        state.invalidateHeldItemStateForHotbarSwitch();
-
-        state.t.clear(HudSignal.CHARGING_WEAPON);
-        state.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
-        state.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
-        state.t.pulse(HudSignal.HOTBAR_INPUT, now, state.hideDelayMsHint);
-        return true;
     }
 
     @Nullable
@@ -128,37 +123,27 @@ public final class HeldItemTracker {
         }
     }
 
-    private static boolean isChargingStart(SyncInteractionChain update) {
+    private static boolean isPrimaryStart(SyncInteractionChain update) {
         return update.interactionType == InteractionType.Primary;
-    }
-
-    private static boolean isChargingEnd(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.ProjectileHit
-                || update.interactionType == InteractionType.ProjectileBounce
-                || update.interactionType == InteractionType.ProjectileMiss;
     }
 
     private static boolean isSecondaryStart(SyncInteractionChain update) {
         return update.interactionType == InteractionType.Secondary;
     }
 
-    private static boolean hasHotbarSlot(
-            PlayerHudState state,
-            SyncInteractionChain update
-    ) {
-        int slot = update.activeHotbarSlot;
-        if (slot < 0 || slot > 8) { return false; }
+    private static boolean isSwapStart(SyncInteractionChain update) {
+        return update.interactionType == InteractionType.SwapTo
+                || update.interactionType == InteractionType.SwapFrom;
+    }
 
-        if (state.lastActiveHotbarSlot == -1) {
-            state.lastActiveHotbarSlot = slot;
-            return false;
-        }
+    private static boolean isChargingStart(SyncInteractionChain update) {
+        Item item = Item.getAssetMap().getAsset(update.itemInHandId);
+        return isPrimaryStart(update) && ItemInHand.isWeapon(item);
+    }
 
-        if (state.lastActiveHotbarSlot != slot) {
-            state.lastActiveHotbarSlot = slot;
-            return true;
-        }
-
-        return false;
+    private static boolean isChargingEnd(SyncInteractionChain update) {
+        return update.interactionType == InteractionType.ProjectileHit
+                || update.interactionType == InteractionType.ProjectileBounce
+                || update.interactionType == InteractionType.ProjectileMiss;
     }
 }

@@ -175,8 +175,4 @@ public final class PlayerHudState {
     public boolean needsHeldItemRepair() {
         return !heldItemStateInitialized || heldItemRefreshRequested;
     }
-
-    public void invalidateHeldItemStateForHotbarSwitch() {
-        resetHeldItemState();
-    }
 }

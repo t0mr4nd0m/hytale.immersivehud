@@ -22,7 +22,7 @@ public final class ItemInHand {
     }
 
     public static boolean isWeapon(Item item) {
-        return item != null && getItemType(item).equalsIgnoreCase("Weapon");
+        return getItemType(item).equalsIgnoreCase("Weapon");
     }
 
     public static boolean isConsumable(Item item) {
@@ -30,12 +30,12 @@ public final class ItemInHand {
     }
 
     public static String getItemType(Item item) {
-
-        String[] types = item.getData().getRawTags().get("Type");
-        return types == null? "<null>" : types[0].trim();
+        return item == null? "<null>" : item.getData().getRawTags().get("Type")[0].trim();
     }
 
     public static boolean checkItemFamily(Item item, Set<String> familiesList) {
+
+        if (item == null) return false;
 
         String[] families = item.getData().getRawTags().get("Family");
         if (families == null) { return false; }

@@ -58,7 +58,6 @@ public final class HudRuntimeCoordinator {
         this.hudVisibilityService = hudVisibilityService;
         this.heldItemTracker = new HeldItemTracker();
         this.hudTickProcessor = new HudTickProcessor(
-                playerConfigManager,
                 hudContextBuilder,
                 hudVisibilityService,
                 heldItemTracker

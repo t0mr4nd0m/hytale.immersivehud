@@ -8,25 +8,21 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.context.HudContextBuilder;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
 import com.tom.immersivehudplugin.visibility.HudVisibilityService;
 
 import javax.annotation.Nullable;
 
 public final class HudTickProcessor {
 
-    private final PlayerConfigManager playerConfigManager;
     private final HudContextBuilder hudContextBuilder;
     private final HudVisibilityService hudVisibilityService;
     private final HeldItemTracker heldItemTracker;
 
     public HudTickProcessor(
-            PlayerConfigManager playerConfigManager,
             HudContextBuilder hudContextBuilder,
             HudVisibilityService hudVisibilityService,
             HeldItemTracker heldItemTracker
     ) {
-        this.playerConfigManager = playerConfigManager;
         this.hudContextBuilder = hudContextBuilder;
         this.hudVisibilityService = hudVisibilityService;
         this.heldItemTracker = heldItemTracker;
@@ -40,12 +36,11 @@ public final class HudTickProcessor {
             PlayerHudState state,
             PlayerConfig playerConfig
     ) {
-        TickEvaluation evaluation = buildTickEvaluation(playerRef, state, playerConfig);
-        if (evaluation == null) {
-            return;
-        }
 
-        ensureStaticHud(evaluation);
+        TickEvaluation evaluation = buildTickEvaluation(playerRef, state, playerConfig);
+        if (evaluation == null) { return; }
+
+        hudVisibilityService.ensureStaticHudBuilt( evaluation.state(), evaluation.hudConfig() );
 
         if (shouldEvaluateDynamicHud(evaluation.state(), evaluation.hudConfig())) {
             repairHeldItemIfNeeded(evaluation);
@@ -74,13 +69,6 @@ public final class HudTickProcessor {
                 playerConfig.getHudComponents(),
                 playerConfig.getDynamicHud(),
                 tickContext
-        );
-    }
-
-    private void ensureStaticHud(TickEvaluation evaluation) {
-        hudVisibilityService.ensureStaticHudBuilt(
-                evaluation.state(),
-                evaluation.hudConfig()
         );
     }
 
