@@ -18,6 +18,7 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.hud.HudSettingsService;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudConfigAccess;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -190,11 +191,11 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             }
 
             HudComponentsConfig hud = playerCfg.getHudComponents();
-            boolean nextHidden = !entry.staticGetter().get(hud);
+            boolean nextHidden = !HudConfigAccess.isHidden(entry, hud);
 
             hudSettingsService.updateHudComponents(playerRef, cfg -> {
-                boolean currentHidden = entry.staticGetter().get(cfg);
-                entry.staticSetter().set(cfg, !currentHidden);
+                boolean currentHidden = HudConfigAccess.isHidden(entry, cfg);
+                HudConfigAccess.setHidden(entry, cfg, !currentHidden);
             });
 
             sendSingleResult(context, entry.label(), nextHidden);
@@ -245,7 +246,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                     if (entry.group() != group) {
                         continue;
                     }
-                    boolean currentHidden = entry.staticGetter().get(hud);
+                    boolean currentHidden = HudConfigAccess.isHidden(entry, hud);
                     if (currentHidden != desiredHidden) {
                         changed++;
                     }
@@ -254,7 +255,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 hudSettingsService.updateHudComponents(playerRef, cfg -> {
                     for (var entry : HudComponentRegistry.allList()) {
                         if (entry.group() == group) {
-                            entry.staticSetter().set(cfg, desiredHidden);
+                            HudConfigAccess.setHidden(entry, cfg, desiredHidden);
                         }
                     }
                 });
@@ -269,7 +270,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            boolean currentHidden = entry.staticGetter().get(hud);
+            boolean currentHidden = HudConfigAccess.isHidden(entry, hud);
             if (currentHidden == desiredHidden) {
                 context.sendMessage(Message.join(
                         Message.raw("ImmersiveHud " + entry.label() + " already set to ").color(INFO_COLOR),
@@ -279,7 +280,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             }
 
             hudSettingsService.updateHudComponents(playerRef, cfg ->
-                    entry.staticSetter().set(cfg, desiredHidden)
+                    HudConfigAccess.setHidden(entry, cfg, desiredHidden)
             );
 
             sendSingleResult(context, entry.label(), desiredHidden);

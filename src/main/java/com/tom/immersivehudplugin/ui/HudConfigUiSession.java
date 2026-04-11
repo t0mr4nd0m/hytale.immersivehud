@@ -7,6 +7,7 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudConfigAccess;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import javax.annotation.Nonnull;
@@ -85,7 +86,7 @@ public final class HudConfigUiSession {
     }
 
     public boolean isHidden(@Nonnull HudComponentRegistry.HudEntry entry) {
-        return entry.staticGetter().get(draftHudComponents);
+        return HudConfigAccess.isHidden(entry, draftHudComponents);
     }
 
     public void toggleVisibility(@Nonnull String componentKey) {
@@ -94,8 +95,8 @@ public final class HudConfigUiSession {
             return;
         }
 
-        boolean hidden = entry.staticGetter().get(draftHudComponents);
-        entry.staticSetter().set(draftHudComponents, !hidden);
+        boolean hidden = HudConfigAccess.isHidden(entry, draftHudComponents);
+        HudConfigAccess.setHidden(entry, draftHudComponents, !hidden);
         dirty = true;
     }
 
@@ -119,11 +120,11 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudComponentRegistry.HudEntry entry) {
-        if (!entry.supportsDynamicRules() || entry.dynamicGetter() == null) {
+        DynamicHudRuleConfig cfg = HudConfigAccess.getDynamicRuleConfig(entry, draftDynamicHud);
+        if (cfg == null) {
             throw new IllegalStateException("Entry is not dynamic-capable: " + entry.key());
         }
-
-        return entry.dynamicGetter().apply(draftDynamicHud);
+        return cfg;
     }
 
     public boolean isRuleEnabled(
@@ -213,7 +214,7 @@ public final class HudConfigUiSession {
     }
 
     public boolean isDynamicComponentVisible(@Nonnull HudComponentRegistry.HudEntry entry) {
-        return !entry.staticGetter().get(draftHudComponents);
+        return !HudConfigAccess.isHidden(entry, draftHudComponents);
     }
 
     @Nonnull

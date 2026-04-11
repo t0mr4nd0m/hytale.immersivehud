@@ -16,7 +16,7 @@ public final class HudDefaults {
         HudComponentsConfig cfg = new HudComponentsConfig();
 
         for (HudComponentRegistry.HudEntry entry : HudComponentRegistry.allList()) {
-            entry.staticSetter().set(cfg, entry.defaultHidden());
+            HudConfigAccess.setHidden(entry, cfg, entry.defaultHidden());
         }
 
         return cfg;
@@ -26,9 +26,8 @@ public final class HudDefaults {
         DynamicHudConfig cfg = new DynamicHudConfig();
 
         for (HudComponentRegistry.HudEntry entry : HudComponentRegistry.dynamicList()) {
-            DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null
-                    ? entry.dynamicGetter().apply(cfg)
-                    : null;
+
+            DynamicHudRuleConfig ruleCfg = HudConfigAccess.getDynamicRuleConfig(entry, cfg);
 
             if (ruleCfg != null) {
                 ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));

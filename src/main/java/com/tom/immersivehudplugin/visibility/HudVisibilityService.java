@@ -5,6 +5,7 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
+import com.tom.immersivehudplugin.registry.HudConfigAccess;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 
@@ -23,7 +24,7 @@ public final class HudVisibilityService {
 
     public boolean hasAnyDynamicHudEnabled(HudComponentsConfig hudConfig) {
         for (HudEntry entry : DYNAMIC_ENTRIES) {
-            if (entry.staticGetter().get(hudConfig)) {
+            if (HudConfigAccess.isHidden(entry, hudConfig)) {
                 return true;
             }
         }
@@ -46,7 +47,7 @@ public final class HudVisibilityService {
         state.clearStaticHidden();
 
         for (HudEntry entry : STATIC_ENTRIES) {
-            if (entry.staticGetter().get(hudConfig)) {
+            if (HudConfigAccess.isHidden(entry, hudConfig)) {
                 state.addStaticHidden(entry.hudComponent());
             }
         }
