@@ -1,6 +1,7 @@
 package com.tom.immersivehudplugin.config;
 
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudDefaults;
 
 public final class GlobalConfig {
 
@@ -13,8 +14,8 @@ public final class GlobalConfig {
     private int hideDelayMs = HIDE_DELAY_MS;
     private float reticleTargetRange = RETICLE_TARGET_RANGE;
 
-    private HudComponentsConfig defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
-    private DynamicHudConfig defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
+    private HudComponentsConfig defaultHudComponents = HudDefaults.buildDefaultHudComponents();
+    private DynamicHudConfig defaultDynamicHud = HudDefaults.buildDefaultDynamicHud();
 
     public String getConfigVersion() {
         return configVersion;
@@ -50,7 +51,7 @@ public final class GlobalConfig {
 
     public HudComponentsConfig getDefaultHudComponents() {
         if (defaultHudComponents == null) {
-            defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
+            defaultHudComponents = HudDefaults.buildDefaultHudComponents();
         }
         return defaultHudComponents.copy();
     }
@@ -58,12 +59,12 @@ public final class GlobalConfig {
     public void setDefaultHudComponents(HudComponentsConfig value) {
         this.defaultHudComponents = (value != null)
                 ? value.copy()
-                : HudComponentRegistry.buildDefaultHudComponents();
+                : HudDefaults.buildDefaultHudComponents();
     }
 
     public DynamicHudConfig getDefaultDynamicHud() {
         if (defaultDynamicHud == null) {
-            defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
+            defaultDynamicHud = HudDefaults.buildDefaultDynamicHud();
         }
         return defaultDynamicHud.copy();
     }
@@ -71,7 +72,7 @@ public final class GlobalConfig {
     public void setDefaultDynamicHud(DynamicHudConfig value) {
         this.defaultDynamicHud = (value != null)
                 ? value.copy()
-                : HudComponentRegistry.buildDefaultDynamicHud();
+                : HudDefaults.buildDefaultDynamicHud();
     }
 
     public boolean sanitize() {
@@ -93,14 +94,14 @@ public final class GlobalConfig {
         }
 
         if (defaultHudComponents == null) {
-            defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
+            defaultHudComponents = HudDefaults.buildDefaultHudComponents();
             changed = true;
         } else {
             changed |= defaultHudComponents.sanitize();
         }
 
         if (defaultDynamicHud == null) {
-            defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
+            defaultDynamicHud = HudDefaults.buildDefaultDynamicHud();
             changed = true;
         } else {
             changed |= defaultDynamicHud.sanitize();

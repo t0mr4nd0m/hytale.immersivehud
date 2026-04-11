@@ -512,35 +512,6 @@ public final class HudComponentRegistry {
         return DYNAMIC_LIST;
     }
 
-    public static HudComponentsConfig buildDefaultHudComponents() {
-        HudComponentsConfig cfg = new HudComponentsConfig();
-
-        for (HudEntry entry : allList()) {
-            entry.staticSetter().set(cfg, entry.defaultHidden());
-        }
-
-        return cfg;
-    }
-
-    public static DynamicHudConfig buildDefaultDynamicHud() {
-        DynamicHudConfig cfg = new DynamicHudConfig();
-
-        for (HudEntry entry : dynamicList()) {
-            DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(cfg) : null;
-            if (ruleCfg != null) {
-                ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
-            }
-
-            if (entry.defaultThreshold() != null) {
-                if (ruleCfg != null) {
-                    ruleCfg.setThreshold(entry.defaultThreshold());
-                }
-            }
-        }
-
-        return cfg;
-    }
-
     @Nullable
     public static HudEntry find(@Nullable String key) {
         return REGISTRY.get(normalize(key));
