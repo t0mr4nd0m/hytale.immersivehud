@@ -7,7 +7,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -20,15 +19,10 @@ import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
 
 public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.PageEventData> {
 
     private static final String PAGE_UI = "Pages/ImmersiveHud/HudConfigPage.ui";
-
-    private static final String PROFILES_UI = "Pages/ImmersiveHud/Views/HudConfigProfilesView.ui";
-    private static final String PROFILE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigProfileRow.ui";
 
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
@@ -37,6 +31,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
     private final HudConfigVisibilityRenderer visibilityRenderer;
     private final HudConfigDynamicRulesRenderer dynamicRulesRenderer;
+    private final HudConfigProfilesRenderer profilesRenderer;
 
     public HudConfigPage(
             @Nonnull HudConfigUiService uiService,
@@ -47,6 +42,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         this.playerRef = playerRef;
         this.visibilityRenderer = new HudConfigVisibilityRenderer(presenter, renderIndex);
         this.dynamicRulesRenderer = new HudConfigDynamicRulesRenderer(renderIndex);
+        this.profilesRenderer = new HudConfigProfilesRenderer(presenter);
     }
 
     @Override
@@ -217,7 +213,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         renderChrome(commands, session);
 
         switch (session.getCurrentView()) {
-            case PROFILES -> renderProfilesView(commands, events, session);
+            case PROFILES -> profilesRenderer.renderProfilesView(commands, events, session);
             case VISIBILITY -> visibilityRenderer.renderVisibilityView(commands, events, session);
             case DYNAMIC_RULES -> dynamicRulesRenderer.renderDynamicRulesView(commands, events, session);
         }
@@ -244,82 +240,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
         commands.set("#ApplyButton.Text", "APPLY");
         commands.set("#CancelButton.Text", "CANCEL");
-    }
-
-    private void renderProfilesView(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session
-    ) {
-        commands.append("#ContentHost", PROFILES_UI);
-        commands.clear("#ProfilesList");
-
-        commands.set(
-                "#ViewHelpText.TextSpans",
-                Message.raw(session.getCurrentView().helpText())
-        );
-
-        List<Profile> profiles = Arrays.stream(Profile.values())
-                .filter(profile -> profile != Profile.CUSTOM)
-                .toList();
-
-        Profile currentProfile = presenter.resolveCurrentProfile(
-                session.getDraftHudComponents(),
-                session.getDraftDynamicHud()
-        );
-
-        int rowIndex = 0;
-        boolean isSelected;
-
-        for (Profile profile : profiles) {
-            isSelected = currentProfile == profile;
-
-            commands.append("#ProfilesList", PROFILE_ROW_UI);
-
-            String rowRootSelector = "#ProfilesList[" + rowIndex + "]";
-            String labelSelector = rowRootSelector + " #ProfileLabel";
-            String labelSelectedSelector = rowRootSelector + " #ProfileSelectedLabel";
-            String descriptionSelector = rowRootSelector + " #ProfileDescription";
-            String selectProfileButtonSelector = rowRootSelector + " #SelectProfileButton";
-            String selectedProfile = rowRootSelector + " #SelectedProfile";
-
-            commands.set(labelSelector + ".TextSpans", Message.raw(profile.label().toUpperCase() + " PROFILE"));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(profile.label().toUpperCase() + " PROFILE <APPLIED>"));
-            commands.set(labelSelector + ".Visible", !isSelected);
-            commands.set(labelSelectedSelector + ".Visible", isSelected);
-            commands.set(descriptionSelector + ".TextSpans", Message.raw(profile.description()));
-            commands.set(selectProfileButtonSelector + ".Visible", !isSelected);
-            commands.set(selectedProfile + ".Visible", isSelected);
-
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    selectProfileButtonSelector,
-                    PageEventData.action("SELECT_PROFILE").append("Value", profile.name()),
-                    false
-            );
-
-            rowIndex++;
-        }
-
-        isSelected = currentProfile == Profile.CUSTOM;
-
-        if (isSelected) {
-            commands.append("#ProfilesList", PROFILE_ROW_UI);
-
-            String rowRootSelector = "#ProfilesList[" + rowIndex + "]";
-            String labelSelector = rowRootSelector + " #ProfileLabel";
-            String labelSelectedSelector = rowRootSelector + " #ProfileSelectedLabel";
-            String descriptionSelector = rowRootSelector + " #ProfileDescription";
-            String selectedProfile = rowRootSelector + " #SelectedProfile";
-
-            commands.set(labelSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase()));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase() + " PROFILE <APPLIED>"));
-            commands.set(descriptionSelector + ".TextSpans", Message.raw(Profile.CUSTOM.description()));
-
-            commands.set(labelSelector + ".Visible", false);
-            commands.set(labelSelectedSelector + ".Visible", true);
-            commands.set(selectedProfile + ".Visible", true);
-        }
     }
 
     @Nullable
