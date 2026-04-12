@@ -25,9 +25,7 @@ public final class HudRuleEvaluator {
         state.clearDynamicHidden();
 
         for (HudEntry entry : DYNAMIC_ENTRIES) {
-            if (!entry.isHidden(hudConfig)) {
-                continue;
-            }
+            if (!entry.isHidden(hudConfig)) { continue; }
 
             DynamicHudRuleConfig ruleConfig = entry.getDynamicRuleConfig(dynamicConfig);
             boolean shouldShow = shouldShowDynamic(ruleConfig, triggersContext);
@@ -42,14 +40,10 @@ public final class HudRuleEvaluator {
             DynamicHudRuleConfig ruleConfig,
             DynamicHudTriggersContext triggersContext
     ) {
-        if (ruleConfig == null) {
-            return false;
-        }
+        if (ruleConfig == null) { return false; }
 
         EnumSet<DynamicHudTriggers> rules = ruleConfig.getRules();
-        if (rules.isEmpty()) {
-            return false;
-        }
+        if (rules.isEmpty()) { return false; }
 
         for (DynamicHudTriggers trigger : rules) {
             if (matchesTrigger(trigger, ruleConfig, triggersContext)) {
@@ -67,22 +61,18 @@ public final class HudRuleEvaluator {
     ) {
         return switch (trigger) {
             case HEALTH_NOT_FULL ->
-                    triggersContext.healthBar() != null
-                            && triggersContext.healthBar().isBelowPercent(ruleConfig.getThreshold());
+                    triggersContext.healthBar().isBelowPercent(ruleConfig.getThreshold());
 
             case STAMINA_NOT_FULL ->
-                    triggersContext.staminaBar() != null
-                            && triggersContext.staminaBar().isBelowPercent(ruleConfig.getThreshold());
+                    triggersContext.staminaBar().isBelowPercent(ruleConfig.getThreshold());
 
             case MANA_NOT_FULL ->
-                    triggersContext.manaBar() != null
-                            && triggersContext.manaBar().isBelowPercent(ruleConfig.getThreshold());
+                    triggersContext.manaBar().isBelowPercent(ruleConfig.getThreshold());
 
             case OXYGEN_NOT_FULL ->
-                    triggersContext.oxygenBar() != null
-                            && triggersContext.oxygenBar().isBelowPercent(ruleConfig.getThreshold());
+                    triggersContext.oxygenBar().isBelowPercent(ruleConfig.getThreshold());
 
-            default -> trigger.test(triggersContext);
+            default -> trigger.matchesSignal(triggersContext);
         };
     }
 }

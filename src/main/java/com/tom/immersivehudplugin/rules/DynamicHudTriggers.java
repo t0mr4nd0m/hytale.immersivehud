@@ -2,49 +2,48 @@ package com.tom.immersivehudplugin.rules;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public enum DynamicHudTriggers {
 
-    HOTBAR_INPUT(Category.INTERACTION, DynamicHudTriggersContext::hotbarInput),
-    CONSUMABLE_USE(Category.INTERACTION, DynamicHudTriggersContext::consumableUse),
-    TARGET_ENTITY(Category.INTERACTION, DynamicHudTriggersContext::targetEntity),
-    INTERACTABLE_BLOCK(Category.INTERACTION, DynamicHudTriggersContext::interactableBlock),
+    HOTBAR_INPUT(Category.INTERACTION, Source.SIGNAL),
+    CONSUMABLE_USE(Category.INTERACTION, Source.SIGNAL),
+    TARGET_ENTITY(Category.INTERACTION, Source.SIGNAL),
+    INTERACTABLE_BLOCK(Category.INTERACTION, Source.SIGNAL),
 
-    PLAYER_MOVING(Category.MOVEMENT, DynamicHudTriggersContext::playerMoving),
-    PLAYER_WALKING(Category.MOVEMENT, DynamicHudTriggersContext::playerWalking),
-    PLAYER_RUNNING(Category.MOVEMENT, DynamicHudTriggersContext::playerRunning),
-    PLAYER_SPRINTING(Category.MOVEMENT, DynamicHudTriggersContext::playerSprinting),
-    PLAYER_MOUNTING(Category.MOVEMENT, DynamicHudTriggersContext::playerMounting),
-    PLAYER_SWIMMING(Category.MOVEMENT, DynamicHudTriggersContext::playerSwimming),
-    PLAYER_FLYING(Category.MOVEMENT, DynamicHudTriggersContext::playerFlying),
-    PLAYER_GLIDING(Category.MOVEMENT, DynamicHudTriggersContext::playerGliding),
-    PLAYER_JUMPING(Category.MOVEMENT, DynamicHudTriggersContext::playerJumping),
-    PLAYER_CROUCHING(Category.MOVEMENT, DynamicHudTriggersContext::playerCrouching),
-    PLAYER_CLIMBING(Category.MOVEMENT, DynamicHudTriggersContext::playerClimbing),
-    PLAYER_FALLING(Category.MOVEMENT, DynamicHudTriggersContext::playerFalling),
-    PLAYER_ROLLING(Category.MOVEMENT, DynamicHudTriggersContext::playerRolling),
-    PLAYER_IDLE(Category.MOVEMENT, DynamicHudTriggersContext::playerIdle),
-    PLAYER_SITTING(Category.MOVEMENT, DynamicHudTriggersContext::playerSitting),
-    PLAYER_SLEEPING(Category.MOVEMENT, DynamicHudTriggersContext::playerSleeping),
-    PLAYER_IN_FLUID(Category.MOVEMENT, DynamicHudTriggersContext::playerInFluid),
-    PLAYER_ON_GROUND(Category.MOVEMENT, DynamicHudTriggersContext::playerOnGround),
+    PLAYER_MOVING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_WALKING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_RUNNING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_SPRINTING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_MOUNTING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_SWIMMING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_FLYING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_GLIDING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_JUMPING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_CROUCHING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_CLIMBING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_FALLING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_ROLLING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_IDLE(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_SITTING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_SLEEPING(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_IN_FLUID(Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_ON_GROUND(Category.MOVEMENT, Source.SIGNAL),
 
-    CHARGING_WEAPON(Category.COMBAT, DynamicHudTriggersContext::chargingWeapon),
-    HOLDING_RANGED_WEAPON(Category.COMBAT, DynamicHudTriggersContext::holdingRangedWeapon),
-    HOLDING_MELEE_WEAPON(Category.COMBAT, DynamicHudTriggersContext::holdingMeleeWeapon),
+    CHARGING_WEAPON(Category.COMBAT, Source.SIGNAL),
+    HOLDING_RANGED_WEAPON(Category.COMBAT, Source.SIGNAL),
+    HOLDING_MELEE_WEAPON(Category.COMBAT, Source.SIGNAL),
 
-    HEALTH_NOT_FULL(Category.STATUS, _ -> true),
-    STAMINA_NOT_FULL(Category.STATUS, _ -> true),
-    MANA_NOT_FULL(Category.STATUS, _ -> true),
-    OXYGEN_NOT_FULL(Category.STATUS, _ -> true);
+    HEALTH_NOT_FULL(Category.STATUS, Source.STATUS),
+    STAMINA_NOT_FULL(Category.STATUS, Source.STATUS),
+    MANA_NOT_FULL(Category.STATUS, Source.STATUS),
+    OXYGEN_NOT_FULL(Category.STATUS, Source.STATUS);
 
     public enum Category {
-        COMBAT      ("COMBAT"),
-        INTERACTION ("INTERACTION"),
-        MOVEMENT    ("MOVEMENT"),
-        STATUS      ("STATUS");
+        COMBAT("COMBAT"),
+        INTERACTION("INTERACTION"),
+        MOVEMENT("MOVEMENT"),
+        STATUS("STATUS");
 
         private final String label;
 
@@ -57,29 +56,34 @@ public enum DynamicHudTriggers {
         }
     }
 
-    private final Category category;
-    private final Predicate<DynamicHudTriggersContext> predicate;
+    public enum Source {
+        SIGNAL,
+        STATUS
+    }
 
-    DynamicHudTriggers(
-            Category category,
-            Predicate<DynamicHudTriggersContext> predicate
-    ) {
+    private final Category category;
+    private final Source source;
+
+    DynamicHudTriggers(Category category, Source source) {
         this.category = category;
-        this.predicate = predicate;
+        this.source = source;
     }
 
     public Category category() {
         return category;
     }
 
-    public boolean test(DynamicHudTriggersContext ctx) {
-        return predicate.test(ctx);
+    public Source source() {
+        return source;
+    }
+
+    public boolean matchesSignal(DynamicHudTriggersContext ctx) {
+        if (ctx == null || Source.SIGNAL != source) { return false; }
+        return ctx.active(this);
     }
 
     public static DynamicHudTriggers fromString(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
+        if (value == null || value.isBlank()) { return null; }
 
         String normalized = value.trim()
                 .toUpperCase()
