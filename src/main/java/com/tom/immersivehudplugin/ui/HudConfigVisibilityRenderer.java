@@ -4,8 +4,8 @@ import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -47,7 +47,7 @@ public final class HudConfigVisibilityRenderer {
         HudComponentRegistry.Group expandedGroup = session.getExpandedVisibilityGroup();
 
         for (HudComponentRegistry.Group group : HudComponentRegistry.groupOrder) {
-            List<HudEntry> entries = HudComponentRegistry.allList().stream()
+            List<HudComponent> entries = HudComponentRegistry.allList().stream()
                     .filter(entry -> entry.group() == group)
                     .toList();
 
@@ -111,7 +111,7 @@ public final class HudConfigVisibilityRenderer {
                 continue;
             }
 
-            for (HudEntry entry : entries) {
+            for (HudComponent entry : entries) {
                 boolean hidden = session.isHidden(entry);
 
                 commands.append("#VisibilityList", VISIBILITY_ROW_UI);
@@ -171,7 +171,7 @@ public final class HudConfigVisibilityRenderer {
             return;
         }
 
-        HudEntry entry = HudComponentRegistry.find(componentKey);
+        HudComponent entry = HudComponentRegistry.find(componentKey);
         if (entry == null) {
             return;
         }

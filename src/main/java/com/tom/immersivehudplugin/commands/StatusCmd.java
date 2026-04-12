@@ -13,9 +13,9 @@ import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -36,15 +36,15 @@ public final class StatusCmd extends AbstractPlayerCommand {
     private static final Color HIDE_COLOR = Color.RED;
     private static final Color ERROR_COLOR = Color.RED;
 
-    private final HudRuntimeCoordinator hudRuntimeCoordinator;
+    private final HudRuntimeService hudRuntimeService;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     public StatusCmd(
-            HudRuntimeCoordinator hudRuntimeCoordinator,
+            HudRuntimeService hudRuntimeService,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
         super("status", "Show your ImmersiveHud settings");
-        this.hudRuntimeCoordinator = hudRuntimeCoordinator;
+        this.hudRuntimeService = hudRuntimeService;
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
@@ -61,7 +61,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        PlayerConfig playerCfg = getPlayerConfig(hudRuntimeCoordinator, playerRef, context);
+        PlayerConfig playerCfg = getPlayerConfig(hudRuntimeService, playerRef, context);
         if (playerCfg == null) { return; }
 
         GlobalConfig global = globalConfigSupplier.get();
@@ -76,11 +76,11 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
     @Nullable
     private static PlayerConfig getPlayerConfig(
-            @Nonnull HudRuntimeCoordinator hudRuntimeCoordinator,
+            @Nonnull HudRuntimeService hudRuntimeService,
             @Nonnull PlayerRef playerRef,
             @Nonnull CommandContext context
     ) {
-        PlayerConfig playerConfig = hudRuntimeCoordinator.requirePlayerConfig(playerRef);
+        PlayerConfig playerConfig = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerConfig == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return null;
@@ -103,21 +103,21 @@ public final class StatusCmd extends AbstractPlayerCommand {
     ) {
         sendSectionHeader(context, "HudComponents");
 
-        Map<HudComponentRegistry.Group, List<HudEntry>> byGroup = HudComponentRegistry.allList().stream()
+        Map<HudComponentRegistry.Group, List<HudComponent>> byGroup = HudComponentRegistry.allList().stream()
                 .collect(Collectors.groupingBy(
-                        HudEntry::group,
+                        HudComponent::group,
                         java.util.LinkedHashMap::new,
                         Collectors.toList()
                 ));
 
         for (HudComponentRegistry.Group group : HudComponentRegistry.Group.values()) {
 
-            List<HudEntry> entries = byGroup.get(group);
+            List<HudComponent> entries = byGroup.get(group);
             if (entries == null || entries.isEmpty()) { continue; }
 
             sendSectionHeader(context, group.label);
 
-            for (HudEntry entry : entries) {
+            for (HudComponent entry : entries) {
                 sendHudEntryLine(context, entry, hud, dynamic);
             }
         }
@@ -125,7 +125,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
     private static void sendHudEntryLine(
             @Nonnull CommandContext context,
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             @Nonnull HudComponentsConfig hud,
             @Nonnull DynamicHudConfig dynamic
     ) {

@@ -1,20 +1,20 @@
-package com.tom.immersivehudplugin.visibility;
+package com.tom.immersivehudplugin.runtime.visibility;
 
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
-import com.tom.immersivehudplugin.context.PlayerTickContext;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTriggerContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 import java.util.List;
 
-public final class HudVisibilityService {
+public final class HudVisibilityCoordinator {
 
-    private static final List<HudEntry> ALL_ENTRIES = HudComponentRegistry.allList();
-    private static final List<HudEntry> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
-    private static final List<HudEntry> STATIC_ENTRIES = ALL_ENTRIES.stream()
+    private static final List<HudComponent> ALL_ENTRIES = HudComponentRegistry.allList();
+    private static final List<HudComponent> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
+    private static final List<HudComponent> STATIC_ENTRIES = ALL_ENTRIES.stream()
             .filter(entry -> !entry.supportsDynamicRules())
             .toList();
 
@@ -22,7 +22,7 @@ public final class HudVisibilityService {
     private final HudDeltaApplier hudDeltaApplier = new HudDeltaApplier();
 
     public boolean hasAnyDynamicHudEnabled(HudComponentsConfig hudConfig) {
-        for (HudEntry entry : DYNAMIC_ENTRIES) {
+        for (HudComponent entry : DYNAMIC_ENTRIES) {
             if (entry.isHidden(hudConfig)) {
                 return true;
             }
@@ -45,7 +45,7 @@ public final class HudVisibilityService {
     public void rebuildStaticHidden(PlayerHudState state, HudComponentsConfig hudConfig) {
         state.clearStaticHidden();
 
-        for (HudEntry entry : STATIC_ENTRIES) {
+        for (HudComponent entry : STATIC_ENTRIES) {
             if (entry.isHidden(hudConfig)) {
                 state.addStaticHidden(entry.hudComponent());
             }
@@ -59,7 +59,7 @@ public final class HudVisibilityService {
             PlayerHudState state,
             HudComponentsConfig hudConfig,
             DynamicHudConfig dynamicConfig,
-            DynamicHudTriggersContext triggersContext
+            HudTriggerContext triggersContext
     ) {
         hudRuleEvaluator.rebuildDynamicHidden(state, hudConfig, dynamicConfig, triggersContext);
     }

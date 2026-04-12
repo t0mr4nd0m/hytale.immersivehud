@@ -14,9 +14,9 @@ import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.profiles.Profile;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -105,7 +105,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
             case "TOGGLE_VISIBILITY" -> {
                 if (data.getValue() != null && !data.getValue().isBlank()) {
-                    HudEntry entry = HudComponentRegistry.find(data.getValue());
+                    HudComponent entry = HudComponentRegistry.find(data.getValue());
                     if (entry == null) {
                         return;
                     }
@@ -128,8 +128,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             }
 
             case "TOGGLE_RULE" -> {
-                DynamicHudTriggers rule = DynamicHudTriggers.fromString(data.getValue());
-                HudEntry entry = HudComponentRegistry.find(data.getComponent());
+                HudTrigger rule = HudTrigger.fromString(data.getValue());
+                HudComponent entry = HudComponentRegistry.find(data.getComponent());
 
                 if (rule != null && entry != null) {
                     session.toggleRule(entry, rule);
@@ -142,7 +142,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             }
 
             case "DYN_SET_THRESHOLD" -> {
-                HudEntry entry = HudComponentRegistry.find(data.getComponent());
+                HudComponent entry = HudComponentRegistry.find(data.getComponent());
                 if (entry == null || !entry.supportsThreshold() || !session.isDynamicThresholdEnabled(entry)) {
                     return;
                 }
@@ -157,7 +157,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
             case "DYN_REVEAL_MORE" -> {
                 String componentKey = data.getComponent();
-                HudEntry entry = HudComponentRegistry.find(componentKey);
+                HudComponent entry = HudComponentRegistry.find(componentKey);
 
                 if (entry != null) {
                     session.revealMoreTriggers(componentKey);

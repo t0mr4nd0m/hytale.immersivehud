@@ -10,14 +10,12 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
-import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.context.HudContextBuilder;
-import com.tom.immersivehudplugin.context.PlayerTickContext;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
-import com.tom.immersivehudplugin.visibility.HudVisibilityService;
+import com.tom.immersivehudplugin.config.PlayerConfigStore;
+import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
+import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -28,12 +26,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-public final class HudRuntimeCoordinator {
+public final class HudRuntimeService {
 
     private final JavaPlugin plugin;
-    private final PlayerConfigManager playerConfigManager;
-    private final HudContextBuilder hudContextBuilder;
-    private final HudVisibilityService hudVisibilityService;
+    private final PlayerConfigStore playerConfigStore;
     private final HeldItemSignalTracker heldItemSignalTracker;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
@@ -42,24 +38,23 @@ public final class HudRuntimeCoordinator {
     private final Map<UUID, PlayerHudState> playerState = new ConcurrentHashMap<>();
 
     private volatile boolean inboundRegistered;
+    private volatile boolean playerEventsRegistered;
     private volatile ScheduledFuture<?> tickTask;
     private volatile int runningIntervalMs = -1;
 
-    public HudRuntimeCoordinator(
+    public HudRuntimeService(
             JavaPlugin plugin,
-            PlayerConfigManager playerConfigManager,
+            PlayerConfigStore playerConfigStore,
             HudContextBuilder hudContextBuilder,
-            HudVisibilityService hudVisibilityService,
+            HudVisibilityCoordinator hudVisibilityCoordinator,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
         this.plugin = plugin;
-        this.playerConfigManager = playerConfigManager;
-        this.hudContextBuilder = hudContextBuilder;
-        this.hudVisibilityService = hudVisibilityService;
+        this.playerConfigStore = playerConfigStore;
         this.heldItemSignalTracker = new HeldItemSignalTracker();
         this.hudTickProcessor = new HudTickProcessor(
                 hudContextBuilder,
-                hudVisibilityService,
+                hudVisibilityCoordinator,
                 heldItemSignalTracker
         );
         this.globalConfigSupplier = globalConfigSupplier;
@@ -80,7 +75,7 @@ public final class HudRuntimeCoordinator {
         }
 
         for (UUID uuid : playerState.keySet()) {
-            playerConfigManager.save(uuid);
+            playerConfigStore.save(uuid);
         }
 
         playerState.clear();
@@ -115,7 +110,7 @@ public final class HudRuntimeCoordinator {
     }
 
     public void markPlayerConfigDirty(UUID uuid) {
-        playerConfigManager.markDirty(uuid);
+        playerConfigStore.markDirty(uuid);
         PlayerHudState state = playerState.get(uuid);
         if (state != null) { state.invalidateDynamicHudEnabledCache(); }
     }
@@ -127,15 +122,15 @@ public final class HudRuntimeCoordinator {
     }
 
     public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
-        PlayerConfig cached = playerConfigManager.getCached(uuid);
+        PlayerConfig cached = playerConfigStore.getCached(uuid);
         if (cached != null) { return cached; }
-        return playerConfigManager.loadOrCreate(uuid, getGlobalConfig());
+        return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
     public void applyAndSavePlayerConfig(PlayerRef playerRef) {
         UUID uuid = playerRef.getUuid();
         markPlayerConfigDirty(uuid);
-        playerConfigManager.saveAsync(uuid);
+        playerConfigStore.saveAsync(uuid);
         markPlayerStaticHudDirty(playerRef);
     }
 
@@ -158,40 +153,31 @@ public final class HudRuntimeCoordinator {
 
     private void registerPlayerEvents() {
 
+        if (playerEventsRegistered) { return; }
+        playerEventsRegistered = true;
+
         plugin.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
-
-            @SuppressWarnings("removal")
             UUID uuid = event.getPlayer().getUuid();
-
-            long now = nowMs();
             int hideDelay = hideDelayMs(getGlobalConfig());
-
             getOrLoadPlayerConfig(uuid);
-
             PlayerHudState state = stateFor(uuid);
-            resetPlayerRuntimeState(state, hideDelay, now);
+            state.reset(hideDelay);
         });
 
         plugin.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, event -> {
             UUID uuid = event.getPlayerRef().getUuid();
             playerState.remove(uuid);
-            playerConfigManager.saveAndUnload(uuid);
+            playerConfigStore.saveAndUnload(uuid);
         });
-    }
-
-    private void resetPlayerRuntimeState(PlayerHudState state, int hideDelay, long now) {
-        state.reset(hideDelay);
-        //state.t.pulse(HudSignal.HOTBAR_INPUT, now, hideDelay);
     }
 
     private void tickReadyPlayers() {
 
         Universe universe = Universe.get();
-        long now = nowMs();
         GlobalConfig global = getGlobalConfig();
 
         for (Map.Entry<UUID, PlayerHudState> entry : playerState.entrySet()) {
-            processReadyPlayerTick(universe, entry.getKey(), entry.getValue(), global, now);
+            processReadyPlayerTick(universe, entry.getKey(), entry.getValue(), global);
         }
     }
 
@@ -199,8 +185,7 @@ public final class HudRuntimeCoordinator {
             Universe universe,
             UUID uuid,
             PlayerHudState state,
-            GlobalConfig global,
-            long now
+            GlobalConfig global
     ) {
 
         state.hideDelayMsHint = hideDelayMs(global);
@@ -223,27 +208,18 @@ public final class HudRuntimeCoordinator {
         if (resolved == null) { return; }
 
         long now = nowMs();
-        checkAndToggle(resolved.playerRef(), resolved.world(), global, now);
-    }
-
-    private void checkAndToggle(
-            PlayerRef playerRef,
-            World world,
-            GlobalConfig global,
-            long now
-    ) {
-        UUID uuid = playerRef.getUuid();
         PlayerHudState state = stateFor(uuid);
         PlayerConfig playerConfig = getOrLoadPlayerConfig(uuid);
 
         hudTickProcessor.processPlayerTick(
-                playerRef,
-                world,
+                resolved.playerRef(),
+                resolved.world(),
                 global,
                 now,
                 state,
                 playerConfig
         );
+
     }
 
     private boolean isTickTaskAlreadyRunningFor(int wantedInterval) {
@@ -279,13 +255,6 @@ public final class HudRuntimeCoordinator {
     private static long nowMs() {
         return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
     }
-
-    private record TickEvaluation(
-            PlayerHudState state,
-            HudComponentsConfig hudConfig,
-            DynamicHudConfig dynamicConfig,
-            PlayerTickContext tickContext
-    ) {}
 
     private record ResolvedPlayerWorld(
             UUID uuid,

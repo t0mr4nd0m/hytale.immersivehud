@@ -1,4 +1,4 @@
-package com.tom.immersivehudplugin.registry;
+package com.tom.immersivehudplugin.hud.component;
 
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
@@ -59,10 +59,10 @@ public final class HudComponentRegistry {
         }
     }
 
-    private static final List<HudEntry> ALL_LIST;
-    private static final List<HudEntry> DYNAMIC_LIST;
-    private static final Map<String, HudEntry> REGISTRY;
-    private static final Map<String, HudEntry> DYNAMIC_REGISTRY;
+    private static final List<HudComponent> ALL_LIST;
+    private static final List<HudComponent> DYNAMIC_LIST;
+    private static final Map<String, HudComponent> REGISTRY;
+    private static final Map<String, HudComponent> DYNAMIC_REGISTRY;
 
     public static final List<Group> groupOrder = List.of(
             Group.CORE,
@@ -74,38 +74,38 @@ public final class HudComponentRegistry {
     );
 
     static {
-        ALL_LIST = List.copyOf(HudDefinitions.createAll());
+        ALL_LIST = List.copyOf(HudComponentCatalog.createAll());
         DYNAMIC_LIST = ALL_LIST.stream()
-                .filter(HudEntry::supportsDynamicRules)
+                .filter(HudComponent::supportsDynamicRules)
                 .toList();
 
         REGISTRY = buildRegistry(ALL_LIST);
         DYNAMIC_REGISTRY = buildRegistry(DYNAMIC_LIST);
     }
 
-    private static Map<String, HudEntry> buildRegistry(List<HudEntry> entries) {
-        Map<String, HudEntry> map = new LinkedHashMap<>();
-        for (HudEntry entry : entries) {
+    private static Map<String, HudComponent> buildRegistry(List<HudComponent> entries) {
+        Map<String, HudComponent> map = new LinkedHashMap<>();
+        for (HudComponent entry : entries) {
             map.put(normalize(entry.key()), entry);
         }
         return Collections.unmodifiableMap(map);
     }
 
-    public static List<HudEntry> allList() {
+    public static List<HudComponent> allList() {
         return ALL_LIST;
     }
 
-    public static List<HudEntry> dynamicList() {
+    public static List<HudComponent> dynamicList() {
         return DYNAMIC_LIST;
     }
 
     @Nullable
-    public static HudEntry find(@Nullable String key) {
+    public static HudComponent find(@Nullable String key) {
         return REGISTRY.get(normalize(key));
     }
 
     @Nullable
-    public static HudEntry findDynamic(@Nullable String key) {
+    public static HudComponent findDynamic(@Nullable String key) {
         return DYNAMIC_REGISTRY.get(normalize(key));
     }
 
@@ -116,7 +116,7 @@ public final class HudComponentRegistry {
     public static HudComponentsConfig buildDefaultHudComponents() {
         HudComponentsConfig cfg = new HudComponentsConfig();
 
-        for (HudEntry entry : allList()) {
+        for (HudComponent entry : allList()) {
             entry.setHidden(cfg, entry.defaultHidden());
         }
 
@@ -126,7 +126,7 @@ public final class HudComponentRegistry {
     public static DynamicHudConfig buildDefaultDynamicHud() {
         DynamicHudConfig cfg = new DynamicHudConfig();
 
-        for (HudEntry entry : dynamicList()) {
+        for (HudComponent entry : dynamicList()) {
 
             DynamicHudRuleConfig ruleCfg = entry.getDynamicRuleConfig(cfg);
 

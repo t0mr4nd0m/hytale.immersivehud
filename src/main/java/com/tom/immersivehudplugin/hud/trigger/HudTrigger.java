@@ -1,10 +1,10 @@
-package com.tom.immersivehudplugin.rules;
+package com.tom.immersivehudplugin.hud.trigger;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public enum DynamicHudTriggers {
+public enum HudTrigger {
 
     HOTBAR_INPUT(Category.INTERACTION, Source.SIGNAL),
     CONSUMABLE_USE(Category.INTERACTION, Source.SIGNAL),
@@ -64,7 +64,7 @@ public enum DynamicHudTriggers {
     private final Category category;
     private final Source source;
 
-    DynamicHudTriggers(Category category, Source source) {
+    HudTrigger(Category category, Source source) {
         this.category = category;
         this.source = source;
     }
@@ -77,12 +77,12 @@ public enum DynamicHudTriggers {
         return source;
     }
 
-    public boolean matchesSignal(DynamicHudTriggersContext ctx) {
+    public boolean matchesSignal(HudTriggerContext ctx) {
         if (ctx == null || Source.SIGNAL != source) { return false; }
         return ctx.active(this);
     }
 
-    public static DynamicHudTriggers fromString(String value) {
+    public static HudTrigger fromString(String value) {
         if (value == null || value.isBlank()) { return null; }
 
         String normalized = value.trim()
@@ -91,13 +91,13 @@ public enum DynamicHudTriggers {
                 .replace(' ', '_');
 
         try {
-            return DynamicHudTriggers.valueOf(normalized);
+            return HudTrigger.valueOf(normalized);
         } catch (IllegalArgumentException ex) {
             return null;
         }
     }
 
-    public static String prettyName(DynamicHudTriggers trigger) {
+    public static String prettyName(HudTrigger trigger) {
         return Arrays.stream(trigger.name().split("_"))
                 .map(String::toUpperCase)
                 .collect(Collectors.joining(" "));

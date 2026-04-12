@@ -1,12 +1,12 @@
-package com.tom.immersivehudplugin.runtime;
+package com.tom.immersivehudplugin.runtime.signal;
 
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
-import com.tom.immersivehudplugin.context.PlayerTickContext;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
-import com.tom.immersivehudplugin.utils.ItemInHand;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
+import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 import javax.annotation.Nullable;
 
@@ -37,17 +37,17 @@ public final class HeldItemSignalTracker {
         }
 
         if (chargingEnd) {
-            state.t.clear(DynamicHudTriggers.CHARGING_WEAPON);
+            state.t.clear(HudTrigger.CHARGING_WEAPON);
         }
 
         if (chargingStart) {
-            state.t.pulse(DynamicHudTriggers.CHARGING_WEAPON, now, state.hideDelayMsHint);
+            state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMsHint);
         }
 
         if (hotbarEvent) {
             state.heldItemRefreshRequested = true;
-            state.t.pulse(DynamicHudTriggers.HOTBAR_INPUT, now, state.hideDelayMsHint);
-            state.t.clear(DynamicHudTriggers.CHARGING_WEAPON);
+            state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMsHint);
+            state.t.clear(HudTrigger.CHARGING_WEAPON);
         }
     }
 
@@ -62,23 +62,23 @@ public final class HeldItemSignalTracker {
         Item heldItem = getHeldItemFromInventory(state, tickContext);
 
         state.applyHeldItemState(
-                ItemInHand.isRangedWeapon(heldItem),
-                ItemInHand.isMeleeWeapon(heldItem),
-                ItemInHand.isConsumable(heldItem)
+                HeldItemState.isRangedWeapon(heldItem),
+                HeldItemState.isMeleeWeapon(heldItem),
+                HeldItemState.isConsumable(heldItem)
         );
     }
 
     public void cleanupWeaponSignals(PlayerHudState state) {
         if (!state.meleeWeaponInHand) {
-            state.t.clear(DynamicHudTriggers.HOLDING_MELEE_WEAPON);
+            state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
         }
 
         if (!state.rangedWeaponInHand) {
-            state.t.clear(DynamicHudTriggers.HOLDING_RANGED_WEAPON);
+            state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
         }
 
         if (!state.meleeWeaponInHand && !state.rangedWeaponInHand) {
-            state.t.clear(DynamicHudTriggers.CHARGING_WEAPON);
+            state.t.clear(HudTrigger.CHARGING_WEAPON);
         }
     }
 
@@ -89,8 +89,8 @@ public final class HeldItemSignalTracker {
     ) {
         Item item = Item.getAssetMap().getAsset(itemInHandId);
 
-        if (ItemInHand.isConsumable(item)) {
-            state.t.pulse(DynamicHudTriggers.CONSUMABLE_USE, now, state.hideDelayMsHint);
+        if (HeldItemState.isConsumable(item)) {
+            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMsHint);
         }
     }
 
@@ -139,7 +139,7 @@ public final class HeldItemSignalTracker {
 
     private static boolean isChargingStart(SyncInteractionChain update) {
         Item item = Item.getAssetMap().getAsset(update.itemInHandId);
-        return isPrimaryStart(update) && ItemInHand.isWeapon(item);
+        return isPrimaryStart(update) && HeldItemState.isWeapon(item);
     }
 
     private static boolean isChargingEnd(SyncInteractionChain update) {

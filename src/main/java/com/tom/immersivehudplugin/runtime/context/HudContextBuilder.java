@@ -1,4 +1,4 @@
-package com.tom.immersivehudplugin.context;
+package com.tom.immersivehudplugin.runtime.context;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -9,11 +9,11 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
-import com.tom.immersivehudplugin.runtime.MovementSignalTracker;
+import com.tom.immersivehudplugin.hud.trigger.HudTriggerContext;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
-import com.tom.immersivehudplugin.runtime.ReticleSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -65,7 +65,7 @@ public final class HudContextBuilder {
         }
     }
 
-    public DynamicHudTriggersContext buildDynamicHudTriggerContext(
+    public HudTriggerContext buildDynamicHudTriggerContext(
             PlayerHudState state,
             World world,
             PlayerTickContext tickContext,
@@ -111,50 +111,50 @@ public final class HudContextBuilder {
         state.oxygenBar.update(getCurrentBar(tickContext, oxygenState), getMaxBar(tickContext, oxygenState));
     }
 
-    private DynamicHudTriggersContext createDynamicHudTriggerContext(
+    private HudTriggerContext createDynamicHudTriggerContext(
             PlayerHudState state,
             long now
     ) {
-        EnumSet<DynamicHudTriggers> activeSignals = EnumSet.noneOf(DynamicHudTriggers.class);
+        EnumSet<HudTrigger> activeSignals = EnumSet.noneOf(HudTrigger.class);
 
-        addIfActive(activeSignals, state, DynamicHudTriggers.HOTBAR_INPUT, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.CONSUMABLE_USE, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.TARGET_ENTITY, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.INTERACTABLE_BLOCK, now);
+        addIfActive(activeSignals, state, HudTrigger.HOTBAR_INPUT, now);
+        addIfActive(activeSignals, state, HudTrigger.CONSUMABLE_USE, now);
+        addIfActive(activeSignals, state, HudTrigger.TARGET_ENTITY, now);
+        addIfActive(activeSignals, state, HudTrigger.INTERACTABLE_BLOCK, now);
 
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_MOVING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_WALKING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_RUNNING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_SPRINTING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_MOUNTING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_SWIMMING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_FLYING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_GLIDING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_JUMPING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_CROUCHING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_CLIMBING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_FALLING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_ROLLING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_IDLE, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_SITTING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_SLEEPING, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_IN_FLUID, now);
-        addIfActive(activeSignals, state, DynamicHudTriggers.PLAYER_ON_GROUND, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_MOVING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_WALKING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_RUNNING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_SPRINTING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_MOUNTING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_SWIMMING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_FLYING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_GLIDING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_JUMPING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_CROUCHING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_CLIMBING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_FALLING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_ROLLING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_IDLE, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_SITTING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_SLEEPING, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_IN_FLUID, now);
+        addIfActive(activeSignals, state, HudTrigger.PLAYER_ON_GROUND, now);
 
         if ((state.rangedWeaponInHand || state.meleeWeaponInHand)
-                && state.t.active(DynamicHudTriggers.CHARGING_WEAPON, now)) {
-            activeSignals.add(DynamicHudTriggers.CHARGING_WEAPON);
+                && state.t.active(HudTrigger.CHARGING_WEAPON, now)) {
+            activeSignals.add(HudTrigger.CHARGING_WEAPON);
         }
 
         if (state.rangedWeaponInHand) {
-            activeSignals.add(DynamicHudTriggers.HOLDING_RANGED_WEAPON);
+            activeSignals.add(HudTrigger.HOLDING_RANGED_WEAPON);
         }
 
         if (state.meleeWeaponInHand) {
-            activeSignals.add(DynamicHudTriggers.HOLDING_MELEE_WEAPON);
+            activeSignals.add(HudTrigger.HOLDING_MELEE_WEAPON);
         }
 
-        return new DynamicHudTriggersContext(
+        return new HudTriggerContext(
                 activeSignals,
                 state.healthBar,
                 state.staminaBar,
@@ -164,9 +164,9 @@ public final class HudContextBuilder {
     }
 
     private void addIfActive(
-            EnumSet<DynamicHudTriggers> activeSignals,
+            EnumSet<HudTrigger> activeSignals,
             PlayerHudState state,
-            DynamicHudTriggers trigger,
+            HudTrigger trigger,
             long now
     ) {
         if (state.t.active(trigger, now)) {

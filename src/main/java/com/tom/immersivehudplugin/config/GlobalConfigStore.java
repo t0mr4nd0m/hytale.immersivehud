@@ -1,23 +1,20 @@
-package com.tom.immersivehudplugin.managers;
+package com.tom.immersivehudplugin.config;
 
 import com.tom.immersivehudplugin.ImmersiveHudPlugin;
-import com.tom.immersivehudplugin.config.ConfigJsonMapper;
-import com.tom.immersivehudplugin.config.ConfigSchemaValidator;
-import com.tom.immersivehudplugin.config.GlobalConfig;
 
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.logging.Level;
 
-public final class GlobalConfigManager {
+public final class GlobalConfigStore {
 
     private final ImmersiveHudPlugin plugin;
     private final ConfigSupport configSupport;
     private final Path configPath;
 
-    private GlobalConfig globalConfig = new GlobalConfig();
+    private com.tom.immersivehudplugin.config.GlobalConfig globalConfig = new com.tom.immersivehudplugin.config.GlobalConfig();
 
-    public GlobalConfigManager(
+    public GlobalConfigStore(
             ImmersiveHudPlugin plugin,
             ConfigSupport configSupport
     ) {
@@ -26,13 +23,13 @@ public final class GlobalConfigManager {
         this.configPath = plugin.getDataDirectory().resolve("config.json");
     }
 
-    public GlobalConfig get() {
+    public com.tom.immersivehudplugin.config.GlobalConfig get() {
         return globalConfig;
     }
 
     public void load() {
 
-        ConfigSupport.LoadResult<GlobalConfig> result = configSupport.loadOrCreate(
+        ConfigSupport.LoadResult<com.tom.immersivehudplugin.config.GlobalConfig> result = configSupport.loadOrCreate(
                 configPath,
                 this::createDefaultConfig,
                 ConfigSchemaValidator::isValidGlobalConfig,
@@ -62,14 +59,14 @@ public final class GlobalConfigManager {
         }
     }
 
-    private GlobalConfig createDefaultConfig() {
-        GlobalConfig cfg = new GlobalConfig();
+    private com.tom.immersivehudplugin.config.GlobalConfig createDefaultConfig() {
+        com.tom.immersivehudplugin.config.GlobalConfig cfg = new com.tom.immersivehudplugin.config.GlobalConfig();
         migrateIfNeeded(cfg);
         cfg.sanitize();
         return cfg;
     }
 
-    private boolean migrateIfNeeded(GlobalConfig cfg) {
+    private boolean migrateIfNeeded(com.tom.immersivehudplugin.config.GlobalConfig cfg) {
         boolean changed = false;
 
         String pluginVersion = plugin.getPluginVersion();

@@ -4,9 +4,9 @@ import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import java.util.EnumSet;
 
@@ -46,39 +46,39 @@ public final class ProfilePresets {
         hud.setHideNotificationsHud(true);
         hud.setHideInputBindingsHud(true);
 
-        dyn.getHealth().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
-        dyn.getStamina().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
-        dyn.getMana().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
-        dyn.getOxygen().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
+        dyn.getHealth().setRules(EnumSet.noneOf(HudTrigger.class));
+        dyn.getStamina().setRules(EnumSet.noneOf(HudTrigger.class));
+        dyn.getMana().setRules(EnumSet.noneOf(HudTrigger.class));
+        dyn.getOxygen().setRules(EnumSet.noneOf(HudTrigger.class));
 
         dyn.getCompass().setRules(EnumSet.of(
-                DynamicHudTriggers.PLAYER_RUNNING,
-                DynamicHudTriggers.PLAYER_MOUNTING,
-                DynamicHudTriggers.PLAYER_SWIMMING,
-                DynamicHudTriggers.PLAYER_FLYING,
-                DynamicHudTriggers.PLAYER_GLIDING
+                HudTrigger.PLAYER_RUNNING,
+                HudTrigger.PLAYER_MOUNTING,
+                HudTrigger.PLAYER_SWIMMING,
+                HudTrigger.PLAYER_FLYING,
+                HudTrigger.PLAYER_GLIDING
         ));
         dyn.getReticle().setRules(EnumSet.of(
-                DynamicHudTriggers.CHARGING_WEAPON,
-                DynamicHudTriggers.CONSUMABLE_USE,
-                DynamicHudTriggers.TARGET_ENTITY,
-                DynamicHudTriggers.HOLDING_RANGED_WEAPON
+                HudTrigger.CHARGING_WEAPON,
+                HudTrigger.CONSUMABLE_USE,
+                HudTrigger.TARGET_ENTITY,
+                HudTrigger.HOLDING_RANGED_WEAPON
         ));
-        dyn.getHotbar().setRules(EnumSet.noneOf(DynamicHudTriggers.class));
+        dyn.getHotbar().setRules(EnumSet.noneOf(HudTrigger.class));
     }
 
     private static void applyDisabled(PlayerConfig cfg) {
         HudComponentsConfig hud = cfg.getHudComponents();
         DynamicHudConfig dyn = cfg.getDynamicHud();
 
-        for (HudEntry entry : HudComponentRegistry.allList()) {
+        for (HudComponent entry : HudComponentRegistry.allList()) {
             entry.staticSetter().set(hud, false);
         }
 
-        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+        for (HudComponent entry : HudComponentRegistry.dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(dyn) : null;
             if (ruleCfg != null) {
-                ruleCfg.setRules(EnumSet.noneOf(DynamicHudTriggers.class));
+                ruleCfg.setRules(EnumSet.noneOf(HudTrigger.class));
             }
         }
     }

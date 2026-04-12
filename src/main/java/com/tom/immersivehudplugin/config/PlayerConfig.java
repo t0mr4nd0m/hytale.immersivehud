@@ -1,6 +1,6 @@
 package com.tom.immersivehudplugin.config;
 
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 
 public final class PlayerConfig {
 
@@ -12,7 +12,9 @@ public final class PlayerConfig {
     }
 
     public void setHudComponents(HudComponentsConfig hudComponents) {
-        this.hudComponents = (hudComponents != null) ? hudComponents : HudComponentRegistry.buildDefaultHudComponents();
+        this.hudComponents = (hudComponents != null)
+                ? hudComponents
+                : HudComponentRegistry.buildDefaultHudComponents();
     }
 
     public DynamicHudConfig getDynamicHud() {
@@ -20,7 +22,9 @@ public final class PlayerConfig {
     }
 
     public void setDynamicHud(DynamicHudConfig dynamicHud) {
-        this.dynamicHud = (dynamicHud != null) ? dynamicHud : HudComponentRegistry.buildDefaultDynamicHud();
+        this.dynamicHud = (dynamicHud != null)
+                ? dynamicHud
+                : HudComponentRegistry.buildDefaultDynamicHud();
     }
 
     public boolean sanitize() {

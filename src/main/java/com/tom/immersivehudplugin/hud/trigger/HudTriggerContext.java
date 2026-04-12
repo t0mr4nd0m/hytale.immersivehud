@@ -1,28 +1,26 @@
-package com.tom.immersivehudplugin.rules;
-
-import com.tom.immersivehudplugin.utils.HudBarState;
+package com.tom.immersivehudplugin.hud.trigger;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-public final class DynamicHudTriggersContext {
+public final class HudTriggerContext {
 
-    private final EnumSet<DynamicHudTriggers> activeSignals;
+    private final EnumSet<HudTrigger> activeSignals;
     private final HudBarState healthBar;
     private final HudBarState staminaBar;
     private final HudBarState manaBar;
     private final HudBarState oxygenBar;
 
-    public DynamicHudTriggersContext(
-            EnumSet<DynamicHudTriggers> activeSignals,
+    public HudTriggerContext(
+            EnumSet<HudTrigger> activeSignals,
             HudBarState healthBar,
             HudBarState staminaBar,
             HudBarState manaBar,
             HudBarState oxygenBar
     ) {
         this.activeSignals = activeSignals == null || activeSignals.isEmpty()
-                ? EnumSet.noneOf(DynamicHudTriggers.class)
+                ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(activeSignals);
 
         this.healthBar = healthBar != null ? healthBar : new HudBarState();
@@ -31,11 +29,11 @@ public final class DynamicHudTriggersContext {
         this.oxygenBar = oxygenBar != null ? oxygenBar : new HudBarState();
     }
 
-    public boolean active(DynamicHudTriggers trigger) {
+    public boolean active(HudTrigger trigger) {
         return trigger != null && activeSignals.contains(trigger);
     }
 
-    public Set<DynamicHudTriggers> activeSignals() {
+    public Set<HudTrigger> activeSignals() {
         return Collections.unmodifiableSet(activeSignals);
     }
 

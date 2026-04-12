@@ -15,7 +15,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.config.HudSettingsService;
+import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 
@@ -36,13 +36,13 @@ public final class ProfileCmd extends AbstractPlayerCommand {
 
     private final RequiredArg<String> profileArg;
 
-    private final HudSettingsService hudSettingsService;
+    private final PlayerConfigService playerConfigService;
 
     public ProfileCmd(
-            HudSettingsService hudSettingsService
+            PlayerConfigService playerConfigService
     ) {
         super("profile", "Apply a predefined ImmersiveHud profile.");
-        this.hudSettingsService = hudSettingsService;
+        this.playerConfigService = playerConfigService;
 
         this.profileArg = withRequiredArg("profile", "Profile name", ArgTypes.STRING)
                 .addValidator(new HudProfileValidator());
@@ -67,13 +67,13 @@ public final class ProfileCmd extends AbstractPlayerCommand {
             return;
         }
 
-        PlayerConfig playerCfg = hudSettingsService.requirePlayerConfig(playerRef);
+        PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
             return;
         }
 
-        hudSettingsService.updatePlayerConfig(playerRef, cfg -> ProfilePresets.applyTo(cfg, profile));
+        playerConfigService.updatePlayerConfig(playerRef, cfg -> ProfilePresets.applyTo(cfg, profile));
 
         context.sendMessage(Message.join(
                 Message.raw("Applied ImmersiveHud profile: ").color(INFO_COLOR),

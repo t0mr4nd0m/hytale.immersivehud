@@ -1,7 +1,7 @@
 package com.tom.immersivehudplugin.ui;
 
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public final class HudConfigRenderIndex {
 
-    private record DynamicRuleRowKey(String componentKey, String host, DynamicHudTriggers trigger) {}
+    private record DynamicRuleRowKey(String componentKey, String host, HudTrigger trigger) {}
     private record DynamicComponentRowKey(String componentKey) {}
 
     private final Map<String, Integer> visibilitySectionRowIndexes = new HashMap<>();
@@ -54,7 +54,7 @@ public final class HudConfigRenderIndex {
     public void putDynamicRuleRowIndex(
             @Nonnull String componentKey,
             @Nonnull String host,
-            @Nonnull DynamicHudTriggers trigger,
+            @Nonnull HudTrigger trigger,
             int rowIndex
     ) {
         dynamicRuleRowIndexes.put(new DynamicRuleRowKey(componentKey, host, trigger), rowIndex);
@@ -64,7 +64,7 @@ public final class HudConfigRenderIndex {
     public Integer getDynamicRuleRowIndex(
             @Nonnull String componentKey,
             @Nonnull String host,
-            @Nonnull DynamicHudTriggers trigger
+            @Nonnull HudTrigger trigger
     ) {
         return dynamicRuleRowIndexes.get(new DynamicRuleRowKey(componentKey, host, trigger));
     }

@@ -6,25 +6,26 @@ import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.context.HudContextBuilder;
-import com.tom.immersivehudplugin.context.PlayerTickContext;
-import com.tom.immersivehudplugin.visibility.HudVisibilityService;
+import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
+import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 
 import javax.annotation.Nullable;
 
 public final class HudTickProcessor {
 
     private final HudContextBuilder hudContextBuilder;
-    private final HudVisibilityService hudVisibilityService;
+    private final HudVisibilityCoordinator hudVisibilityCoordinator;
     private final HeldItemSignalTracker heldItemSignalTracker;
 
     public HudTickProcessor(
             HudContextBuilder hudContextBuilder,
-            HudVisibilityService hudVisibilityService,
+            HudVisibilityCoordinator hudVisibilityCoordinator,
             HeldItemSignalTracker heldItemSignalTracker
     ) {
         this.hudContextBuilder = hudContextBuilder;
-        this.hudVisibilityService = hudVisibilityService;
+        this.hudVisibilityCoordinator = hudVisibilityCoordinator;
         this.heldItemSignalTracker = heldItemSignalTracker;
     }
 
@@ -40,7 +41,7 @@ public final class HudTickProcessor {
         TickEvaluation evaluation = buildTickEvaluation(playerRef, state, playerConfig);
         if (evaluation == null) { return; }
 
-        hudVisibilityService.ensureStaticHudBuilt( evaluation.state(), evaluation.hudConfig() );
+        hudVisibilityCoordinator.ensureStaticHudBuilt( evaluation.state(), evaluation.hudConfig() );
 
         if (shouldEvaluateDynamicHud(evaluation.state(), evaluation.hudConfig())) {
             repairHeldItemIfNeeded(evaluation);
@@ -87,7 +88,7 @@ public final class HudTickProcessor {
     }
 
     private void clearDynamicHud(TickEvaluation evaluation) {
-        hudVisibilityService.clearDynamicHiddenIfNeeded(evaluation.state());
+        hudVisibilityCoordinator.clearDynamicHiddenIfNeeded(evaluation.state());
     }
 
     private void cleanupHeldItemSignals(TickEvaluation evaluation) {
@@ -110,7 +111,7 @@ public final class HudTickProcessor {
                 now
         );
 
-        hudVisibilityService.rebuildDynamicHidden(
+        hudVisibilityCoordinator.rebuildDynamicHidden(
                 evaluation.state(),
                 evaluation.hudConfig(),
                 evaluation.dynamicConfig(),
@@ -119,7 +120,7 @@ public final class HudTickProcessor {
     }
 
     private void applyHud(TickEvaluation evaluation) {
-        hudVisibilityService.applyHudDelta(
+        hudVisibilityCoordinator.applyHudDelta(
                 evaluation.tickContext(),
                 evaluation.state()
         );
@@ -128,7 +129,7 @@ public final class HudTickProcessor {
     private boolean isDynamicHudEnabled(PlayerHudState state, HudComponentsConfig hudConfig) {
         if (!state.hasDynamicHudEnabledCache()) {
             state.cacheDynamicHudEnabled(
-                    hudVisibilityService.hasAnyDynamicHudEnabled(hudConfig)
+                    hudVisibilityCoordinator.hasAnyDynamicHudEnabled(hudConfig)
             );
         }
 

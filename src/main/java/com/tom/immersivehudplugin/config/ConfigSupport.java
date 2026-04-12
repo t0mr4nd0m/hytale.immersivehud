@@ -1,4 +1,4 @@
-package com.tom.immersivehudplugin.managers;
+package com.tom.immersivehudplugin.config;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

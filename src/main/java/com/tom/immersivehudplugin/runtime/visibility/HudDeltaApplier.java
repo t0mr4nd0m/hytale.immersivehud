@@ -1,8 +1,8 @@
-package com.tom.immersivehudplugin.visibility;
+package com.tom.immersivehudplugin.runtime.visibility;
 
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
-import com.tom.immersivehudplugin.context.PlayerTickContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 public final class HudDeltaApplier {
 

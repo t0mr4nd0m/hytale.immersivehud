@@ -1,10 +1,10 @@
-package com.tom.immersivehudplugin.utils;
+package com.tom.immersivehudplugin.runtime.signal;
 
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 
 import java.util.Set;
 
-public final class ItemInHand {
+public final class HeldItemState {
 
     private static final Set<String> RANGED_WEAPONS = Set.of(
             "Bow", "Crossbow", "Staff", "Arrow", "Gun", "Bomb", "Wand", "Spear"

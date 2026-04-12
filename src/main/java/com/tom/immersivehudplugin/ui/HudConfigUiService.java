@@ -7,7 +7,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,14 +17,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class HudConfigUiService {
 
-    private final HudRuntimeCoordinator hudRuntimeCoordinator;
+    private final HudRuntimeService hudRuntimeService;
 
     private final Map<UUID, HudConfigUiSession> sessions = new ConcurrentHashMap<>();
 
     public HudConfigUiService(
-            @Nonnull HudRuntimeCoordinator hudRuntimeCoordinator
+            @Nonnull HudRuntimeService hudRuntimeService
     ) {
-        this.hudRuntimeCoordinator = hudRuntimeCoordinator;
+        this.hudRuntimeService = hudRuntimeService;
     }
 
     public void open(
@@ -32,7 +32,7 @@ public final class HudConfigUiService {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store
     ) {
-        PlayerConfig playerCfg = hudRuntimeCoordinator.requirePlayerConfig(playerRef);
+        PlayerConfig playerCfg = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
             return;
         }
@@ -63,7 +63,7 @@ public final class HudConfigUiService {
             return false;
         }
 
-        PlayerConfig live = hudRuntimeCoordinator.requirePlayerConfig(playerRef);
+        PlayerConfig live = hudRuntimeService.requirePlayerConfig(playerRef);
         if (live == null) {
             return false;
         }
@@ -71,7 +71,7 @@ public final class HudConfigUiService {
         live.setHudComponents(session.getDraftHudComponents().copy());
         live.setDynamicHud(session.getDraftDynamicHud().copy());
 
-        hudRuntimeCoordinator.applyAndSavePlayerConfig(playerRef);
+        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
 
         discard(playerRef);
         return true;

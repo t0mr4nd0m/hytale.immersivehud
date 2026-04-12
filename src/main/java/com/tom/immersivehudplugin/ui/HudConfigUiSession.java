@@ -6,9 +6,9 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,12 +85,12 @@ public final class HudConfigUiSession {
         return draftDynamicHud;
     }
 
-    public boolean isHidden(@Nonnull HudEntry entry) {
+    public boolean isHidden(@Nonnull HudComponent entry) {
         return entry.isHidden(draftHudComponents);
     }
 
     public void toggleVisibility(@Nonnull String componentKey) {
-        HudEntry entry = HudComponentRegistry.find(componentKey);
+        HudComponent entry = HudComponentRegistry.find(componentKey);
         if (entry == null) {
             return;
         }
@@ -114,12 +114,12 @@ public final class HudConfigUiSession {
     }
 
     @Nonnull
-    public List<HudEntry> getDynamicEntries() {
+    public List<HudComponent> getDynamicEntries() {
         return HudComponentRegistry.dynamicList();
     }
 
     @Nonnull
-    public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudEntry entry) {
+    public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudComponent entry) {
         DynamicHudRuleConfig cfg = entry.getDynamicRuleConfig(draftDynamicHud);
         if (cfg == null) {
             throw new IllegalStateException("Entry is not dynamic-capable: " + entry.key());
@@ -128,15 +128,15 @@ public final class HudConfigUiSession {
     }
 
     public boolean isRuleEnabled(
-            @Nonnull HudEntry entry,
-            @Nonnull DynamicHudTriggers rule
+            @Nonnull HudComponent entry,
+            @Nonnull HudTrigger rule
     ) {
         return getDynamicRuleConfig(entry).getRules().contains(rule);
     }
 
     public void toggleRule(
-            @Nonnull HudEntry entry,
-            @Nonnull DynamicHudTriggers rule
+            @Nonnull HudComponent entry,
+            @Nonnull HudTrigger rule
     ) {
         DynamicHudRuleConfig cfg = getDynamicRuleConfig(entry);
 
@@ -149,28 +149,28 @@ public final class HudConfigUiSession {
         dirty = true;
     }
 
-    public float getDynamicThreshold(@Nonnull HudEntry entry) {
+    public float getDynamicThreshold(@Nonnull HudComponent entry) {
         return getDynamicRuleConfig(entry).getThreshold();
     }
 
     public void setDynamicThreshold(
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             float value
     ) {
         getDynamicRuleConfig(entry).setThreshold(value);
         dirty = true;
     }
 
-    public boolean isDynamicThresholdEnabled(@Nonnull HudEntry entry) {
+    public boolean isDynamicThresholdEnabled(@Nonnull HudComponent entry) {
         if (!entry.supportsThreshold()) {
             return false;
         }
 
         return switch (entry.key()) {
-            case "health" -> isRuleEnabled(entry, DynamicHudTriggers.HEALTH_NOT_FULL);
-            case "stamina" -> isRuleEnabled(entry, DynamicHudTriggers.STAMINA_NOT_FULL);
-            case "mana" -> isRuleEnabled(entry, DynamicHudTriggers.MANA_NOT_FULL);
-            case "oxygen" -> isRuleEnabled(entry, DynamicHudTriggers.OXYGEN_NOT_FULL);
+            case "health" -> isRuleEnabled(entry, HudTrigger.HEALTH_NOT_FULL);
+            case "stamina" -> isRuleEnabled(entry, HudTrigger.STAMINA_NOT_FULL);
+            case "mana" -> isRuleEnabled(entry, HudTrigger.MANA_NOT_FULL);
+            case "oxygen" -> isRuleEnabled(entry, HudTrigger.OXYGEN_NOT_FULL);
             default -> false;
         };
     }
@@ -188,37 +188,37 @@ public final class HudConfigUiSession {
     }
 
     @Nonnull
-    public List<DynamicHudTriggers> getBaseRulesInDisplayOrder(
-            @Nonnull HudEntry entry
+    public List<HudTrigger> getBaseRulesInDisplayOrder(
+            @Nonnull HudComponent entry
     ) {
-        return DynamicHudTriggers.displayCategoryOrder().stream()
-                .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
+        return HudTrigger.displayCategoryOrder().stream()
+                .flatMap(category -> Arrays.stream(HudTrigger.values())
                         .filter(trigger -> trigger.category() == category)
                         .filter(entry::supportsRule))
                 .toList();
     }
 
     @Nonnull
-    public List<DynamicHudTriggers> getExtraRulesInDisplayOrder(
-            @Nonnull HudEntry entry
+    public List<HudTrigger> getExtraRulesInDisplayOrder(
+            @Nonnull HudComponent entry
     ) {
-        return DynamicHudTriggers.displayCategoryOrder().stream()
-                .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
+        return HudTrigger.displayCategoryOrder().stream()
+                .flatMap(category -> Arrays.stream(HudTrigger.values())
                     .filter(trigger -> trigger.category() == category)
                     .filter(trigger -> !entry.supportsRule(trigger))
-                    .filter(trigger -> trigger != DynamicHudTriggers.HEALTH_NOT_FULL)
-                    .filter(trigger -> trigger != DynamicHudTriggers.STAMINA_NOT_FULL)
-                    .filter(trigger -> trigger != DynamicHudTriggers.MANA_NOT_FULL)
-                    .filter(trigger -> trigger != DynamicHudTriggers.OXYGEN_NOT_FULL)
+                    .filter(trigger -> trigger != HudTrigger.HEALTH_NOT_FULL)
+                    .filter(trigger -> trigger != HudTrigger.STAMINA_NOT_FULL)
+                    .filter(trigger -> trigger != HudTrigger.MANA_NOT_FULL)
+                    .filter(trigger -> trigger != HudTrigger.OXYGEN_NOT_FULL)
                 ).toList();
     }
 
-    public boolean isDynamicComponentVisible(@Nonnull HudEntry entry) {
+    public boolean isDynamicComponentVisible(@Nonnull HudComponent entry) {
         return !entry.isHidden(draftHudComponents);
     }
 
     @Nonnull
-    public String getDynamicComponentVisibilityLabel(@Nonnull HudEntry entry) {
+    public String getDynamicComponentVisibilityLabel(@Nonnull HudComponent entry) {
         return isDynamicComponentVisible(entry) ? "<VISIBLE>" : "<HIDDEN>";
     }
 }

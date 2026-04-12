@@ -1,12 +1,12 @@
-package com.tom.immersivehudplugin.visibility;
+package com.tom.immersivehudplugin.runtime.visibility;
 
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
+import com.tom.immersivehudplugin.hud.trigger.HudTriggerContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 
 import java.util.EnumSet;
@@ -14,17 +14,17 @@ import java.util.List;
 
 public final class HudRuleEvaluator {
 
-    private static final List<HudEntry> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
+    private static final List<HudComponent> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
 
     public void rebuildDynamicHidden(
             PlayerHudState state,
             HudComponentsConfig hudConfig,
             DynamicHudConfig dynamicConfig,
-            DynamicHudTriggersContext triggersContext
+            HudTriggerContext triggersContext
     ) {
         state.clearDynamicHidden();
 
-        for (HudEntry entry : DYNAMIC_ENTRIES) {
+        for (HudComponent entry : DYNAMIC_ENTRIES) {
             if (!entry.isHidden(hudConfig)) { continue; }
 
             DynamicHudRuleConfig ruleConfig = entry.getDynamicRuleConfig(dynamicConfig);
@@ -38,14 +38,14 @@ public final class HudRuleEvaluator {
 
     public boolean shouldShowDynamic(
             DynamicHudRuleConfig ruleConfig,
-            DynamicHudTriggersContext triggersContext
+            HudTriggerContext triggersContext
     ) {
         if (ruleConfig == null) { return false; }
 
-        EnumSet<DynamicHudTriggers> rules = ruleConfig.getRules();
+        EnumSet<HudTrigger> rules = ruleConfig.getRules();
         if (rules.isEmpty()) { return false; }
 
-        for (DynamicHudTriggers trigger : rules) {
+        for (HudTrigger trigger : rules) {
             if (matchesTrigger(trigger, ruleConfig, triggersContext)) {
                 return true;
             }
@@ -55,9 +55,9 @@ public final class HudRuleEvaluator {
     }
 
     public boolean matchesTrigger(
-            DynamicHudTriggers trigger,
+            HudTrigger trigger,
             DynamicHudRuleConfig ruleConfig,
-            DynamicHudTriggersContext triggersContext
+            HudTriggerContext triggersContext
     ) {
         return switch (trigger) {
             case HEALTH_NOT_FULL ->

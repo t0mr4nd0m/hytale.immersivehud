@@ -5,8 +5,8 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
-import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -42,7 +42,7 @@ public final class HudConfigDynamicRulesRenderer {
 
         int componentIndex = 0;
 
-        for (HudEntry entry : session.getDynamicEntries()) {
+        for (HudComponent entry : session.getDynamicEntries()) {
             commands.append("#DynamicComponentsList", DYNAMIC_SECTION_UI);
             renderIndex.putDynamicComponentRowIndex(entry.key(), componentIndex);
 
@@ -68,8 +68,8 @@ public final class HudConfigDynamicRulesRenderer {
     public void updateDynamicRuleRow(
             @Nonnull UICommandBuilder commands,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry,
-            @Nonnull DynamicHudTriggers trigger
+            @Nonnull HudComponent entry,
+            @Nonnull HudTrigger trigger
     ) {
         Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
         if (componentIndex == null) {
@@ -100,7 +100,7 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry
+            @Nonnull HudComponent entry
     ) {
         Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
         if (componentIndex == null) {
@@ -114,7 +114,7 @@ public final class HudConfigDynamicRulesRenderer {
     public void updateDynamicThresholdControls(
             @Nonnull UICommandBuilder commands,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry
+            @Nonnull HudComponent entry
     ) {
         Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
         if (componentIndex == null) {
@@ -143,12 +143,12 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             @Nonnull String rulesListSelector
     ) {
         int rowIndex = 0;
 
-        for (DynamicHudTriggers trigger : session.getBaseRulesInDisplayOrder(entry)) {
+        for (HudTrigger trigger : session.getBaseRulesInDisplayOrder(entry)) {
             rowIndex = renderDynamicRuleRow(commands, events, session, entry, rulesListSelector, "base", rowIndex, trigger);
         }
     }
@@ -157,10 +157,10 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             @Nonnull String componentRoot
     ) {
-        List<DynamicHudTriggers> extraRules = session.getExtraRulesInDisplayOrder(entry);
+        List<HudTrigger> extraRules = session.getExtraRulesInDisplayOrder(entry);
         boolean revealed = session.isMoreTriggersRevealed(entry.key());
 
         String extraHostSelector = componentRoot + " #DynamicExtraTriggersList";
@@ -191,7 +191,7 @@ public final class HudConfigDynamicRulesRenderer {
             return;
         }
 
-        for (DynamicHudTriggers trigger : extraRules) {
+        for (HudTrigger trigger : extraRules) {
             rowIndex = renderDynamicRuleRow(
                     commands,
                     events,
@@ -209,11 +209,11 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             @Nonnull String hostSelector,
             @Nonnull String hostKey,
             int rowIndex,
-            @Nonnull DynamicHudTriggers trigger
+            @Nonnull HudTrigger trigger
     ) {
         boolean enabled = session.isRuleEnabled(entry, trigger);
 
@@ -226,7 +226,7 @@ public final class HudConfigDynamicRulesRenderer {
 
         commands.set(
                 labelSelector + ".TextSpans",
-                Message.raw(DynamicHudTriggers.prettyName(trigger).toUpperCase())
+                Message.raw(HudTrigger.prettyName(trigger).toUpperCase())
         );
         commands.set(checkBoxSelector + ".Value", enabled);
 
@@ -246,7 +246,7 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             @Nonnull String componentRoot
     ) {
         String thresholdHostSelector = componentRoot + " #DynamicThresholdHost";

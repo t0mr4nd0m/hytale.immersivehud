@@ -1,37 +1,36 @@
-package com.tom.immersivehudplugin.registry;
+package com.tom.immersivehudplugin.hud.component;
 
-import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.function.Function;
 
-public record HudEntry(
+public record HudComponent(
         String key,
         String label,
         HudComponentRegistry.Group group,
-        HudComponent hudComponent,
+        com.hypixel.hytale.protocol.packets.interface_.HudComponent hudComponent,
         String staticConfigKey,
         @Nullable String dynamicConfigKey,
         HudComponentRegistry.BoolGetter<HudComponentsConfig> staticGetter,
         HudComponentRegistry.BoolSetter<HudComponentsConfig> staticSetter,
         @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
         boolean defaultHidden,
-        EnumSet<DynamicHudTriggers> allowedRules,
-        EnumSet<DynamicHudTriggers> defaultRules,
+        EnumSet<HudTrigger> allowedRules,
+        EnumSet<HudTrigger> defaultRules,
         @Nullable Float defaultThreshold
 ) {
-    public HudEntry {
+    public HudComponent {
         allowedRules = allowedRules == null
-                ? EnumSet.noneOf(DynamicHudTriggers.class)
+                ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(allowedRules);
 
         defaultRules = defaultRules == null
-                ? EnumSet.noneOf(DynamicHudTriggers.class)
+                ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(defaultRules);
 
         if (!allowedRules.containsAll(defaultRules)) {
@@ -53,11 +52,11 @@ public record HudEntry(
         return defaultThreshold != null;
     }
 
-    public boolean supportsRule(@Nullable DynamicHudTriggers rule) {
+    public boolean supportsRule(@Nullable HudTrigger rule) {
         return rule != null && allowedRules.contains(rule);
     }
 
-    public EnumSet<DynamicHudTriggers> allowedRulesCopy() {
+    public EnumSet<HudTrigger> allowedRulesCopy() {
         return EnumSet.copyOf(allowedRules);
     }
 

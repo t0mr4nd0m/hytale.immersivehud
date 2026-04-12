@@ -1,4 +1,4 @@
-package com.tom.immersivehudplugin.utils;
+package com.tom.immersivehudplugin.hud.trigger;
 
 public final class HudBarState {
 

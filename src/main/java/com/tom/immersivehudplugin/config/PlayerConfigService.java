@@ -1,32 +1,31 @@
 package com.tom.immersivehudplugin.config;
 
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
-import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class HudSettingsService {
+public final class PlayerConfigService {
 
-    private final PlayerConfigManager playerConfigManager;
-    private final HudRuntimeCoordinator hudRuntimeCoordinator;
+    private final PlayerConfigStore playerConfigStore;
+    private final HudRuntimeService hudRuntimeService;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
-    public HudSettingsService(
-            PlayerConfigManager playerConfigManager,
-            HudRuntimeCoordinator hudRuntimeCoordinator,
+    public PlayerConfigService(
+            PlayerConfigStore playerConfigStore,
+            HudRuntimeService hudRuntimeService,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
-        this.playerConfigManager = playerConfigManager;
-        this.hudRuntimeCoordinator = hudRuntimeCoordinator;
+        this.playerConfigStore = playerConfigStore;
+        this.hudRuntimeService = hudRuntimeService;
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
     @Nullable
-    public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
+    public com.tom.immersivehudplugin.config.PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
         if (playerRef == null) {
             return null;
         }
@@ -34,19 +33,19 @@ public final class HudSettingsService {
         return getOrLoadPlayerConfig(playerRef.getUuid());
     }
 
-    public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
-        PlayerConfig cached = playerConfigManager.getCached(uuid);
+    public com.tom.immersivehudplugin.config.PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
+        com.tom.immersivehudplugin.config.PlayerConfig cached = playerConfigStore.getCached(uuid);
         if (cached != null) {
             return cached;
         }
 
-        return playerConfigManager.loadOrCreate(uuid, getGlobalConfig());
+        return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
-    public void updatePlayerConfig(PlayerRef playerRef, Consumer<PlayerConfig> mutator) {
-        PlayerConfig config = getOrLoadPlayerConfig(playerRef.getUuid());
+    public void updatePlayerConfig(PlayerRef playerRef, Consumer<com.tom.immersivehudplugin.config.PlayerConfig> mutator) {
+        com.tom.immersivehudplugin.config.PlayerConfig config = getOrLoadPlayerConfig(playerRef.getUuid());
         mutator.accept(config);
-        hudRuntimeCoordinator.applyAndSavePlayerConfig(playerRef);
+        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
     }
 
     public void updateHudComponents(PlayerRef playerRef, Consumer<HudComponentsConfig> mutator) {

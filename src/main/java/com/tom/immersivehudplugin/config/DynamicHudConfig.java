@@ -1,7 +1,7 @@
 package com.tom.immersivehudplugin.config;
 
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudEntry;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -104,7 +104,7 @@ public final class DynamicHudConfig {
     public boolean sanitize() {
         boolean changed = false;
 
-        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+        for (HudComponent entry : HudComponentRegistry.dynamicList()) {
             String key = normalizeKey(entry.key());
             DynamicHudRuleConfig ruleCfg = rulesByKey.get(key);
 
@@ -146,7 +146,7 @@ public final class DynamicHudConfig {
     }
 
     private void ensureAllDynamicEntries() {
-        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+        for (HudComponent entry : HudComponentRegistry.dynamicList()) {
             String key = normalizeKey(entry.key());
             rulesByKey.computeIfAbsent(key, ignored -> new DynamicHudRuleConfig());
         }
@@ -158,7 +158,7 @@ public final class DynamicHudConfig {
 
     private static Set<String> validDynamicKeys() {
         return HudComponentRegistry.dynamicList().stream()
-                .map(HudEntry::key)
+                .map(HudComponent::key)
                 .map(HudComponentRegistry::normalize)
                 .collect(Collectors.toSet());
     }
