@@ -13,14 +13,14 @@ public final class HudConfigAccess {
     }
 
     public static boolean isHidden(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             @Nonnull HudComponentsConfig hudConfig
     ) {
         return entry.staticGetter().get(hudConfig);
     }
 
     public static void setHidden(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             @Nonnull HudComponentsConfig hudConfig,
             boolean hidden
     ) {
@@ -29,7 +29,7 @@ public final class HudConfigAccess {
 
     @Nullable
     public static DynamicHudRuleConfig getDynamicRuleConfig(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             @Nonnull DynamicHudConfig dynamicConfig
     ) {
         return entry.dynamicGetter() != null
@@ -37,7 +37,7 @@ public final class HudConfigAccess {
                 : null;
     }
 
-    public static boolean supportsDynamicRules(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public static boolean supportsDynamicRules(@Nonnull HudEntry entry) {
         return entry.dynamicGetter() != null && entry.dynamicConfigKey() != null;
     }
 }

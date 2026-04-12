@@ -4,7 +4,7 @@ import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
+import com.tom.immersivehudplugin.registry.HudEntry;
 import com.tom.immersivehudplugin.registry.HudConfigAccess;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;

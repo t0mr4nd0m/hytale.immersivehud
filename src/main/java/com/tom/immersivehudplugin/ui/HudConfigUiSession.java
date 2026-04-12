@@ -8,6 +8,7 @@ import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudConfigAccess;
+import com.tom.immersivehudplugin.registry.HudEntry;
 import com.tom.immersivehudplugin.registry.HudRuleCatalog;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
@@ -86,12 +87,12 @@ public final class HudConfigUiSession {
         return draftDynamicHud;
     }
 
-    public boolean isHidden(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public boolean isHidden(@Nonnull HudEntry entry) {
         return HudConfigAccess.isHidden(entry, draftHudComponents);
     }
 
     public void toggleVisibility(@Nonnull String componentKey) {
-        HudComponentRegistry.HudEntry entry = HudComponentRegistry.find(componentKey);
+        HudEntry entry = HudComponentRegistry.find(componentKey);
         if (entry == null) {
             return;
         }
@@ -115,12 +116,12 @@ public final class HudConfigUiSession {
     }
 
     @Nonnull
-    public List<HudComponentRegistry.HudEntry> getDynamicEntries() {
+    public List<HudEntry> getDynamicEntries() {
         return HudComponentRegistry.dynamicList();
     }
 
     @Nonnull
-    public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudEntry entry) {
         DynamicHudRuleConfig cfg = HudConfigAccess.getDynamicRuleConfig(entry, draftDynamicHud);
         if (cfg == null) {
             throw new IllegalStateException("Entry is not dynamic-capable: " + entry.key());
@@ -129,14 +130,14 @@ public final class HudConfigUiSession {
     }
 
     public boolean isRuleEnabled(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             @Nonnull DynamicHudTriggers rule
     ) {
         return getDynamicRuleConfig(entry).getRules().contains(rule);
     }
 
     public void toggleRule(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             @Nonnull DynamicHudTriggers rule
     ) {
         DynamicHudRuleConfig cfg = getDynamicRuleConfig(entry);
@@ -150,19 +151,19 @@ public final class HudConfigUiSession {
         dirty = true;
     }
 
-    public float getDynamicThreshold(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public float getDynamicThreshold(@Nonnull HudEntry entry) {
         return getDynamicRuleConfig(entry).getThreshold();
     }
 
     public void setDynamicThreshold(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             float value
     ) {
         getDynamicRuleConfig(entry).setThreshold(value);
         dirty = true;
     }
 
-    public boolean isDynamicThresholdEnabled(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public boolean isDynamicThresholdEnabled(@Nonnull HudEntry entry) {
         if (!entry.supportsThreshold()) {
             return false;
         }
@@ -190,7 +191,7 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public List<DynamicHudTriggers> getBaseRulesInDisplayOrder(
-            @Nonnull HudComponentRegistry.HudEntry entry
+            @Nonnull HudEntry entry
     ) {
         return DynamicHudTriggers.displayCategoryOrder().stream()
                 .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
@@ -201,7 +202,7 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public List<DynamicHudTriggers> getExtraRulesInDisplayOrder(
-            @Nonnull HudComponentRegistry.HudEntry entry
+            @Nonnull HudEntry entry
     ) {
         return DynamicHudTriggers.displayCategoryOrder().stream()
                 .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
@@ -214,12 +215,12 @@ public final class HudConfigUiSession {
                 .toList();
     }
 
-    public boolean isDynamicComponentVisible(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public boolean isDynamicComponentVisible(@Nonnull HudEntry entry) {
         return !HudConfigAccess.isHidden(entry, draftHudComponents);
     }
 
     @Nonnull
-    public String getDynamicComponentVisibilityLabel(@Nonnull HudComponentRegistry.HudEntry entry) {
+    public String getDynamicComponentVisibilityLabel(@Nonnull HudEntry entry) {
         return isDynamicComponentVisible(entry) ? "<VISIBLE>" : "<HIDDEN>";
     }
 }

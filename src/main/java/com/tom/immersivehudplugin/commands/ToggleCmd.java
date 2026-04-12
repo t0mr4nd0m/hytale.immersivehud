@@ -19,6 +19,7 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.hud.HudSettingsService;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudConfigAccess;
+import com.tom.immersivehudplugin.registry.HudEntry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -137,7 +138,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
 
     private static String availableComponents() {
         return HudComponentRegistry.allList().stream()
-                .map(HudComponentRegistry.HudEntry::key)
+                .map(HudEntry::key)
                 .sorted()
                 .collect(Collectors.joining(", "));
     }

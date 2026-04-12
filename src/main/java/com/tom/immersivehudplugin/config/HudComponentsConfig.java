@@ -1,7 +1,7 @@
 package com.tom.immersivehudplugin.config;
 
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
+import com.tom.immersivehudplugin.registry.HudEntry;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

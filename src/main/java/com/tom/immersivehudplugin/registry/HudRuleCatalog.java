@@ -86,7 +86,7 @@ public final class HudRuleCatalog {
 
     @Nonnull
     public static EnumSet<DynamicHudTriggers> getAllowedRules(
-            @Nonnull HudComponentRegistry.HudEntry entry
+            @Nonnull HudEntry entry
     ) {
         EnumSet<DynamicHudTriggers> rules = ALLOWED_RULES_BY_COMPONENT.get(HudComponentRegistry.normalize(entry.key()));
         return rules == null
@@ -95,7 +95,7 @@ public final class HudRuleCatalog {
     }
 
     public static boolean supportsRule(
-            @Nonnull HudComponentRegistry.HudEntry entry,
+            @Nonnull HudEntry entry,
             @Nonnull DynamicHudTriggers rule
     ) {
         return getAllowedRules(entry).contains(rule);

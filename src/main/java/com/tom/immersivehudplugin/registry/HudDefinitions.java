@@ -12,13 +12,13 @@ final class HudDefinitions {
 
     private HudDefinitions() {}
 
-    static List<HudComponentRegistry.HudEntry> createAll() {
+    static List<HudEntry> createAll() {
 
         return List.of(
 
                 // Bars (dynamic-capable)
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "health", "Health",
                         HudComponentRegistry.Group.BARS, HudComponent.Health,
                         "HideHealth",
@@ -31,7 +31,7 @@ final class HudDefinitions {
                         100f
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "stamina", "Stamina",
                         HudComponentRegistry.Group.BARS, HudComponent.Stamina,
                         "HideStamina",
@@ -44,7 +44,7 @@ final class HudDefinitions {
                         100f
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "mana", "Mana",
                         HudComponentRegistry.Group.BARS, HudComponent.Mana,
                         "HideMana",
@@ -57,7 +57,7 @@ final class HudDefinitions {
                         100f
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "oxygen", "Oxygen",
                         HudComponentRegistry.Group.BARS, HudComponent.Oxygen,
                         "HideOxygen",
@@ -72,7 +72,7 @@ final class HudDefinitions {
 
                 // Core (dynamic-capable)
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "compass", "Compass",
                         HudComponentRegistry.Group.CORE, HudComponent.Compass,
                         "HideCompass",
@@ -85,7 +85,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "hotbar", "Hotbar",
                         HudComponentRegistry.Group.CORE, HudComponent.Hotbar,
                         "HideHotbar",
@@ -98,7 +98,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "reticle", "Reticle",
                         HudComponentRegistry.Group.CORE, HudComponent.Reticle,
                         "HideReticle",
@@ -119,7 +119,7 @@ final class HudDefinitions {
 
                 // Static-only
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "inputbindings", "Input Bindings",
                         HudComponentRegistry.Group.UI, HudComponent.InputBindings,
                         "HideInputBindings",
@@ -132,7 +132,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "notifications", "Notifications",
                         HudComponentRegistry.Group.UI, HudComponent.Notifications,
                         "HideNotifications",
@@ -145,7 +145,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "statusicons", "Status Icons",
                         HudComponentRegistry.Group.UI, HudComponent.StatusIcons,
                         "HideStatusIcons",
@@ -158,7 +158,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "speedometer", "Speedometer",
                         HudComponentRegistry.Group.UI, HudComponent.Speedometer,
                         "HideSpeedometer",
@@ -171,7 +171,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "ammo", "Ammo Indicator",
                         HudComponentRegistry.Group.UI, HudComponent.AmmoIndicator,
                         "HideAmmoIndicator",
@@ -184,7 +184,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "utilityslotselector", "Utility Slot Selector",
                         HudComponentRegistry.Group.UI, HudComponent.UtilitySlotSelector,
                         "HideUtilitySlotSelector",
@@ -197,7 +197,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "chat", "Chat",
                         HudComponentRegistry.Group.SOCIAL, HudComponent.Chat,
                         "HideChat",
@@ -210,7 +210,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "requests", "Requests",
                         HudComponentRegistry.Group.SOCIAL, HudComponent.Requests,
                         "HideRequests",
@@ -223,7 +223,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "killfeed", "Kill Feed",
                         HudComponentRegistry.Group.SOCIAL, HudComponent.KillFeed,
                         "HideKillFeed",
@@ -236,7 +236,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "playerlist", "Player List",
                         HudComponentRegistry.Group.SOCIAL, HudComponent.PlayerList,
                         "HidePlayerList",
@@ -249,7 +249,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "eventtitle", "Event Title",
                         HudComponentRegistry.Group.PANELS, HudComponent.EventTitle,
                         "HideEventTitle",
@@ -262,7 +262,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "objectivepanel", "Objective Panel",
                         HudComponentRegistry.Group.PANELS, HudComponent.ObjectivePanel,
                         "HideObjectivePanel",
@@ -275,7 +275,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "portalpanel", "Portal Panel",
                         HudComponentRegistry.Group.PANELS, HudComponent.PortalPanel,
                         "HidePortalPanel",
@@ -288,7 +288,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "sleep", "Sleep",
                         HudComponentRegistry.Group.PANELS, HudComponent.Sleep,
                         "HideSleep",
@@ -301,7 +301,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "blockvariantselector", "Block Variant Selector",
                         HudComponentRegistry.Group.BUILDER, HudComponent.BlockVariantSelector,
                         "HideBlockVariantSelector",
@@ -314,7 +314,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "buildertoolslegend", "Builder Tools Legend",
                         HudComponentRegistry.Group.BUILDER, HudComponent.BuilderToolsLegend,
                         "HideBuilderToolsLegend",
@@ -327,7 +327,7 @@ final class HudDefinitions {
                         null
                 ),
 
-                new HudComponentRegistry.HudEntry(
+                new HudEntry(
                         "buildertoolsmaterialslotselector", "Builder Tools Material Slot Selector",
                         HudComponentRegistry.Group.BUILDER, HudComponent.BuilderToolsMaterialSlotSelector,
                         "HideBuilderToolsMaterialSlotSelector",

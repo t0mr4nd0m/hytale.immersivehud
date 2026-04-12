@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.registry.HudEntry;
 import com.tom.immersivehudplugin.registry.HudRuleCatalog;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.hud.HudSettingsService;
@@ -304,7 +305,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
     }
 
     private record ResolvedRules(
-            HudComponentRegistry.HudEntry entry,
+            HudEntry entry,
             DynamicHudRuleConfig rules
     ) {
         String messagePrefix() {
@@ -364,7 +365,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
     }
 
     private static boolean hasMatchingThresholdRule(
-            HudComponentRegistry.HudEntry entry,
+            HudEntry entry,
             DynamicHudRuleConfig ruleCfg
     ) {
         return switch (entry.key()) {
@@ -415,7 +416,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static String availableComponents() {
         return HudComponentRegistry.dynamicList().stream()
-                .map(HudComponentRegistry.HudEntry::key)
+                .map(HudEntry::key)
                 .sorted()
                 .collect(Collectors.joining(", "));
     }
