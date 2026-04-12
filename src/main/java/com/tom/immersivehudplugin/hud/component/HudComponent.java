@@ -56,10 +56,6 @@ public record HudComponent(
         return rule != null && allowedRules.contains(rule);
     }
 
-    public EnumSet<HudTrigger> allowedRulesCopy() {
-        return EnumSet.copyOf(allowedRules);
-    }
-
     public boolean isHidden(HudComponentsConfig hudConfig) {
         return staticGetter.get(hudConfig);
     }
