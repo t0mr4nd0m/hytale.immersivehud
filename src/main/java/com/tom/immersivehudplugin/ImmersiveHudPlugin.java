@@ -8,7 +8,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.tom.immersivehudplugin.commands.CommandCollection;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.context.HudContextBuilder;
-import com.tom.immersivehudplugin.hud.HudSettingsService;
+import com.tom.immersivehudplugin.config.HudSettingsService;
 import com.tom.immersivehudplugin.managers.ConfigSupport;
 import com.tom.immersivehudplugin.managers.GlobalConfigManager;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;

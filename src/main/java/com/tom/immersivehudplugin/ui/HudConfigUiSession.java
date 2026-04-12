@@ -7,7 +7,6 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudConfigAccess;
 import com.tom.immersivehudplugin.registry.HudEntry;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
@@ -87,7 +86,7 @@ public final class HudConfigUiSession {
     }
 
     public boolean isHidden(@Nonnull HudEntry entry) {
-        return HudConfigAccess.isHidden(entry, draftHudComponents);
+        return entry.isHidden(draftHudComponents);
     }
 
     public void toggleVisibility(@Nonnull String componentKey) {
@@ -96,8 +95,8 @@ public final class HudConfigUiSession {
             return;
         }
 
-        boolean hidden = HudConfigAccess.isHidden(entry, draftHudComponents);
-        HudConfigAccess.setHidden(entry, draftHudComponents, !hidden);
+        boolean hidden = entry.isHidden(draftHudComponents);
+        entry.setHidden(draftHudComponents, !hidden);
         dirty = true;
     }
 
@@ -121,7 +120,7 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudEntry entry) {
-        DynamicHudRuleConfig cfg = HudConfigAccess.getDynamicRuleConfig(entry, draftDynamicHud);
+        DynamicHudRuleConfig cfg = entry.getDynamicRuleConfig(draftDynamicHud);
         if (cfg == null) {
             throw new IllegalStateException("Entry is not dynamic-capable: " + entry.key());
         }
@@ -215,7 +214,7 @@ public final class HudConfigUiSession {
     }
 
     public boolean isDynamicComponentVisible(@Nonnull HudEntry entry) {
-        return !HudConfigAccess.isHidden(entry, draftHudComponents);
+        return !entry.isHidden(draftHudComponents);
     }
 
     @Nonnull

@@ -19,7 +19,7 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudEntry;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
-import com.tom.immersivehudplugin.hud.HudSettingsService;
+import com.tom.immersivehudplugin.config.HudSettingsService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

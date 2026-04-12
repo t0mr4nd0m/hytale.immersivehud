@@ -5,7 +5,6 @@ import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.registry.HudConfigAccess;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
@@ -26,11 +25,11 @@ public final class HudRuleEvaluator {
         state.clearDynamicHidden();
 
         for (HudEntry entry : DYNAMIC_ENTRIES) {
-            if (!HudConfigAccess.isHidden(entry, hudConfig)) {
+            if (!entry.isHidden(hudConfig)) {
                 continue;
             }
 
-            DynamicHudRuleConfig ruleConfig = HudConfigAccess.getDynamicRuleConfig(entry, dynamicConfig);
+            DynamicHudRuleConfig ruleConfig = entry.getDynamicRuleConfig(dynamicConfig);
             boolean shouldShow = shouldShowDynamic(ruleConfig, triggersContext);
 
             if (!shouldShow) {

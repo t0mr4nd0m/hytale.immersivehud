@@ -15,7 +15,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.hud.HudSettingsService;
+import com.tom.immersivehudplugin.config.HudSettingsService;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 

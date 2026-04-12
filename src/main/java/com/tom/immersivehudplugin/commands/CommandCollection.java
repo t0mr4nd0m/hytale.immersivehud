@@ -3,8 +3,7 @@ package com.tom.immersivehudplugin.commands;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 
 import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.hud.HudSettingsService;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
+import com.tom.immersivehudplugin.config.HudSettingsService;
 import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 

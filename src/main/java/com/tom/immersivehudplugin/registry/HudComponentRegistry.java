@@ -1,7 +1,12 @@
 package com.tom.immersivehudplugin.registry;
 
+import com.tom.immersivehudplugin.config.DynamicHudConfig;
+import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
+import com.tom.immersivehudplugin.config.HudComponentsConfig;
+
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -23,12 +28,12 @@ public final class HudComponentRegistry {
 
     public enum Group {
 
-        CORE("core", "Core"),
-        BARS("bars", "Bars"),
-        UI("ui", "UI"),
-        SOCIAL("social", "Social"),
-        PANELS("panels", "Panels"),
-        BUILDER("builder", "Builder");
+        CORE    ("CORE",    "Core"),
+        BARS    ("BARS",    "Bars"),
+        UI      ("UI",      "UI"),
+        SOCIAL  ("SOCIAL",  "Social"),
+        PANELS  ("PANELS",  "Panels"),
+        BUILDER ("BUILDER", "Builder");
 
         public final String key;
         public final String label;
@@ -106,5 +111,34 @@ public final class HudComponentRegistry {
 
     public static String normalize(@Nullable String key) {
         return key == null ? "" : key.trim().toLowerCase(Locale.ROOT).replace("_", "");
+    }
+
+    public static HudComponentsConfig buildDefaultHudComponents() {
+        HudComponentsConfig cfg = new HudComponentsConfig();
+
+        for (HudEntry entry : allList()) {
+            entry.setHidden(cfg, entry.defaultHidden());
+        }
+
+        return cfg;
+    }
+
+    public static DynamicHudConfig buildDefaultDynamicHud() {
+        DynamicHudConfig cfg = new DynamicHudConfig();
+
+        for (HudEntry entry : dynamicList()) {
+
+            DynamicHudRuleConfig ruleCfg = entry.getDynamicRuleConfig(cfg);
+
+            if (ruleCfg != null) {
+                ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
+            }
+
+            if (entry.defaultThreshold() != null && ruleCfg != null) {
+                ruleCfg.setThreshold(entry.defaultThreshold());
+            }
+        }
+
+        return cfg;
     }
 }

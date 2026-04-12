@@ -60,4 +60,17 @@ public record HudEntry(
     public EnumSet<DynamicHudTriggers> allowedRulesCopy() {
         return EnumSet.copyOf(allowedRules);
     }
+
+    public boolean isHidden(HudComponentsConfig hudConfig) {
+        return staticGetter.get(hudConfig);
+    }
+
+    public void setHidden(HudComponentsConfig hudConfig, boolean hidden) {
+        staticSetter.set(hudConfig, hidden);
+    }
+
+    @Nullable
+    public DynamicHudRuleConfig getDynamicRuleConfig(DynamicHudConfig dynamicConfig) {
+        return dynamicGetter != null ? dynamicGetter.apply(dynamicConfig) : null;
+    }
 }

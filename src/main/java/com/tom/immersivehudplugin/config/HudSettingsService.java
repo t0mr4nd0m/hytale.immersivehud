@@ -1,10 +1,6 @@
-package com.tom.immersivehudplugin.hud;
+package com.tom.immersivehudplugin.config;
 
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.tom.immersivehudplugin.config.DynamicHudConfig;
-import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.config.HudComponentsConfig;
-import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.managers.PlayerConfigManager;
 import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 

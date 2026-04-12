@@ -15,7 +15,6 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.registry.HudConfigAccess;
 import com.tom.immersivehudplugin.runtime.HudRuntimeCoordinator;
 
 import javax.annotation.Nonnull;
@@ -130,7 +129,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
             @Nonnull HudComponentsConfig hud,
             @Nonnull DynamicHudConfig dynamic
     ) {
-        boolean hiddenNow = HudConfigAccess.isHidden(entry, hud);
+        boolean hiddenNow = entry.isHidden(hud);
 
         if (!entry.supportsDynamicRules()) {
             sendStaticComponentLine(context, entry.label(), hiddenNow);

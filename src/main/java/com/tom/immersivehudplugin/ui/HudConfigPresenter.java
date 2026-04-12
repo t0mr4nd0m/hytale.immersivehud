@@ -7,7 +7,6 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudConfigAccess;
 
 import javax.annotation.Nullable;
 
@@ -44,7 +43,7 @@ public final class HudConfigPresenter {
             if (entry.group() != group) continue;
 
             total++;
-            if (HudConfigAccess.isHidden(entry, hud)) {
+            if (entry.isHidden(hud)) {
                 hidden++;
             }
         }
@@ -60,7 +59,7 @@ public final class HudConfigPresenter {
             HudComponentsConfig b
     ) {
         for (var entry : HudComponentRegistry.allList()) {
-            if (HudConfigAccess.isHidden(entry, a) != HudConfigAccess.isHidden(entry, b)) {
+            if (entry.isHidden(a) != entry.isHidden(b)) {
                 return false;
             }
         }
@@ -72,8 +71,8 @@ public final class HudConfigPresenter {
             DynamicHudConfig b
     ) {
         for (var entry : HudComponentRegistry.dynamicList()) {
-            DynamicHudRuleConfig ra = HudConfigAccess.getDynamicRuleConfig(entry, a);
-            DynamicHudRuleConfig rb = HudConfigAccess.getDynamicRuleConfig(entry, b);
+            DynamicHudRuleConfig ra = entry.getDynamicRuleConfig(a);
+            DynamicHudRuleConfig rb = entry.getDynamicRuleConfig(b);
 
             if (!ra.getRules().equals(rb.getRules())) {
                 return false;

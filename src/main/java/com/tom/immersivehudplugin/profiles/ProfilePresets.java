@@ -6,7 +6,6 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
 import com.tom.immersivehudplugin.registry.HudEntry;
-import com.tom.immersivehudplugin.registry.HudDefaults;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 import java.util.EnumSet;
@@ -33,8 +32,8 @@ public final class ProfilePresets {
     }
 
     private static void applyRegistryDefaults(PlayerConfig cfg) {
-        cfg.setHudComponents(HudDefaults.buildDefaultHudComponents());
-        cfg.setDynamicHud(HudDefaults.buildDefaultDynamicHud());
+        cfg.setHudComponents(HudComponentRegistry.buildDefaultHudComponents());
+        cfg.setDynamicHud(HudComponentRegistry.buildDefaultDynamicHud());
     }
 
     private static void applyImmersive(PlayerConfig cfg) {

@@ -1,19 +1,18 @@
 package com.tom.immersivehudplugin.config;
 
 import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudDefaults;
 
 public final class PlayerConfig {
 
-    private HudComponentsConfig hudComponents = HudDefaults.buildDefaultHudComponents();
-    private DynamicHudConfig dynamicHud = HudDefaults.buildDefaultDynamicHud();
+    private HudComponentsConfig hudComponents = HudComponentRegistry.buildDefaultHudComponents();
+    private DynamicHudConfig dynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
 
     public HudComponentsConfig getHudComponents() {
         return hudComponents;
     }
 
     public void setHudComponents(HudComponentsConfig hudComponents) {
-        this.hudComponents = (hudComponents != null) ? hudComponents : HudDefaults.buildDefaultHudComponents();
+        this.hudComponents = (hudComponents != null) ? hudComponents : HudComponentRegistry.buildDefaultHudComponents();
     }
 
     public DynamicHudConfig getDynamicHud() {
@@ -21,21 +20,21 @@ public final class PlayerConfig {
     }
 
     public void setDynamicHud(DynamicHudConfig dynamicHud) {
-        this.dynamicHud = (dynamicHud != null) ? dynamicHud : HudDefaults.buildDefaultDynamicHud();
+        this.dynamicHud = (dynamicHud != null) ? dynamicHud : HudComponentRegistry.buildDefaultDynamicHud();
     }
 
     public boolean sanitize() {
         boolean changed = false;
 
         if (hudComponents == null) {
-            hudComponents = HudDefaults.buildDefaultHudComponents();
+            hudComponents = HudComponentRegistry.buildDefaultHudComponents();
             changed = true;
         } else {
             changed |= hudComponents.sanitize();
         }
 
         if (dynamicHud == null) {
-            dynamicHud = HudDefaults.buildDefaultDynamicHud();
+            dynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
             changed = true;
         } else {
             changed |= dynamicHud.sanitize();
@@ -49,8 +48,8 @@ public final class PlayerConfig {
             DynamicHudConfig defaultDynamic
     ) {
         PlayerConfig cfg = new PlayerConfig();
-        cfg.setHudComponents(defaultHud != null ? defaultHud.copy() : HudDefaults.buildDefaultHudComponents());
-        cfg.setDynamicHud(defaultDynamic != null ? defaultDynamic.copy() : HudDefaults.buildDefaultDynamicHud());
+        cfg.setHudComponents(defaultHud != null ? defaultHud.copy() : HudComponentRegistry.buildDefaultHudComponents());
+        cfg.setDynamicHud(defaultDynamic != null ? defaultDynamic.copy() : HudComponentRegistry.buildDefaultDynamicHud());
         return cfg;
     }
 }
