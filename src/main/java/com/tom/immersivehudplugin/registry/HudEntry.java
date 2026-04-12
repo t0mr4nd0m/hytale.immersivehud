@@ -53,6 +53,10 @@ public record HudEntry(
         return defaultThreshold != null;
     }
 
+    public boolean supportsRule(@Nullable DynamicHudTriggers rule) {
+        return rule != null && allowedRules.contains(rule);
+    }
+
     public EnumSet<DynamicHudTriggers> allowedRulesCopy() {
         return EnumSet.copyOf(allowedRules);
     }
