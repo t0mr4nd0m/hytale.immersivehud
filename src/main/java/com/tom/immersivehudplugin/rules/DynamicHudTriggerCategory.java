@@ -4,8 +4,7 @@ public enum DynamicHudTriggerCategory {
     COMBAT("COMBAT"),
     INTERACTION("INTERACTION"),
     MOVEMENT("MOVEMENT"),
-    STATUS("STATUS"),
-    SPECIAL("SPECIAL");
+    STATUS("STATUS");
 
     private final String label;
 

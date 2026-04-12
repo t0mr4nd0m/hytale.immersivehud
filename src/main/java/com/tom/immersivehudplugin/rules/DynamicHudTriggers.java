@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 public enum DynamicHudTriggers {
 
     HOTBAR_INPUT(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::hotbarInput),
-    CHARGING_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::chargingWeapon),
     CONSUMABLE_USE(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::consumableUse),
     TARGET_ENTITY(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::targetEntity),
     INTERACTABLE_BLOCK(DynamicHudTriggerCategory.INTERACTION, DynamicHudTriggersContext::interactableBlock),
@@ -32,6 +31,7 @@ public enum DynamicHudTriggers {
     PLAYER_IN_FLUID(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerInFluid),
     PLAYER_ON_GROUND(DynamicHudTriggerCategory.MOVEMENT, DynamicHudTriggersContext::playerOnGround),
 
+    CHARGING_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::chargingWeapon),
     HOLDING_RANGED_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::holdingRangedWeapon),
     HOLDING_MELEE_WEAPON(DynamicHudTriggerCategory.COMBAT, DynamicHudTriggersContext::holdingMeleeWeapon),
 
