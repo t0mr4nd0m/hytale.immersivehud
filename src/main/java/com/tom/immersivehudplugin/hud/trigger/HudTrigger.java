@@ -74,10 +74,6 @@ public enum HudTrigger {
         return category;
     }
 
-    public Source source() {
-        return source;
-    }
-
     public boolean matchesSignal(HudTriggerContext ctx) {
         if (ctx == null || Source.SIGNAL != source) { return false; }
         return ctx.active(this);
