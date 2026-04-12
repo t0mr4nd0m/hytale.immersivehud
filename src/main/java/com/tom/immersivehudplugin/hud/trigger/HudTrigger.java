@@ -33,6 +33,7 @@ public enum HudTrigger {
     CHARGING_WEAPON(Category.COMBAT, Source.SIGNAL),
     HOLDING_RANGED_WEAPON(Category.COMBAT, Source.SIGNAL),
     HOLDING_MELEE_WEAPON(Category.COMBAT, Source.SIGNAL),
+    BLOCKING_ATTACK(Category.COMBAT, Source.SIGNAL),
 
     HEALTH_NOT_FULL(Category.STATUS, Source.STATUS),
     STAMINA_NOT_FULL(Category.STATUS, Source.STATUS),

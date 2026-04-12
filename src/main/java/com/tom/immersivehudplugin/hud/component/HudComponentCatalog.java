@@ -177,7 +177,8 @@ final class HudComponentCatalog {
                                 HudTrigger.TARGET_ENTITY,
                                 HudTrigger.INTERACTABLE_BLOCK,
                                 HudTrigger.HOLDING_RANGED_WEAPON,
-                                HudTrigger.HOLDING_MELEE_WEAPON
+                                HudTrigger.HOLDING_MELEE_WEAPON,
+                                HudTrigger.BLOCKING_ATTACK
                         ),
                         EnumSet.of(
                                 HudTrigger.CHARGING_WEAPON,

@@ -51,47 +51,28 @@ public final class HeldItemSignalTracker {
         }
     }
 
-    public void repairFromInventoryIfNeeded(
-            PlayerHudState state,
-            PlayerTickContext tickContext
-    ) {
-        if (!state.needsHeldItemRepair()) {
-            return;
-        }
-
-        Item heldItem = getHeldItemFromInventory(state, tickContext);
-
-        state.applyHeldItemState(
-                HeldItemState.isRangedWeapon(heldItem),
-                HeldItemState.isMeleeWeapon(heldItem),
-                HeldItemState.isConsumable(heldItem)
-        );
+    private static boolean isPrimaryStart(SyncInteractionChain update) {
+        return update.interactionType == InteractionType.Primary;
     }
 
-    public void cleanupWeaponSignals(PlayerHudState state) {
-        if (!state.meleeWeaponInHand) {
-            state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
-        }
-
-        if (!state.rangedWeaponInHand) {
-            state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
-        }
-
-        if (!state.meleeWeaponInHand && !state.rangedWeaponInHand) {
-            state.t.clear(HudTrigger.CHARGING_WEAPON);
-        }
+    private static boolean isSecondaryStart(SyncInteractionChain update) {
+        return update.interactionType == InteractionType.Secondary;
     }
 
-    private void handleSecondaryInteractionType(
-            PlayerHudState state,
-            String itemInHandId,
-            long now
-    ) {
-        Item item = Item.getAssetMap().getAsset(itemInHandId);
+    private static boolean isSwapStart(SyncInteractionChain update) {
+        return update.interactionType == InteractionType.SwapTo
+                || update.interactionType == InteractionType.SwapFrom;
+    }
 
-        if (HeldItemState.isConsumable(item)) {
-            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMsHint);
-        }
+    private static boolean isChargingStart(SyncInteractionChain update) {
+        Item item = Item.getAssetMap().getAsset(update.itemInHandId);
+        return isPrimaryStart(update) && HeldItemState.isWeapon(item);
+    }
+
+    private static boolean isChargingEnd(SyncInteractionChain update) {
+        return update.interactionType == InteractionType.ProjectileHit
+                || update.interactionType == InteractionType.ProjectileBounce
+                || update.interactionType == InteractionType.ProjectileMiss;
     }
 
     @Nullable
@@ -124,27 +105,52 @@ public final class HeldItemSignalTracker {
         }
     }
 
-    private static boolean isPrimaryStart(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.Primary;
+    public void repairFromInventoryIfNeeded(
+            PlayerHudState state,
+            PlayerTickContext tickContext
+    ) {
+        if (!state.needsHeldItemRepair()) {
+            return;
+        }
+
+        Item heldItem = getHeldItemFromInventory(state, tickContext);
+
+        state.applyHeldItemState(
+                HeldItemState.isRangedWeapon(heldItem),
+                HeldItemState.isMeleeWeapon(heldItem),
+                HeldItemState.isConsumable(heldItem)
+        );
     }
 
-    private static boolean isSecondaryStart(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.Secondary;
+    public void cleanupWeaponSignals(PlayerHudState state) {
+
+        if (!state.meleeWeaponInHand) {
+            state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
+        }
+
+        if (!state.rangedWeaponInHand) {
+            state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
+        }
+
+        if (!state.meleeWeaponInHand && !state.rangedWeaponInHand) {
+            state.t.clear(HudTrigger.CHARGING_WEAPON);
+            state.t.clear(HudTrigger.BLOCKING_ATTACK);
+        }
     }
 
-    private static boolean isSwapStart(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.SwapTo
-                || update.interactionType == InteractionType.SwapFrom;
-    }
+    private void handleSecondaryInteractionType(
+            PlayerHudState state,
+            String itemInHandId,
+            long now
+    ) {
+        Item item = Item.getAssetMap().getAsset(itemInHandId);
 
-    private static boolean isChargingStart(SyncInteractionChain update) {
-        Item item = Item.getAssetMap().getAsset(update.itemInHandId);
-        return isPrimaryStart(update) && HeldItemState.isWeapon(item);
-    }
+        if (HeldItemState.isConsumable(item)) {
+            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMsHint);
+        }
 
-    private static boolean isChargingEnd(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.ProjectileHit
-                || update.interactionType == InteractionType.ProjectileBounce
-                || update.interactionType == InteractionType.ProjectileMiss;
+        if (HeldItemState.isWeapon(item)) {
+            state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMsHint);
+        }
     }
 }

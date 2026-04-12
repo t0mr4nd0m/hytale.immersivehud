@@ -146,6 +146,11 @@ public final class HudContextBuilder {
             activeSignals.add(HudTrigger.CHARGING_WEAPON);
         }
 
+        if ((state.rangedWeaponInHand || state.meleeWeaponInHand)
+                && state.t.active(HudTrigger.BLOCKING_ATTACK, now)) {
+            activeSignals.add(HudTrigger.BLOCKING_ATTACK);
+        }
+
         if (state.rangedWeaponInHand) {
             activeSignals.add(HudTrigger.HOLDING_RANGED_WEAPON);
         }
