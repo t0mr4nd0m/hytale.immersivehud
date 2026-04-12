@@ -34,7 +34,7 @@ public final class HudRuntimeCoordinator {
     private final PlayerConfigManager playerConfigManager;
     private final HudContextBuilder hudContextBuilder;
     private final HudVisibilityService hudVisibilityService;
-    private final HeldItemTracker heldItemTracker;
+    private final HeldItemSignalTracker heldItemSignalTracker;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     private final HudTickProcessor hudTickProcessor;
@@ -56,11 +56,11 @@ public final class HudRuntimeCoordinator {
         this.playerConfigManager = playerConfigManager;
         this.hudContextBuilder = hudContextBuilder;
         this.hudVisibilityService = hudVisibilityService;
-        this.heldItemTracker = new HeldItemTracker();
+        this.heldItemSignalTracker = new HeldItemSignalTracker();
         this.hudTickProcessor = new HudTickProcessor(
                 hudContextBuilder,
                 hudVisibilityService,
-                heldItemTracker
+                heldItemSignalTracker
         );
         this.globalConfigSupplier = globalConfigSupplier;
     }
@@ -151,8 +151,8 @@ public final class HudRuntimeCoordinator {
             long now = nowMs();
             PlayerHudState state = stateFor(playerRef.getUuid());
 
-            heldItemTracker.applyPacketBatch(state, updates, now);
-            heldItemTracker.cleanupWeaponSignals(state);
+            heldItemSignalTracker.applyPacketBatch(state, updates, now);
+            heldItemSignalTracker.cleanupWeaponSignals(state);
         });
     }
 

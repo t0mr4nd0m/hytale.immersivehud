@@ -10,7 +10,7 @@ import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
-public final class ReticleTracker {
+public final class ReticleSignalTracker {
 
     public void updateReticleSignalsIfNeeded(
             PlayerHudState state,

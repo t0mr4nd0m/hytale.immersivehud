@@ -16,16 +16,16 @@ public final class HudTickProcessor {
 
     private final HudContextBuilder hudContextBuilder;
     private final HudVisibilityService hudVisibilityService;
-    private final HeldItemTracker heldItemTracker;
+    private final HeldItemSignalTracker heldItemSignalTracker;
 
     public HudTickProcessor(
             HudContextBuilder hudContextBuilder,
             HudVisibilityService hudVisibilityService,
-            HeldItemTracker heldItemTracker
+            HeldItemSignalTracker heldItemSignalTracker
     ) {
         this.hudContextBuilder = hudContextBuilder;
         this.hudVisibilityService = hudVisibilityService;
-        this.heldItemTracker = heldItemTracker;
+        this.heldItemSignalTracker = heldItemSignalTracker;
     }
 
     public void processPlayerTick(
@@ -80,7 +80,7 @@ public final class HudTickProcessor {
     }
 
     private void repairHeldItemIfNeeded(TickEvaluation evaluation) {
-        heldItemTracker.repairFromInventoryIfNeeded(
+        heldItemSignalTracker.repairFromInventoryIfNeeded(
                 evaluation.state(),
                 evaluation.tickContext()
         );
@@ -91,7 +91,7 @@ public final class HudTickProcessor {
     }
 
     private void cleanupHeldItemSignals(TickEvaluation evaluation) {
-        heldItemTracker.cleanupWeaponSignals(evaluation.state());
+        heldItemSignalTracker.cleanupWeaponSignals(evaluation.state());
     }
 
     private void rebuildDynamicHud(
@@ -100,7 +100,7 @@ public final class HudTickProcessor {
             GlobalConfig global,
             long now
     ) {
-        heldItemTracker.cleanupWeaponSignals(evaluation.state());
+        heldItemSignalTracker.cleanupWeaponSignals(evaluation.state());
 
         var dynamicContext = hudContextBuilder.buildDynamicHudTriggerContext(
                 evaluation.state(),

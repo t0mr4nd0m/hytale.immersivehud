@@ -13,7 +13,7 @@ import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.runtime.MovementSignalTracker;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
-import com.tom.immersivehudplugin.runtime.ReticleTracker;
+import com.tom.immersivehudplugin.runtime.ReticleSignalTracker;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -26,7 +26,7 @@ public final class HudContextBuilder {
     private final int oxygenState;
 
     private final MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
-    private final ReticleTracker reticleTracker = new ReticleTracker();
+    private final ReticleSignalTracker reticleSignalTracker = new ReticleSignalTracker();
 
     public HudContextBuilder(
             int healthState,
@@ -76,7 +76,7 @@ public final class HudContextBuilder {
         state.hideDelayMsHint = hideDelay;
 
         movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
-        reticleTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
+        reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
         updateBars(state, tickContext);
 
         return createDynamicHudTriggerContext(state, now);

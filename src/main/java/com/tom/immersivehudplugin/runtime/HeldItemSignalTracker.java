@@ -10,9 +10,9 @@ import com.tom.immersivehudplugin.utils.ItemInHand;
 
 import javax.annotation.Nullable;
 
-public final class HeldItemTracker {
+public final class HeldItemSignalTracker {
 
-    public HeldItemTracker() {}
+    public HeldItemSignalTracker() {}
 
     public void applyPacketBatch(
             PlayerHudState state,
