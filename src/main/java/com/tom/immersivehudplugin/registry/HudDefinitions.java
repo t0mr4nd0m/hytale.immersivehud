@@ -27,6 +27,10 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideHealthHud,
                         DynamicHudConfig::getHealth,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.HEALTH_NOT_FULL
+                        ),
                         EnumSet.of(DynamicHudTriggers.HEALTH_NOT_FULL),
                         100f
                 ),
@@ -40,6 +44,10 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideStaminaHud,
                         DynamicHudConfig::getStamina,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.STAMINA_NOT_FULL
+                        ),
                         EnumSet.of(DynamicHudTriggers.STAMINA_NOT_FULL),
                         100f
                 ),
@@ -53,6 +61,10 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideManaHud,
                         DynamicHudConfig::getMana,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.MANA_NOT_FULL
+                        ),
                         EnumSet.of(DynamicHudTriggers.MANA_NOT_FULL),
                         100f
                 ),
@@ -66,6 +78,10 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideOxygenHud,
                         DynamicHudConfig::getOxygen,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.OXYGEN_NOT_FULL
+                        ),
                         EnumSet.of(DynamicHudTriggers.OXYGEN_NOT_FULL),
                         100f
                 ),
@@ -81,6 +97,27 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideCompassHud,
                         DynamicHudConfig::getCompass,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.PLAYER_MOVING,
+                                DynamicHudTriggers.PLAYER_WALKING,
+                                DynamicHudTriggers.PLAYER_RUNNING,
+                                DynamicHudTriggers.PLAYER_SPRINTING,
+                                DynamicHudTriggers.PLAYER_MOUNTING,
+                                DynamicHudTriggers.PLAYER_SWIMMING,
+                                DynamicHudTriggers.PLAYER_FLYING,
+                                DynamicHudTriggers.PLAYER_GLIDING,
+                                DynamicHudTriggers.PLAYER_JUMPING,
+                                DynamicHudTriggers.PLAYER_CROUCHING,
+                                DynamicHudTriggers.PLAYER_CLIMBING,
+                                DynamicHudTriggers.PLAYER_FALLING,
+                                DynamicHudTriggers.PLAYER_ROLLING,
+                                DynamicHudTriggers.PLAYER_IDLE,
+                                DynamicHudTriggers.PLAYER_SITTING,
+                                DynamicHudTriggers.PLAYER_SLEEPING,
+                                DynamicHudTriggers.PLAYER_IN_FLUID,
+                                DynamicHudTriggers.PLAYER_ON_GROUND
+                        ),
                         EnumSet.of(DynamicHudTriggers.PLAYER_MOVING),
                         null
                 ),
@@ -94,6 +131,12 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideHotbarHud,
                         DynamicHudConfig::getHotbar,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.CONSUMABLE_USE,
+                                DynamicHudTriggers.HOLDING_MELEE_WEAPON,
+                                DynamicHudTriggers.HOLDING_RANGED_WEAPON
+                        ),
                         EnumSet.of(DynamicHudTriggers.HOTBAR_INPUT),
                         null
                 ),
@@ -107,6 +150,15 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideReticleHud,
                         DynamicHudConfig::getReticle,
                         true,
+                        EnumSet.of(
+                                DynamicHudTriggers.HOTBAR_INPUT,
+                                DynamicHudTriggers.CHARGING_WEAPON,
+                                DynamicHudTriggers.CONSUMABLE_USE,
+                                DynamicHudTriggers.TARGET_ENTITY,
+                                DynamicHudTriggers.INTERACTABLE_BLOCK,
+                                DynamicHudTriggers.HOLDING_RANGED_WEAPON,
+                                DynamicHudTriggers.HOLDING_MELEE_WEAPON
+                        ),
                         EnumSet.of(
                                 DynamicHudTriggers.CHARGING_WEAPON,
                                 DynamicHudTriggers.CONSUMABLE_USE,
@@ -129,6 +181,7 @@ final class HudDefinitions {
                         null,
                         true,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -141,6 +194,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideNotificationsHud,
                         null,
                         true,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -155,6 +209,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -167,6 +222,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideSpeedometerHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -181,6 +237,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -193,6 +250,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideUtilitySlotSelectorHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -207,6 +265,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -219,6 +278,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideRequestsHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -233,6 +293,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -245,6 +306,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHidePlayerListHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -259,6 +321,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -271,6 +334,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideObjectivePanelHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -285,6 +349,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -297,6 +362,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideSleepHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
@@ -311,6 +377,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -324,6 +391,7 @@ final class HudDefinitions {
                         null,
                         false,
                         EnumSet.noneOf(DynamicHudTriggers.class),
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 ),
 
@@ -336,6 +404,7 @@ final class HudDefinitions {
                         HudComponentsConfig::setHideBuilderToolsMaterialSlotSelectorHud,
                         null,
                         false,
+                        EnumSet.noneOf(DynamicHudTriggers.class),
                         EnumSet.noneOf(DynamicHudTriggers.class),
                         null
                 )

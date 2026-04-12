@@ -21,13 +21,24 @@ public record HudEntry(
         HudComponentRegistry.BoolSetter<HudComponentsConfig> staticSetter,
         @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
         boolean defaultHidden,
+        EnumSet<DynamicHudTriggers> allowedRules,
         EnumSet<DynamicHudTriggers> defaultRules,
         @Nullable Float defaultThreshold
 ) {
     public HudEntry {
+        allowedRules = allowedRules == null
+                ? EnumSet.noneOf(DynamicHudTriggers.class)
+                : EnumSet.copyOf(allowedRules);
+
         defaultRules = defaultRules == null
                 ? EnumSet.noneOf(DynamicHudTriggers.class)
                 : EnumSet.copyOf(defaultRules);
+
+        if (!allowedRules.containsAll(defaultRules)) {
+            throw new IllegalArgumentException(
+                    "defaultRules must be a subset of allowedRules for component: " + key
+            );
+        }
 
         if (defaultThreshold != null) {
             defaultThreshold = Math.max(0f, Math.min(100f, defaultThreshold));
@@ -40,5 +51,9 @@ public record HudEntry(
 
     public boolean supportsThreshold() {
         return defaultThreshold != null;
+    }
+
+    public EnumSet<DynamicHudTriggers> allowedRulesCopy() {
+        return EnumSet.copyOf(allowedRules);
     }
 }
