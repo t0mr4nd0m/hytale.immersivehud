@@ -10,7 +10,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.rules.DynamicHudTriggersContext;
-import com.tom.immersivehudplugin.runtime.HudSignal;
+import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.runtime.MovementSignalTracker;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 import com.tom.immersivehudplugin.runtime.ReticleTracker;
@@ -118,30 +118,30 @@ public final class HudContextBuilder {
         boolean meleeWeaponInHand = state.meleeWeaponInHand;
 
         return new DynamicHudTriggersContext(
-                state.t.active(HudSignal.HOTBAR_INPUT, now),
-                (rangedWeaponInHand || meleeWeaponInHand) && state.t.active(HudSignal.CHARGING_WEAPON, now),
-                state.t.active(HudSignal.CONSUMABLE_USE, now),
-                state.t.active(HudSignal.TARGET_ENTITY, now),
-                state.t.active(HudSignal.INTERACTABLE_BLOCK, now),
+                state.t.active(DynamicHudTriggers.HOTBAR_INPUT, now),
+                (rangedWeaponInHand || meleeWeaponInHand) && state.t.active(DynamicHudTriggers.CHARGING_WEAPON, now),
+                state.t.active(DynamicHudTriggers.CONSUMABLE_USE, now),
+                state.t.active(DynamicHudTriggers.TARGET_ENTITY, now),
+                state.t.active(DynamicHudTriggers.INTERACTABLE_BLOCK, now),
 
-                state.t.active(HudSignal.PLAYER_MOVING, now),
-                state.t.active(HudSignal.PLAYER_WALKING, now),
-                state.t.active(HudSignal.PLAYER_RUNNING, now),
-                state.t.active(HudSignal.PLAYER_SPRINTING, now),
-                state.t.active(HudSignal.PLAYER_MOUNTING, now),
-                state.t.active(HudSignal.PLAYER_SWIMMING, now),
-                state.t.active(HudSignal.PLAYER_FLYING, now),
-                state.t.active(HudSignal.PLAYER_GLIDING, now),
-                state.t.active(HudSignal.PLAYER_JUMPING, now),
-                state.t.active(HudSignal.PLAYER_CROUCHING, now),
-                state.t.active(HudSignal.PLAYER_CLIMBING, now),
-                state.t.active(HudSignal.PLAYER_FALLING, now),
-                state.t.active(HudSignal.PLAYER_ROLLING, now),
-                state.t.active(HudSignal.PLAYER_IDLE, now),
-                state.t.active(HudSignal.PLAYER_SITTING, now),
-                state.t.active(HudSignal.PLAYER_SLEEPING, now),
-                state.t.active(HudSignal.PLAYER_IN_FLUID, now),
-                state.t.active(HudSignal.PLAYER_ON_GROUND, now),
+                state.t.active(DynamicHudTriggers.PLAYER_MOVING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_WALKING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_RUNNING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_SPRINTING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_MOUNTING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_SWIMMING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_FLYING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_GLIDING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_JUMPING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_CROUCHING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_CLIMBING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_FALLING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_ROLLING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_IDLE, now),
+                state.t.active(DynamicHudTriggers.PLAYER_SITTING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_SLEEPING, now),
+                state.t.active(DynamicHudTriggers.PLAYER_IN_FLUID, now),
+                state.t.active(DynamicHudTriggers.PLAYER_ON_GROUND, now),
 
                 rangedWeaponInHand,
                 meleeWeaponInHand,

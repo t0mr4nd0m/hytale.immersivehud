@@ -1,12 +1,14 @@
 package com.tom.immersivehudplugin.runtime;
 
+import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+
 import java.util.concurrent.atomic.AtomicLongArray;
 
 public final class HudTimers {
 
-    private final AtomicLongArray untilMs = new AtomicLongArray(HudSignal.values().length);
+    private final AtomicLongArray untilMs = new AtomicLongArray(DynamicHudTriggers.values().length);
 
-    public void pulse(HudSignal signal, long now, long durationMs) {
+    public void pulse(DynamicHudTriggers signal, long now, long durationMs) {
         long newUntil = now + Math.max(0L, durationMs);
         int idx = signal.ordinal();
 
@@ -21,7 +23,7 @@ public final class HudTimers {
         }
     }
 
-    public void clear(HudSignal signal) {
+    public void clear(DynamicHudTriggers signal) {
         untilMs.set(signal.ordinal(), 0L);
     }
 
@@ -31,7 +33,7 @@ public final class HudTimers {
         }
     }
 
-    public boolean active(HudSignal signal, long now) {
+    public boolean active(DynamicHudTriggers signal, long now) {
         return untilMs.get(signal.ordinal()) > now;
     }
 }

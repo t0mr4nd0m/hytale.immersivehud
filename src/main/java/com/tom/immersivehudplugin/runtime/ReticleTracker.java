@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
+import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 
 public final class ReticleTracker {
 
@@ -27,11 +28,11 @@ public final class ReticleTracker {
         ReticleScanResult scan = scanReticle(world, tickContext, targetRange);
 
         if (scan.targetEntity()) {
-            state.t.pulse(HudSignal.TARGET_ENTITY, now, hideDelay);
+            state.t.pulse(DynamicHudTriggers.TARGET_ENTITY, now, hideDelay);
         }
 
         if (scan.interactableBlock()) {
-            state.t.pulse(HudSignal.INTERACTABLE_BLOCK, now, hideDelay);
+            state.t.pulse(DynamicHudTriggers.INTERACTABLE_BLOCK, now, hideDelay);
         }
 
         markReticleScanExecuted(state, now);

@@ -181,8 +181,7 @@ public final class HudRuntimeCoordinator {
 
     private void resetPlayerRuntimeState(PlayerHudState state, int hideDelay, long now) {
         state.reset(hideDelay);
-        state.t.pulse(HudSignal.READY_GRACE, now, hideDelay);
-        state.t.pulse(HudSignal.HOTBAR_INPUT, now, hideDelay);
+        //state.t.pulse(HudSignal.HOTBAR_INPUT, now, hideDelay);
     }
 
     private void tickReadyPlayers() {
@@ -205,8 +204,6 @@ public final class HudRuntimeCoordinator {
     ) {
 
         state.hideDelayMsHint = hideDelayMs(global);
-
-        if (state.t.active(HudSignal.READY_GRACE, now)) { return; }
 
         ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
         if (resolved == null) { return; }

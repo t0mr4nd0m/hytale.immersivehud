@@ -5,6 +5,7 @@ import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.tom.immersivehudplugin.context.PlayerTickContext;
+import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
 import com.tom.immersivehudplugin.utils.ItemInHand;
 
 import javax.annotation.Nullable;
@@ -36,17 +37,17 @@ public final class HeldItemTracker {
         }
 
         if (chargingEnd) {
-            state.t.clear(HudSignal.CHARGING_WEAPON);
+            state.t.clear(DynamicHudTriggers.CHARGING_WEAPON);
         }
 
         if (chargingStart) {
-            state.t.pulse(HudSignal.CHARGING_WEAPON, now, state.hideDelayMsHint);
+            state.t.pulse(DynamicHudTriggers.CHARGING_WEAPON, now, state.hideDelayMsHint);
         }
 
         if (hotbarEvent) {
             state.heldItemRefreshRequested = true;
-            state.t.pulse(HudSignal.HOTBAR_INPUT, now, state.hideDelayMsHint);
-            state.t.clear(HudSignal.CHARGING_WEAPON);
+            state.t.pulse(DynamicHudTriggers.HOTBAR_INPUT, now, state.hideDelayMsHint);
+            state.t.clear(DynamicHudTriggers.CHARGING_WEAPON);
         }
     }
 
@@ -69,15 +70,15 @@ public final class HeldItemTracker {
 
     public void cleanupWeaponSignals(PlayerHudState state) {
         if (!state.meleeWeaponInHand) {
-            state.t.clear(HudSignal.HOLDING_MELEE_WEAPON);
+            state.t.clear(DynamicHudTriggers.HOLDING_MELEE_WEAPON);
         }
 
         if (!state.rangedWeaponInHand) {
-            state.t.clear(HudSignal.HOLDING_RANGED_WEAPON);
+            state.t.clear(DynamicHudTriggers.HOLDING_RANGED_WEAPON);
         }
 
         if (!state.meleeWeaponInHand && !state.rangedWeaponInHand) {
-            state.t.clear(HudSignal.CHARGING_WEAPON);
+            state.t.clear(DynamicHudTriggers.CHARGING_WEAPON);
         }
     }
 
@@ -89,7 +90,7 @@ public final class HeldItemTracker {
         Item item = Item.getAssetMap().getAsset(itemInHandId);
 
         if (ItemInHand.isConsumable(item)) {
-            state.t.pulse(HudSignal.CONSUMABLE_USE, now, state.hideDelayMsHint);
+            state.t.pulse(DynamicHudTriggers.CONSUMABLE_USE, now, state.hideDelayMsHint);
         }
     }
 
