@@ -38,12 +38,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static final Color ERROR_COLOR = Color.RED;
     private static final Color HIDE_COLOR = Color.RED;
 
-    private final PlayerConfigService playerConfigService;
-
     public RulesCmd(PlayerConfigService playerConfigService) {
         super("rules", "List, add, remove, clear or configure dynamic HUD rules.");
-
-        this.playerConfigService = playerConfigService;
 
         addUsageVariant(new TwoArgVariant(playerConfigService));
         addUsageVariant(new ThreeArgVariant(playerConfigService));
@@ -135,7 +131,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             playerConfigService.updateDynamicHud(playerRef, dynamicCfg -> {
-                DynamicHudRuleConfig cfg = resolved.entry().dynamicGetter().apply(dynamicCfg);
+                DynamicHudRuleConfig cfg = resolved.entry().getDynamicRuleConfig(dynamicCfg);
+                if (cfg == null) { return; }
                 cfg.setRules(EnumSet.noneOf(HudTrigger.class));
 
                 if (resolved.entry().supportsThreshold()) {
@@ -220,7 +217,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 }
 
                 playerConfigService.updateDynamicHud(playerRef, dynamicCfg -> {
-                    DynamicHudRuleConfig cfg = resolved.entry().dynamicGetter().apply(dynamicCfg);
+                    DynamicHudRuleConfig cfg = resolved.entry().getDynamicRuleConfig(dynamicCfg);
+                    if (cfg == null) { return; }
                     cfg.setThreshold(threshold);
                 });
 
@@ -268,7 +266,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 }
 
                 playerConfigService.updateDynamicHud(playerRef, dynamicCfg -> {
-                    DynamicHudRuleConfig cfg = resolved.entry().dynamicGetter().apply(dynamicCfg);
+                    DynamicHudRuleConfig cfg = resolved.entry().getDynamicRuleConfig(dynamicCfg);
+                    if (cfg == null) { return; }
                     cfg.setRules(EnumSet.copyOf(resolved.rules().getRules()));
                     cfg.setThreshold(resolved.rules().getThreshold());
                 });
@@ -290,7 +289,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             playerConfigService.updateDynamicHud(playerRef, dynamicCfg -> {
-                DynamicHudRuleConfig cfg = resolved.entry().dynamicGetter().apply(dynamicCfg);
+                DynamicHudRuleConfig cfg = resolved.entry().getDynamicRuleConfig(dynamicCfg);
+                if (cfg == null) { return; }
                 cfg.setRules(EnumSet.copyOf(resolved.rules().getRules()));
                 cfg.setThreshold(resolved.rules().getThreshold());
             });
@@ -321,6 +321,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         return cmd.withRequiredArg("value", "Rule or threshold", ArgTypes.STRING);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static RequiredArg<String> allowedArg(
             AbstractPlayerCommand cmd,
             String name,
@@ -354,7 +355,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
             return null;
         }
 
-        DynamicHudRuleConfig rules = entry.dynamicGetter().apply(playerCfg.getDynamicHud());
+        DynamicHudRuleConfig rules = entry.getDynamicRuleConfig(playerCfg.getDynamicHud());
         if (rules == null) {
             context.sendMessage(Message.raw("No dynamic rules found for " + entry.label() + ".").color(ERROR_COLOR));
             return null;
