@@ -204,13 +204,13 @@ public final class HudConfigUiSession {
     ) {
         return DynamicHudTriggers.displayCategoryOrder().stream()
                 .flatMap(category -> Arrays.stream(DynamicHudTriggers.values())
-                        .filter(trigger -> trigger.category() == category)
-                        .filter(trigger -> !entry.supportsRule(trigger))
-                        .filter(trigger -> trigger != DynamicHudTriggers.HEALTH_NOT_FULL)
-                        .filter(trigger -> trigger != DynamicHudTriggers.STAMINA_NOT_FULL)
-                        .filter(trigger -> trigger != DynamicHudTriggers.MANA_NOT_FULL)
-                        .filter(trigger -> trigger != DynamicHudTriggers.OXYGEN_NOT_FULL))
-                .toList();
+                    .filter(trigger -> trigger.category() == category)
+                    .filter(trigger -> !entry.supportsRule(trigger))
+                    .filter(trigger -> trigger != DynamicHudTriggers.HEALTH_NOT_FULL)
+                    .filter(trigger -> trigger != DynamicHudTriggers.STAMINA_NOT_FULL)
+                    .filter(trigger -> trigger != DynamicHudTriggers.MANA_NOT_FULL)
+                    .filter(trigger -> trigger != DynamicHudTriggers.OXYGEN_NOT_FULL)
+                ).toList();
     }
 
     public boolean isDynamicComponentVisible(@Nonnull HudEntry entry) {

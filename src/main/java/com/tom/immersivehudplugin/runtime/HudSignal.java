@@ -2,7 +2,6 @@ package com.tom.immersivehudplugin.runtime;
 
 public enum HudSignal {
     HOTBAR_INPUT,
-    CHARGING_WEAPON,
     CONSUMABLE_USE,
     TARGET_ENTITY,
     INTERACTABLE_BLOCK,
@@ -24,6 +23,7 @@ public enum HudSignal {
     PLAYER_SLEEPING,
     PLAYER_IN_FLUID,
     PLAYER_ON_GROUND,
+    CHARGING_WEAPON,
     HOLDING_MELEE_WEAPON,
     HOLDING_RANGED_WEAPON,
     READY_GRACE
