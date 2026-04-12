@@ -82,8 +82,7 @@ public final class HudRuleCatalog {
         ALLOWED_RULES_BY_COMPONENT = Collections.unmodifiableMap(copy);
     }
 
-    private HudRuleCatalog() {
-    }
+    private HudRuleCatalog() {}
 
     @Nonnull
     public static EnumSet<DynamicHudTriggers> getAllowedRules(

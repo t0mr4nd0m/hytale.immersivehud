@@ -75,17 +75,12 @@ public final class HudComponentRegistry {
             @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
             boolean defaultHidden,
             EnumSet<DynamicHudTriggers> defaultRules,
-            @Nullable Float defaultThreshold,
-            EnumSet<DynamicHudTriggers> allowedRules
+            @Nullable Float defaultThreshold
     ) {
         public HudEntry {
             defaultRules = defaultRules == null
                     ? EnumSet.noneOf(DynamicHudTriggers.class)
                     : EnumSet.copyOf(defaultRules);
-
-            allowedRules = allowedRules == null
-                    ? EnumSet.noneOf(DynamicHudTriggers.class)
-                    : EnumSet.copyOf(allowedRules);
 
             if (defaultThreshold != null) {
                 defaultThreshold = Math.max(0f, Math.min(100f, defaultThreshold));
@@ -120,11 +115,7 @@ public final class HudComponentRegistry {
                 DynamicHudConfig::getHealth,
                 true,
                 EnumSet.of(DynamicHudTriggers.HEALTH_NOT_FULL),
-                100f,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.HEALTH_NOT_FULL
-                )
+                100f
         ));
 
         register(new HudEntry(
@@ -136,11 +127,7 @@ public final class HudComponentRegistry {
                 DynamicHudConfig::getStamina,
                 true,
                 EnumSet.of(DynamicHudTriggers.STAMINA_NOT_FULL),
-                100f,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.STAMINA_NOT_FULL
-                )
+                100f
         ));
 
         register(new HudEntry(
@@ -152,11 +139,7 @@ public final class HudComponentRegistry {
                 DynamicHudConfig::getMana,
                 true,
                 EnumSet.of(DynamicHudTriggers.MANA_NOT_FULL),
-                100f,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.MANA_NOT_FULL
-                )
+                100f
         ));
 
         register(new HudEntry(
@@ -168,11 +151,7 @@ public final class HudComponentRegistry {
                 DynamicHudConfig::getOxygen,
                 true,
                 EnumSet.of(DynamicHudTriggers.OXYGEN_NOT_FULL),
-                100f,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.OXYGEN_NOT_FULL
-                )
+                100f
         ));
 
         // Core (dynamic-capable)
@@ -186,28 +165,7 @@ public final class HudComponentRegistry {
                 DynamicHudConfig::getCompass,
                 true,
                 EnumSet.of(DynamicHudTriggers.PLAYER_MOVING),
-                null,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.PLAYER_MOVING,
-                        DynamicHudTriggers.PLAYER_WALKING,
-                        DynamicHudTriggers.PLAYER_RUNNING,
-                        DynamicHudTriggers.PLAYER_SPRINTING,
-                        DynamicHudTriggers.PLAYER_MOUNTING,
-                        DynamicHudTriggers.PLAYER_SWIMMING,
-                        DynamicHudTriggers.PLAYER_FLYING,
-                        DynamicHudTriggers.PLAYER_GLIDING,
-                        DynamicHudTriggers.PLAYER_JUMPING,
-                        DynamicHudTriggers.PLAYER_CROUCHING,
-                        DynamicHudTriggers.PLAYER_CLIMBING,
-                        DynamicHudTriggers.PLAYER_FALLING,
-                        DynamicHudTriggers.PLAYER_ROLLING,
-                        DynamicHudTriggers.PLAYER_IDLE,
-                        DynamicHudTriggers.PLAYER_SITTING,
-                        DynamicHudTriggers.PLAYER_SLEEPING,
-                        DynamicHudTriggers.PLAYER_IN_FLUID,
-                        DynamicHudTriggers.PLAYER_ON_GROUND
-                )
+                null
         ));
 
         register(new HudEntry(
@@ -219,14 +177,7 @@ public final class HudComponentRegistry {
                 DynamicHudConfig::getHotbar,
                 true,
                 EnumSet.of(DynamicHudTriggers.HOTBAR_INPUT),
-                null,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.CHARGING_WEAPON,
-                        DynamicHudTriggers.CONSUMABLE_USE,
-                        DynamicHudTriggers.HOLDING_MELEE_WEAPON,
-                        DynamicHudTriggers.HOLDING_RANGED_WEAPON
-                )
+                null
         ));
 
         register(new HudEntry(
@@ -244,16 +195,7 @@ public final class HudComponentRegistry {
                         DynamicHudTriggers.INTERACTABLE_BLOCK,
                         DynamicHudTriggers.HOLDING_RANGED_WEAPON
                 ),
-                null,
-                EnumSet.of(
-                        DynamicHudTriggers.HOTBAR_INPUT,
-                        DynamicHudTriggers.CHARGING_WEAPON,
-                        DynamicHudTriggers.CONSUMABLE_USE,
-                        DynamicHudTriggers.TARGET_ENTITY,
-                        DynamicHudTriggers.INTERACTABLE_BLOCK,
-                        DynamicHudTriggers.HOLDING_RANGED_WEAPON,
-                        DynamicHudTriggers.HOLDING_MELEE_WEAPON
-                )
+                null
         ));
 
         // Static-only
@@ -267,7 +209,6 @@ public final class HudComponentRegistry {
                 null,
                 true,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -280,7 +221,6 @@ public final class HudComponentRegistry {
                 null,
                 true,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -293,7 +233,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -306,7 +245,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -319,7 +257,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -332,7 +269,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -345,7 +281,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -358,7 +293,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -371,7 +305,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -384,7 +317,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -397,7 +329,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -410,7 +341,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -423,7 +353,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -436,7 +365,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -449,7 +377,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -462,7 +389,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
@@ -475,7 +401,6 @@ public final class HudComponentRegistry {
                 null,
                 false,
                 EnumSet.noneOf(DynamicHudTriggers.class),
-                null,
                 null
         ));
 
