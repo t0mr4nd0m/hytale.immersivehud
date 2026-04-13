@@ -17,6 +17,7 @@ import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
 import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
 import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.HudSignalPipeline;
 import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
 import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
@@ -37,6 +38,12 @@ public final class HudRuntimeService {
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     private final HeldItemSignalTracker heldItemSignalTracker;
+    private final PlayerTickContextFactory tickContextFactory;
+    private final MovementSignalTracker movementSignalTracker;
+    private final ReticleSignalTracker reticleSignalTracker;
+    private final HudSignalPipeline hudSignalPipeline;
+    private final HudBarStateUpdater barUpdater;
+    private final HudTriggerContextFactory triggerContextFactory;
 
     private final HudTickProcessor hudTickProcessor;
 
@@ -62,21 +69,25 @@ public final class HudRuntimeService {
         this.globalConfigSupplier = globalConfigSupplier;
 
         this.heldItemSignalTracker = new HeldItemSignalTracker();
-        PlayerTickContextFactory tickContextFactory = new PlayerTickContextFactory();
-        MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
-        ReticleSignalTracker reticleSignalTracker = new ReticleSignalTracker();
-        HudBarStateUpdater barUpdater = new HudBarStateUpdater(
+        this.tickContextFactory = new PlayerTickContextFactory();
+        this.movementSignalTracker = new MovementSignalTracker();
+        this.reticleSignalTracker = new ReticleSignalTracker();
+        this.hudSignalPipeline = new HudSignalPipeline(
+                heldItemSignalTracker,
+                movementSignalTracker,
+                reticleSignalTracker
+        );
+        this.barUpdater = new HudBarStateUpdater(
                 healthState,
                 staminaState,
                 manaState,
                 oxygenState
         );
-        HudTriggerContextFactory triggerContextFactory = new HudTriggerContextFactory();
+        this.triggerContextFactory = new HudTriggerContextFactory();
 
         this.hudTickProcessor = new HudTickProcessor(
                 tickContextFactory,
-                movementSignalTracker,
-                reticleSignalTracker,
+                hudSignalPipeline,
                 barUpdater,
                 triggerContextFactory,
                 hudVisibilityCoordinator,
@@ -99,7 +110,6 @@ public final class HudRuntimeService {
         }
 
         playerState.forEach((uuid, state) -> playerConfigStore.save(uuid));
-
         playerState.clear();
     }
 
@@ -216,7 +226,9 @@ public final class HudRuntimeService {
         Universe universe = Universe.get();
         GlobalConfig global = getGlobalConfig();
 
-        playerState.forEach((uuid, state) -> processReadyPlayerTick(universe, uuid, state, global));
+        playerState.forEach((uuid, state) ->
+                processReadyPlayerTick(universe, uuid, state, global)
+        );
     }
 
     private void processReadyPlayerTick(

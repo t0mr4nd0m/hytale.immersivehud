@@ -6,23 +6,20 @@ import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
-import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
-import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
-import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
+import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
 import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.HudSignalPipeline;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
-
 
 import javax.annotation.Nullable;
 
 public final class HudTickProcessor {
 
     private final PlayerTickContextFactory tickContextFactory;
-    private final MovementSignalTracker movementSignalTracker;
-    private final ReticleSignalTracker reticleSignalTracker;
+    private final HudSignalPipeline hudSignalPipeline;
     private final HudBarStateUpdater barUpdater;
     private final HudTriggerContextFactory triggerContextFactory;
 
@@ -31,19 +28,16 @@ public final class HudTickProcessor {
 
     public HudTickProcessor(
             PlayerTickContextFactory tickContextFactory,
-            MovementSignalTracker movementSignalTracker,
-            ReticleSignalTracker reticleSignalTracker,
+            HudSignalPipeline hudSignalPipeline,
             HudBarStateUpdater barUpdater,
             HudTriggerContextFactory triggerContextFactory,
             HudVisibilityCoordinator hudVisibilityCoordinator,
             HeldItemSignalTracker heldItemSignalTracker
     ) {
         this.tickContextFactory = tickContextFactory;
-        this.movementSignalTracker = movementSignalTracker;
-        this.reticleSignalTracker = reticleSignalTracker;
+        this.hudSignalPipeline = hudSignalPipeline;
         this.barUpdater = barUpdater;
         this.triggerContextFactory = triggerContextFactory;
-
         this.hudVisibilityCoordinator = hudVisibilityCoordinator;
         this.heldItemSignalTracker = heldItemSignalTracker;
     }
@@ -56,15 +50,18 @@ public final class HudTickProcessor {
             PlayerHudState state,
             PlayerConfig playerConfig
     ) {
-
         TickEvaluation evaluation = buildTickEvaluation(playerRef, state, playerConfig);
-        if (evaluation == null) { return; }
+        if (evaluation == null) {
+            return;
+        }
 
-        hudVisibilityCoordinator.ensureStaticHudBuilt( evaluation.state(), evaluation.hudConfig() );
+        hudVisibilityCoordinator.ensureStaticHudBuilt(
+                evaluation.state(),
+                evaluation.hudConfig()
+        );
 
         if (shouldEvaluateDynamicHud(evaluation)) {
             repairHeldItemIfNeeded(evaluation);
-            cleanupHeldItemSignals(evaluation);
             rebuildDynamicHud(evaluation, world, global, now);
         } else {
             clearDynamicHud(evaluation);
@@ -104,11 +101,7 @@ public final class HudTickProcessor {
     }
 
     private void clearDynamicHud(TickEvaluation evaluation) {
-        hudVisibilityCoordinator.clearDynamicHiddenIfNeeded(evaluation.state());
-    }
-
-    private void cleanupHeldItemSignals(TickEvaluation evaluation) {
-        heldItemSignalTracker.cleanupWeaponSignals(evaluation.state());
+        hudVisibilityCoordinator.clearDynamicHidden(evaluation.state());
     }
 
     private void rebuildDynamicHud(
@@ -120,20 +113,10 @@ public final class HudTickProcessor {
         PlayerHudState state = evaluation.state();
         PlayerTickContext tickContext = evaluation.tickContext();
 
-        int hideDelay = global != null
-                ? global.getHideDelayMs()
-                : GlobalConfig.HIDE_DELAY_MS;
+        hudSignalPipeline.update(state, world, tickContext, global, now);
 
-        state.hideDelayMsHint = hideDelay;
-
-        // --- SIGNALS
-        movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
-        reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
-
-        // --- HUD BARS
         barUpdater.update(state, tickContext);
 
-        // --- CONTEXT
         var dynamicContext = triggerContextFactory.create(state, now);
 
         hudVisibilityCoordinator.rebuildDynamicHidden(
