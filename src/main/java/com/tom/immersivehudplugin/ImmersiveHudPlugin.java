@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.tom.immersivehudplugin.commands.CommandsCollection;
+import com.tom.immersivehudplugin.commands.IHudCommands;
 import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.config.ConfigSupport;
@@ -99,7 +99,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        this.getCommandRegistry().registerCommand(new CommandsCollection(
+        this.getCommandRegistry().registerCommand(new IHudCommands(
                 hudRuntimeService,
                 hudConfigUiService,
                 this::getImmersiveHudGlobalConfig,

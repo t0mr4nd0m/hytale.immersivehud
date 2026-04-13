@@ -9,9 +9,9 @@ import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
 import java.util.function.Supplier;
 
-public final class CommandsCollection extends AbstractCommandCollection {
+public final class IHudCommands extends AbstractCommandCollection {
 
-    public CommandsCollection(
+    public IHudCommands(
             HudRuntimeService hudRuntimeService,
             HudConfigUiService hudConfigUiService,
             Supplier<GlobalConfig> globalConfigSupplier,
