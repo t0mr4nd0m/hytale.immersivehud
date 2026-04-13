@@ -98,9 +98,7 @@ public final class HudRuntimeService {
             task.cancel(true);
         }
 
-        for (UUID uuid : playerState.keySet()) {
-            playerConfigStore.save(uuid);
-        }
+        playerState.forEach((uuid, state) -> playerConfigStore.save(uuid));
 
         playerState.clear();
     }
@@ -218,9 +216,7 @@ public final class HudRuntimeService {
         Universe universe = Universe.get();
         GlobalConfig global = getGlobalConfig();
 
-        for (Map.Entry<UUID, PlayerHudState> entry : playerState.entrySet()) {
-            processReadyPlayerTick(universe, entry.getKey(), entry.getValue(), global);
-        }
+        playerState.forEach((uuid, state) -> processReadyPlayerTick(universe, uuid, state, global));
     }
 
     private void processReadyPlayerTick(
