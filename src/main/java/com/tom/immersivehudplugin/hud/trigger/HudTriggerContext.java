@@ -1,8 +1,6 @@
 package com.tom.immersivehudplugin.hud.trigger;
 
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Set;
 
 public final class HudTriggerContext {
 
@@ -19,10 +17,7 @@ public final class HudTriggerContext {
             HudBarState manaBar,
             HudBarState oxygenBar
     ) {
-        this.activeSignals = activeSignals == null || activeSignals.isEmpty()
-                ? EnumSet.noneOf(HudTrigger.class)
-                : EnumSet.copyOf(activeSignals);
-
+        this.activeSignals = copySignals(activeSignals);
         this.healthBar = healthBar != null ? healthBar : new HudBarState();
         this.staminaBar = staminaBar != null ? staminaBar : new HudBarState();
         this.manaBar = manaBar != null ? manaBar : new HudBarState();
@@ -31,10 +26,6 @@ public final class HudTriggerContext {
 
     public boolean active(HudTrigger trigger) {
         return trigger != null && activeSignals.contains(trigger);
-    }
-
-    public Set<HudTrigger> activeSignals() {
-        return Collections.unmodifiableSet(activeSignals);
     }
 
     public HudBarState healthBar() {
@@ -51,5 +42,11 @@ public final class HudTriggerContext {
 
     public HudBarState oxygenBar() {
         return oxygenBar;
+    }
+
+    private static EnumSet<HudTrigger> copySignals(EnumSet<HudTrigger> signals) {
+        return signals == null || signals.isEmpty()
+                ? EnumSet.noneOf(HudTrigger.class)
+                : EnumSet.copyOf(signals);
     }
 }
