@@ -162,4 +162,8 @@ public final class DynamicHudConfig {
                 .map(HudComponentRegistry::normalize)
                 .collect(Collectors.toSet());
     }
+
+    public boolean hasRules(@Nullable String key) {
+        return !getByKey(key).getRules().isEmpty();
+    }
 }

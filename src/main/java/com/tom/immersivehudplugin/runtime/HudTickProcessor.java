@@ -62,7 +62,7 @@ public final class HudTickProcessor {
 
         hudVisibilityCoordinator.ensureStaticHudBuilt( evaluation.state(), evaluation.hudConfig() );
 
-        if (shouldEvaluateDynamicHud(evaluation.state(), evaluation.hudConfig())) {
+        if (shouldEvaluateDynamicHud(evaluation)) {
             repairHeldItemIfNeeded(evaluation);
             cleanupHeldItemSignals(evaluation);
             rebuildDynamicHud(evaluation, world, global, now);
@@ -92,11 +92,8 @@ public final class HudTickProcessor {
         );
     }
 
-    private boolean shouldEvaluateDynamicHud(
-            PlayerHudState state,
-            HudComponentsConfig hudConfig
-    ) {
-        return isDynamicHudEnabled(state, hudConfig);
+    private boolean shouldEvaluateDynamicHud(TickEvaluation evaluation) {
+        return isDynamicHudEnabled(evaluation);
     }
 
     private void repairHeldItemIfNeeded(TickEvaluation evaluation) {
@@ -154,10 +151,15 @@ public final class HudTickProcessor {
         );
     }
 
-    private boolean isDynamicHudEnabled(PlayerHudState state, HudComponentsConfig hudConfig) {
+    private boolean isDynamicHudEnabled(TickEvaluation evaluation) {
+        PlayerHudState state = evaluation.state();
+
         if (!state.hasDynamicHudEnabledCache()) {
             state.cacheDynamicHudEnabled(
-                    hudVisibilityCoordinator.hasAnyDynamicHudEnabled(hudConfig)
+                    hudVisibilityCoordinator.hasAnyDynamicHudEnabled(
+                            evaluation.hudConfig(),
+                            evaluation.dynamicConfig()
+                    )
             );
         }
 
