@@ -19,32 +19,37 @@ public final class HeldItemSignalTracker {
             SyncInteractionChains updates,
             long now
     ) {
-        boolean chargingStart = false;
-        boolean chargingEnd = false;
-        boolean hotbarEvent = false;
+        boolean hasChargingStart = false;
+        boolean hasChargingEnd = false;
+        boolean hasHotbarSwap = false;
 
         for (SyncInteractionChain update : updates.updates) {
-
             if (update.itemInHandId != null && isSecondaryStart(update)) {
                 handleSecondaryInteractionType(state, update.itemInHandId, now);
             }
 
-            chargingEnd |= isChargingEnd(update);
+            if (isChargingEnd(update)) {
+                hasChargingEnd = true;
+            }
 
-            chargingStart |= (isChargingStart(update) || (!chargingEnd && isPrimaryStart(update)));
+            if (isChargingStart(update) || (!hasChargingEnd && isPrimaryStart(update))) {
+                hasChargingStart = true;
+            }
 
-            hotbarEvent |= isSwapStart(update);
+            if (isSwapStart(update)) {
+                hasHotbarSwap = true;
+            }
         }
 
-        if (chargingEnd) {
+        if (hasChargingEnd) {
             state.t.clear(HudTrigger.CHARGING_WEAPON);
         }
 
-        if (chargingStart) {
+        if (hasChargingStart) {
             state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMsHint);
         }
 
-        if (hotbarEvent) {
+        if (hasHotbarSwap) {
             state.heldItem.refreshRequested = true;
             state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMsHint);
             state.t.clear(HudTrigger.CHARGING_WEAPON);
@@ -65,7 +70,7 @@ public final class HeldItemSignalTracker {
     }
 
     private static boolean isChargingStart(SyncInteractionChain update) {
-        Item item = Item.getAssetMap().getAsset(update.itemInHandId);
+        Item item = resolveItem(update.itemInHandId);
         return isPrimaryStart(update) && HeldItemState.isWeapon(item);
     }
 
@@ -98,7 +103,7 @@ public final class HeldItemSignalTracker {
                 }
             }
 
-            return Item.getAssetMap().getAsset(itemId);
+            return resolveItem(itemId);
 
         } catch (Throwable ignored) {
             return null;
@@ -123,16 +128,19 @@ public final class HeldItemSignalTracker {
     }
 
     public void cleanupWeaponSignals(PlayerHudState state) {
+        boolean hasMelee = state.heldItem.meleeWeaponInHand;
+        boolean hasRanged = state.heldItem.rangedWeaponInHand;
+        boolean hasWeapon = state.heldItem.hasAnyWeaponInHand();
 
-        if (!state.heldItem.meleeWeaponInHand) {
+        if (!hasMelee) {
             state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
         }
 
-        if (!state.heldItem.rangedWeaponInHand) {
+        if (!hasRanged) {
             state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
         }
 
-        if (!state.heldItem.meleeWeaponInHand && !state.heldItem.rangedWeaponInHand) {
+        if (!hasWeapon) {
             state.t.clear(HudTrigger.CHARGING_WEAPON);
             state.t.clear(HudTrigger.BLOCKING_ATTACK);
         }
@@ -143,7 +151,7 @@ public final class HeldItemSignalTracker {
             String itemInHandId,
             long now
     ) {
-        Item item = Item.getAssetMap().getAsset(itemInHandId);
+        Item item = resolveItem(itemInHandId);
 
         if (HeldItemState.isConsumable(item)) {
             state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMsHint);
@@ -152,5 +160,13 @@ public final class HeldItemSignalTracker {
         if (HeldItemState.isWeapon(item)) {
             state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMsHint);
         }
+    }
+
+    @Nullable
+    private static Item resolveItem(@Nullable String itemId) {
+        if (itemId == null || itemId.isBlank()) {
+            return null;
+        }
+        return Item.getAssetMap().getAsset(itemId);
     }
 }
