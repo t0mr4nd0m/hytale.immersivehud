@@ -13,8 +13,12 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigStore;
-import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
+import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
+import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
 import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 
 import javax.annotation.Nullable;
@@ -30,8 +34,9 @@ public final class HudRuntimeService {
 
     private final JavaPlugin plugin;
     private final PlayerConfigStore playerConfigStore;
-    private final HeldItemSignalTracker heldItemSignalTracker;
     private final Supplier<GlobalConfig> globalConfigSupplier;
+
+    private final HeldItemSignalTracker heldItemSignalTracker;
 
     private final HudTickProcessor hudTickProcessor;
 
@@ -45,19 +50,38 @@ public final class HudRuntimeService {
     public HudRuntimeService(
             JavaPlugin plugin,
             PlayerConfigStore playerConfigStore,
-            HudContextBuilder hudContextBuilder,
             HudVisibilityCoordinator hudVisibilityCoordinator,
-            Supplier<GlobalConfig> globalConfigSupplier
+            Supplier<GlobalConfig> globalConfigSupplier,
+            int healthState,
+            int staminaState,
+            int manaState,
+            int oxygenState
     ) {
         this.plugin = plugin;
         this.playerConfigStore = playerConfigStore;
+        this.globalConfigSupplier = globalConfigSupplier;
+
         this.heldItemSignalTracker = new HeldItemSignalTracker();
+        PlayerTickContextFactory tickContextFactory = new PlayerTickContextFactory();
+        MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
+        ReticleSignalTracker reticleSignalTracker = new ReticleSignalTracker();
+        HudBarStateUpdater barUpdater = new HudBarStateUpdater(
+                healthState,
+                staminaState,
+                manaState,
+                oxygenState
+        );
+        HudTriggerContextFactory triggerContextFactory = new HudTriggerContextFactory();
+
         this.hudTickProcessor = new HudTickProcessor(
-                hudContextBuilder,
+                tickContextFactory,
+                movementSignalTracker,
+                reticleSignalTracker,
+                barUpdater,
+                triggerContextFactory,
                 hudVisibilityCoordinator,
                 heldItemSignalTracker
         );
-        this.globalConfigSupplier = globalConfigSupplier;
     }
 
     public void start() {
@@ -88,7 +112,9 @@ public final class HudRuntimeService {
             wantedInterval = GlobalConfig.INTERVAL_MS;
         }
 
-        if (isTickTaskAlreadyRunningFor(wantedInterval)) { return; }
+        if (isTickTaskAlreadyRunningFor(wantedInterval)) {
+            return;
+        }
 
         cancelCurrentTickTask();
 
@@ -103,7 +129,10 @@ public final class HudRuntimeService {
     }
 
     public void markPlayerStaticHudDirty(@Nullable PlayerRef playerRef) {
-        if (playerRef == null) { return; }
+        if (playerRef == null) {
+            return;
+        }
+
         PlayerHudState state = stateFor(playerRef.getUuid());
         state.markStaticHudDirty();
         state.invalidateDynamicHudEnabledCache();
@@ -111,19 +140,28 @@ public final class HudRuntimeService {
 
     public void markPlayerConfigDirty(UUID uuid) {
         playerConfigStore.markDirty(uuid);
+
         PlayerHudState state = playerState.get(uuid);
-        if (state != null) { state.invalidateDynamicHudEnabledCache(); }
+        if (state != null) {
+            state.invalidateDynamicHudEnabledCache();
+        }
     }
 
     @Nullable
     public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
-        if (playerRef == null) { return null; }
+        if (playerRef == null) {
+            return null;
+        }
+
         return getOrLoadPlayerConfig(playerRef.getUuid());
     }
 
     public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
         PlayerConfig cached = playerConfigStore.getCached(uuid);
-        if (cached != null) { return cached; }
+        if (cached != null) {
+            return cached;
+        }
+
         return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
@@ -135,13 +173,15 @@ public final class HudRuntimeService {
     }
 
     private void registerInboundWatcher() {
-
-        if (inboundRegistered) { return; }
+        if (inboundRegistered) {
+            return;
+        }
         inboundRegistered = true;
 
         PacketAdapters.registerInbound((PlayerPacketWatcher) (playerRef, packet) -> {
-
-            if (!(packet instanceof SyncInteractionChains updates)) { return; }
+            if (!(packet instanceof SyncInteractionChains updates)) {
+                return;
+            }
 
             long now = nowMs();
             PlayerHudState state = stateFor(playerRef.getUuid());
@@ -152,14 +192,17 @@ public final class HudRuntimeService {
     }
 
     private void registerPlayerEvents() {
-
-        if (playerEventsRegistered) { return; }
+        if (playerEventsRegistered) {
+            return;
+        }
         playerEventsRegistered = true;
 
         plugin.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
             UUID uuid = event.getPlayer().getUuid();
             int hideDelay = hideDelayMs(getGlobalConfig());
+
             getOrLoadPlayerConfig(uuid);
+
             PlayerHudState state = stateFor(uuid);
             state.reset(hideDelay);
         });
@@ -172,7 +215,6 @@ public final class HudRuntimeService {
     }
 
     private void tickReadyPlayers() {
-
         Universe universe = Universe.get();
         GlobalConfig global = getGlobalConfig();
 
@@ -187,11 +229,12 @@ public final class HudRuntimeService {
             PlayerHudState state,
             GlobalConfig global
     ) {
-
         state.hideDelayMsHint = hideDelayMs(global);
 
         ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
-        if (resolved == null) { return; }
+        if (resolved == null) {
+            return;
+        }
 
         resolved.world().execute(() ->
                 processReadyPlayerTickOnWorldThread(resolved.uuid(), resolved.worldUuid(), global)
@@ -203,9 +246,10 @@ public final class HudRuntimeService {
             UUID expectedWorldUuid,
             GlobalConfig global
     ) {
-
         ResolvedPlayerWorld resolved = revalidatePlayerWorldOnWorldThread(uuid, expectedWorldUuid);
-        if (resolved == null) { return; }
+        if (resolved == null) {
+            return;
+        }
 
         long now = nowMs();
         PlayerHudState state = stateFor(uuid);
@@ -219,7 +263,6 @@ public final class HudRuntimeService {
                 state,
                 playerConfig
         );
-
     }
 
     private boolean isTickTaskAlreadyRunningFor(int wantedInterval) {
@@ -264,18 +307,21 @@ public final class HudRuntimeService {
     ) {}
 
     @Nullable
-    private ResolvedPlayerWorld resolvePlayerWorld(
-            Universe universe,
-            UUID uuid
-    ) {
+    private ResolvedPlayerWorld resolvePlayerWorld(Universe universe, UUID uuid) {
         PlayerRef playerRef = universe.getPlayer(uuid);
-        if (playerRef == null || !playerRef.isValid()) { return null; }
+        if (playerRef == null || !playerRef.isValid()) {
+            return null;
+        }
 
         UUID worldUuid = playerRef.getWorldUuid();
-        if (worldUuid == null) { return null; }
+        if (worldUuid == null) {
+            return null;
+        }
 
         World world = universe.getWorld(worldUuid);
-        if (world == null || !world.isAlive()) { return null; }
+        if (world == null || !world.isAlive()) {
+            return null;
+        }
 
         return new ResolvedPlayerWorld(uuid, playerRef, worldUuid, world);
     }
@@ -288,12 +334,18 @@ public final class HudRuntimeService {
         Universe universe = Universe.get();
 
         PlayerRef playerRef = universe.getPlayer(uuid);
-        if (playerRef == null || !playerRef.isValid()) { return null; }
+        if (playerRef == null || !playerRef.isValid()) {
+            return null;
+        }
 
-        if (!expectedWorldUuid.equals(playerRef.getWorldUuid())) { return null; }
+        if (!expectedWorldUuid.equals(playerRef.getWorldUuid())) {
+            return null;
+        }
 
         World world = universe.getWorld(expectedWorldUuid);
-        if (world == null || !world.isAlive()) { return null; }
+        if (world == null || !world.isAlive()) {
+            return null;
+        }
 
         return new ResolvedPlayerWorld(uuid, playerRef, expectedWorldUuid, world);
     }

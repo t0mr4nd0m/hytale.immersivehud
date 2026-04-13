@@ -6,25 +6,44 @@ import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
+import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
+import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
+import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
+import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
+
 
 import javax.annotation.Nullable;
 
 public final class HudTickProcessor {
 
-    private final HudContextBuilder hudContextBuilder;
+    private final PlayerTickContextFactory tickContextFactory;
+    private final MovementSignalTracker movementSignalTracker;
+    private final ReticleSignalTracker reticleSignalTracker;
+    private final HudBarStateUpdater barUpdater;
+    private final HudTriggerContextFactory triggerContextFactory;
+
     private final HudVisibilityCoordinator hudVisibilityCoordinator;
     private final HeldItemSignalTracker heldItemSignalTracker;
 
     public HudTickProcessor(
-            HudContextBuilder hudContextBuilder,
+            PlayerTickContextFactory tickContextFactory,
+            MovementSignalTracker movementSignalTracker,
+            ReticleSignalTracker reticleSignalTracker,
+            HudBarStateUpdater barUpdater,
+            HudTriggerContextFactory triggerContextFactory,
             HudVisibilityCoordinator hudVisibilityCoordinator,
             HeldItemSignalTracker heldItemSignalTracker
     ) {
-        this.hudContextBuilder = hudContextBuilder;
+        this.tickContextFactory = tickContextFactory;
+        this.movementSignalTracker = movementSignalTracker;
+        this.reticleSignalTracker = reticleSignalTracker;
+        this.barUpdater = barUpdater;
+        this.triggerContextFactory = triggerContextFactory;
+
         this.hudVisibilityCoordinator = hudVisibilityCoordinator;
         this.heldItemSignalTracker = heldItemSignalTracker;
     }
@@ -60,7 +79,7 @@ public final class HudTickProcessor {
             PlayerHudState state,
             PlayerConfig playerConfig
     ) {
-        PlayerTickContext tickContext = hudContextBuilder.buildCtx(playerRef);
+        PlayerTickContext tickContext = tickContextFactory.build(playerRef);
         if (tickContext == null) {
             return null;
         }
@@ -101,18 +120,27 @@ public final class HudTickProcessor {
             GlobalConfig global,
             long now
     ) {
-        heldItemSignalTracker.cleanupWeaponSignals(evaluation.state());
+        PlayerHudState state = evaluation.state();
+        PlayerTickContext tickContext = evaluation.tickContext();
 
-        var dynamicContext = hudContextBuilder.buildDynamicHudTriggerContext(
-                evaluation.state(),
-                world,
-                evaluation.tickContext(),
-                global,
-                now
-        );
+        int hideDelay = global != null
+                ? global.getHideDelayMs()
+                : GlobalConfig.HIDE_DELAY_MS;
+
+        state.hideDelayMsHint = hideDelay;
+
+        // --- SIGNALS
+        movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
+        reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
+
+        // --- HUD BARS
+        barUpdater.update(state, tickContext);
+
+        // --- CONTEXT
+        var dynamicContext = triggerContextFactory.create(state, now);
 
         hudVisibilityCoordinator.rebuildDynamicHidden(
-                evaluation.state(),
+                state,
                 evaluation.hudConfig(),
                 evaluation.dynamicConfig(),
                 dynamicContext

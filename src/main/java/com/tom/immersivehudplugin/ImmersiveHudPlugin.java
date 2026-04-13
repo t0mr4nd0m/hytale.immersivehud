@@ -6,7 +6,6 @@ import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntitySta
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.tom.immersivehudplugin.commands.IHudCommands;
-import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.config.ConfigSupport;
 import com.tom.immersivehudplugin.config.GlobalConfigStore;
@@ -71,21 +70,17 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private HudRuntimeService createHudRuntimeCoordinator() {
-        HudContextBuilder hudContextBuilder = new HudContextBuilder(
-                DefaultEntityStatTypes.getHealth(),
-                DefaultEntityStatTypes.getStamina(),
-                DefaultEntityStatTypes.getMana(),
-                DefaultEntityStatTypes.getOxygen()
-        );
-
         HudVisibilityCoordinator hudVisibilityCoordinator = new HudVisibilityCoordinator();
 
         return new HudRuntimeService(
                 this,
                 playerConfigStore,
-                hudContextBuilder,
                 hudVisibilityCoordinator,
-                this::getImmersiveHudGlobalConfig
+                this::getImmersiveHudGlobalConfig,
+                DefaultEntityStatTypes.getHealth(),
+                DefaultEntityStatTypes.getStamina(),
+                DefaultEntityStatTypes.getMana(),
+                DefaultEntityStatTypes.getOxygen()
         );
     }
 

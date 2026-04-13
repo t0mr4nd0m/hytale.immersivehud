@@ -12,6 +12,7 @@ With a flexible trigger system and ready-to-use profiles, it shows only what mat
 
 By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
+![link](https://img.shields.io/badge/platform-Hytale-purple)
 ![GitHub release](https://img.shields.io/github/v/release/T0mR4nD0m/hytale.immersivehud)
 ![GitHub last commit](https://img.shields.io/github/last-commit/T0mR4nD0m/hytale.immersivehud)
 ![GitHub repo size](https://img.shields.io/github/repo-size/T0mR4nD0m/hytale.immersivehud)
