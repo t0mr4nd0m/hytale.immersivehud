@@ -4,6 +4,7 @@ import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public enum HudTrigger {
@@ -37,16 +38,16 @@ public enum HudTrigger {
     HOLDING_MELEE_WEAPON    (Category.COMBAT, Source.SIGNAL),
     BLOCKING_ATTACK         (Category.COMBAT, Source.SIGNAL),
 
-    HEALTH_NOT_FULL         (Category.STATUS, Source.STATUS),
-    STAMINA_NOT_FULL        (Category.STATUS, Source.STATUS),
-    MANA_NOT_FULL           (Category.STATUS, Source.STATUS),
-    OXYGEN_NOT_FULL         (Category.STATUS, Source.STATUS);
+    HEALTH_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR),
+    STAMINA_NOT_FULL        (Category.HUD_BAR , Source.HUD_BAR),
+    MANA_NOT_FULL           (Category.HUD_BAR , Source.HUD_BAR),
+    OXYGEN_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR);
 
     public enum Category {
         COMBAT      ("COMBAT"),
         INTERACTION ("INTERACTION"),
         MOVEMENT    ("MOVEMENT"),
-        STATUS      ("STATUS");
+        HUD_BAR      ("HUD BAR");
 
         private final String label;
 
@@ -61,7 +62,7 @@ public enum HudTrigger {
 
     public enum Source {
         SIGNAL,
-        STATUS
+        HUD_BAR
     }
 
     private final Category category;
@@ -125,8 +126,14 @@ public enum HudTrigger {
         return List.of(
             Category.INTERACTION,
             Category.COMBAT,
-            Category.STATUS,
+            Category.HUD_BAR,
             Category.MOVEMENT
         );
+    }
+
+    public static String availableRulesText() {
+        return Arrays.stream(values())
+                .map(rule -> rule.name().toLowerCase(Locale.ROOT))
+                .collect(Collectors.joining(", "));
     }
 }

@@ -1,9 +1,5 @@
 package com.tom.immersivehudplugin.commands;
 
-import com.hypixel.hytale.codec.schema.SchemaContext;
-import com.hypixel.hytale.codec.schema.config.Schema;
-import com.hypixel.hytale.codec.validation.ValidationResults;
-import com.hypixel.hytale.codec.validation.Validator;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -14,22 +10,20 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.tom.immersivehudplugin.commands.validation.AllowedValuesValidator;
+import com.tom.immersivehudplugin.commands.validation.DynamicHudComponentValidator;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.trigger.HudRuleSupport;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class RulesCmd extends AbstractPlayerCommand {
 
@@ -38,7 +32,6 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static final Color ERROR_COLOR = Color.RED;
     private static final Color HIDE_COLOR = Color.RED;
     private static final Color SUCCESS_COLOR = Color.GREEN;
-    private static final float DEFAULT_THRESHOLD = 100f;
 
     public RulesCmd(PlayerConfigService playerConfigService) {
         super("rules", "List, add, remove, clear or configure dynamic HUD rules.");
@@ -65,8 +58,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw("   or: /ihud rules <component> add <rule>").color(WARN_COLOR));
         context.sendMessage(Message.raw("   or: /ihud rules <component> remove <rule>").color(WARN_COLOR));
         context.sendMessage(Message.raw("   or: /ihud rules <component> threshold <0-100>").color(WARN_COLOR));
-        context.sendMessage(Message.raw("Dynamic components: " + availableComponents()).color(INFO_COLOR));
-        context.sendMessage(Message.raw("Rules: " + availableRules()).color(INFO_COLOR));
+        context.sendMessage(Message.raw("Dynamic components: " + HudComponentRegistry.availableDynamicComponentsText()).color(INFO_COLOR));
+        context.sendMessage(Message.raw("Rules: " + HudTrigger.availableRulesText()).color(INFO_COLOR));
     }
 
     private static final class TwoArgVariant extends AbstractPlayerCommand {
@@ -105,7 +98,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            String action = normalize(actionArg.get(context));
+            String action = HudComponentRegistry.normalize(actionArg.get(context));
 
             if ("list".equals(action)) {
                 sendListMessage(context, resolved);
@@ -125,7 +118,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 context.sendMessage(Message.raw(
                         resolved.messagePrefix()
                                 + " rules cleared. Threshold reset to "
-                                + formatThreshold(resetThreshold)
+                                + HudRuleSupport.formatThreshold(resetThreshold)
                                 + "%."
                 ).color(SUCCESS_COLOR));
             } else {
@@ -174,7 +167,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            String action = normalize(actionArg.get(context));
+            String action = HudComponentRegistry.normalize(actionArg.get(context));
             String rawValue = valueArg.get(context);
 
             if ("threshold".equals(action)) {
@@ -191,7 +184,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
             HudTrigger rule = HudTrigger.fromString(rawValue);
             if (rule == null) {
                 context.sendMessage(Message.raw(
-                        "Unknown rule: " + rawValue + ". Available rules: " + availableRules()
+                        "Unknown rule: " + rawValue + ". Available rules: " + HudTrigger.availableRulesText()
                 ).color(ERROR_COLOR));
                 return;
             }
@@ -231,13 +224,13 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
         float defaultThresholdOrDefault() {
             Float value = entry.defaultThreshold();
-            return value != null ? value : DEFAULT_THRESHOLD;
+            return value != null ? value : DynamicHudRuleConfig.DEFAULT_THRESHOLD;
         }
     }
 
     private static RequiredArg<String> dynamicComponentArg(AbstractPlayerCommand cmd) {
         return cmd.withRequiredArg("component", "Dynamic HUD component", ArgTypes.STRING)
-                .addValidator(new ManagedHudComponentValidator());
+                .addValidator(new DynamicHudComponentValidator());
     }
 
     private static RequiredArg<String> genericValueArg(AbstractPlayerCommand cmd) {
@@ -295,7 +288,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
             CommandContext context,
             ResolvedRules resolved
     ) {
-        String rulesText = formatRules(resolved.rules().getRules());
+        String rulesText = HudRuleSupport.formatRules(resolved.rules().getRules());
 
         if (resolved.supportsThreshold()) {
             context.sendMessage(Message.raw(
@@ -303,7 +296,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                             + " rules: "
                             + rulesText
                             + " | threshold: "
-                            + formatThreshold(resolved.rules().getThreshold())
+                            + HudRuleSupport.formatThreshold(resolved.rules().getThreshold())
                             + "%"
             ).color(INFO_COLOR));
             return;
@@ -328,7 +321,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
             return;
         }
 
-        Float threshold = parseThreshold(rawValue);
+        Float threshold = HudRuleSupport.parseThreshold(rawValue);
         if (threshold == null) {
             context.sendMessage(Message.raw(
                     "Invalid threshold. Use a value between 0 and 100."
@@ -347,7 +340,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
             context.sendMessage(Message.raw(
                     resolved.messagePrefix()
                             + " threshold set to "
-                            + formatThreshold(threshold)
+                            + HudRuleSupport.formatThreshold(threshold)
                             + "%, but no threshold-based rule is currently active."
             ).color(WARN_COLOR));
             return;
@@ -356,7 +349,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw(
                 resolved.messagePrefix()
                         + " threshold set to "
-                        + formatThreshold(threshold)
+                        + HudRuleSupport.formatThreshold(threshold)
                         + "%."
         ).color(SUCCESS_COLOR));
     }
@@ -388,7 +381,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.join(
                 Message.raw(resolved.messagePrefix() + " Added rule ").color(INFO_COLOR),
                 Message.raw(rule.name()).color(SUCCESS_COLOR),
-                Message.raw(" -> " + formatRules(resolved.rules().getRules())).color(INFO_COLOR)
+                Message.raw(" -> " + HudRuleSupport.formatRules(resolved.rules().getRules())).color(INFO_COLOR)
         ));
     }
 
@@ -412,7 +405,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.join(
                 Message.raw(resolved.messagePrefix() + " Removed rule ").color(INFO_COLOR),
                 Message.raw(rule.name()).color(HIDE_COLOR),
-                Message.raw(" -> " + formatRules(resolved.rules().getRules())).color(INFO_COLOR)
+                Message.raw(" -> " + HudRuleSupport.formatRules(resolved.rules().getRules())).color(INFO_COLOR)
         ));
     }
 
@@ -456,114 +449,6 @@ public final class RulesCmd extends AbstractPlayerCommand {
     ) {
         resolved.rules().setThreshold(threshold);
         persistResolvedRules(playerConfigService, playerRef, resolved);
-        return hasActiveThresholdRule(resolved.entry(), resolved.rules());
-    }
-
-    private static boolean hasActiveThresholdRule(
-            HudComponent entry,
-            DynamicHudRuleConfig ruleCfg
-    ) {
-        return switch (entry.key()) {
-            case "health" -> ruleCfg.getRules().contains(HudTrigger.HEALTH_NOT_FULL);
-            case "stamina" -> ruleCfg.getRules().contains(HudTrigger.STAMINA_NOT_FULL);
-            case "mana" -> ruleCfg.getRules().contains(HudTrigger.MANA_NOT_FULL);
-            case "oxygen" -> ruleCfg.getRules().contains(HudTrigger.OXYGEN_NOT_FULL);
-            default -> false;
-        };
-    }
-
-    @Nullable
-    private static Float parseThreshold(@Nullable String raw) {
-        if (raw == null || raw.isBlank()) {
-            return null;
-        }
-
-        try {
-            float value = Float.parseFloat(raw.trim());
-            if (Float.isNaN(value) || Float.isInfinite(value)) {
-                return null;
-            }
-            if (value < 0f || value > 100f) {
-                return null;
-            }
-            return value;
-        } catch (NumberFormatException ex) {
-            return null;
-        }
-    }
-
-    private static String formatThreshold(float value) {
-        if (value == (long) value) {
-            return Long.toString((long) value);
-        }
-        return Float.toString(value);
-    }
-
-    private static String formatRules(EnumSet<HudTrigger> rules) {
-        if (rules == null || rules.isEmpty()) {
-            return "(none)";
-        }
-
-        return rules.stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(", "));
-    }
-
-    private static String availableComponents() {
-        return HudComponentRegistry.dynamicList().stream()
-                .map(HudComponent::key)
-                .sorted()
-                .collect(Collectors.joining(", "));
-    }
-
-    private static String availableRules() {
-        return Arrays.stream(HudTrigger.values())
-                .map(rule -> rule.name().toLowerCase(Locale.ROOT))
-                .collect(Collectors.joining(", "));
-    }
-
-    private static String normalize(@Nullable String s) {
-        return HudComponentRegistry.normalize(s);
-    }
-
-    private static final class ManagedHudComponentValidator implements Validator<String> {
-        @Override
-        public void accept(@Nullable String input, @Nonnull ValidationResults results) {
-            String key = HudComponentRegistry.normalize(input);
-            if (HudComponentRegistry.findDynamic(key) == null) {
-                results.fail(
-                        "Unknown dynamic HUD component: " + input
-                                + ". Available components: " + availableComponents()
-                );
-            }
-        }
-
-        @Override
-        public void updateSchema(SchemaContext context, @Nonnull Schema target) {
-        }
-    }
-
-    private static final class AllowedValuesValidator implements Validator<String> {
-        private final Set<String> allowed;
-        private final String display;
-
-        AllowedValuesValidator(String... allowedValues) {
-            this.allowed = Arrays.stream(allowedValues)
-                    .map(v -> v.toLowerCase(Locale.ROOT))
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            this.display = String.join(", ", allowedValues);
-        }
-
-        @Override
-        public void accept(@Nullable String input, @Nonnull ValidationResults results) {
-            String normalized = normalize(input);
-            if (!allowed.contains(normalized)) {
-                results.fail("Allowed values: " + display);
-            }
-        }
-
-        @Override
-        public void updateSchema(SchemaContext context, @Nonnull Schema target) {
-        }
+        return resolved.rules().hasActiveThresholdRule();
     }
 }

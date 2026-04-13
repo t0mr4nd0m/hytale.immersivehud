@@ -171,4 +171,8 @@ public final class DynamicHudRuleConfig {
                 ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(rules);
     }
+
+    public boolean hasActiveThresholdRule() {
+        return getRules().stream().anyMatch(rule -> rule.source() == HudTrigger.Source.HUD_BAR);
+    }
 }
