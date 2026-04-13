@@ -45,7 +45,7 @@ public final class HeldItemSignalTracker {
         }
 
         if (hotbarEvent) {
-            state.heldItemRefreshRequested = true;
+            state.heldItem.refreshRequested = true;
             state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMsHint);
             state.t.clear(HudTrigger.CHARGING_WEAPON);
         }
@@ -90,11 +90,11 @@ public final class HeldItemSignalTracker {
             String itemId = heldStack.getItemId();
             if (itemId.isBlank()) { return null; }
 
-            if (state.lastActiveHotbarSlot == -1) {
+            if (state.heldItem.lastActiveHotbarSlot == -1) {
 
                 int slot = inventory.getActiveHotbarSlot();
                 if (slot >= 0 && slot <= 8) {
-                    state.lastActiveHotbarSlot = slot;
+                    state.heldItem.lastActiveHotbarSlot = slot;
                 }
             }
 
@@ -124,15 +124,15 @@ public final class HeldItemSignalTracker {
 
     public void cleanupWeaponSignals(PlayerHudState state) {
 
-        if (!state.meleeWeaponInHand) {
+        if (!state.heldItem.meleeWeaponInHand) {
             state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
         }
 
-        if (!state.rangedWeaponInHand) {
+        if (!state.heldItem.rangedWeaponInHand) {
             state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
         }
 
-        if (!state.meleeWeaponInHand && !state.rangedWeaponInHand) {
+        if (!state.heldItem.meleeWeaponInHand && !state.heldItem.rangedWeaponInHand) {
             state.t.clear(HudTrigger.CHARGING_WEAPON);
             state.t.clear(HudTrigger.BLOCKING_ATTACK);
         }

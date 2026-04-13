@@ -35,21 +35,19 @@ public final class HudTriggerContextFactory {
             PlayerHudState state,
             long now
     ) {
-        if ((state.rangedWeaponInHand || state.meleeWeaponInHand)
-                && state.t.active(HudTrigger.CHARGING_WEAPON, now)) {
+        if (state.heldItem.hasAnyWeaponInHand() && state.t.active(HudTrigger.CHARGING_WEAPON, now)) {
             activeSignals.add(HudTrigger.CHARGING_WEAPON);
         }
 
-        if ((state.rangedWeaponInHand || state.meleeWeaponInHand)
-                && state.t.active(HudTrigger.BLOCKING_ATTACK, now)) {
+        if (state.heldItem.hasAnyWeaponInHand() && state.t.active(HudTrigger.BLOCKING_ATTACK, now)) {
             activeSignals.add(HudTrigger.BLOCKING_ATTACK);
         }
 
-        if (state.rangedWeaponInHand) {
+        if (state.heldItem.rangedWeaponInHand) {
             activeSignals.add(HudTrigger.HOLDING_RANGED_WEAPON);
         }
 
-        if (state.meleeWeaponInHand) {
+        if (state.heldItem.meleeWeaponInHand) {
             activeSignals.add(HudTrigger.HOLDING_MELEE_WEAPON);
         }
     }

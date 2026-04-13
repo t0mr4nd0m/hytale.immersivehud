@@ -22,31 +22,21 @@ public final class PlayerHudState {
     public final HudBarState oxygenBar = new HudBarState();
 
     public final HudTimers t = new HudTimers();
+    public final PlayerHeldItemState heldItem = new PlayerHeldItemState();
+    public final DynamicHudCache dynamicHudCache = new DynamicHudCache();
 
     public boolean staticHudInitialized;
     public boolean staticDirty = true;
 
     public volatile long lastReticleScanMs;
-
-    public volatile boolean rangedWeaponInHand;
-    public volatile boolean meleeWeaponInHand;
-    public volatile boolean consumableInHand;
-    public volatile boolean heldItemStateInitialized;
-    public volatile boolean heldItemRefreshRequested;
-
-    public volatile int lastActiveHotbarSlot = -1;
-
-    public boolean dynamicHudEnabledKnown;
-    public boolean dynamicHudEnabled;
-
     public volatile int hideDelayMsHint = GlobalConfig.HIDE_DELAY_MS;
 
     public void reset(int hideDelay) {
         resetHudVisibilityState();
         resetBars();
         resetTimersAndScans();
-        resetHeldItemState();
-        resetDynamicHudCache();
+        heldItem.reset();
+        dynamicHudCache.reset();
 
         hideDelayMsHint = hideDelay;
     }
@@ -57,20 +47,19 @@ public final class PlayerHudState {
     }
 
     public void invalidateDynamicHudEnabledCache() {
-        dynamicHudEnabledKnown = false;
+        dynamicHudCache.invalidate();
     }
 
     public void cacheDynamicHudEnabled(boolean enabled) {
-        dynamicHudEnabled = enabled;
-        dynamicHudEnabledKnown = true;
+        dynamicHudCache.cache(enabled);
     }
 
     public boolean hasDynamicHudEnabledCache() {
-        return dynamicHudEnabledKnown;
+        return dynamicHudCache.isKnown();
     }
 
     public boolean isDynamicHudEnabledCached() {
-        return dynamicHudEnabled;
+        return dynamicHudCache.isEnabled();
     }
 
     public void applyHeldItemState(
@@ -78,11 +67,7 @@ public final class PlayerHudState {
             boolean meleeWeapon,
             boolean consumableItem
     ) {
-        rangedWeaponInHand = rangedWeapon;
-        meleeWeaponInHand = meleeWeapon;
-        consumableInHand = consumableItem;
-        heldItemStateInitialized = true;
-        heldItemRefreshRequested = false;
+        heldItem.apply(rangedWeapon, meleeWeapon, consumableItem);
     }
 
     public void clearStaticHidden() {
@@ -152,19 +137,6 @@ public final class PlayerHudState {
         lastReticleScanMs = 0L;
     }
 
-    private void resetHeldItemState() {
-        rangedWeaponInHand = false;
-        meleeWeaponInHand = false;
-        consumableInHand = false;
-        heldItemStateInitialized = false;
-        heldItemRefreshRequested = true;
-    }
-
-    private void resetDynamicHudCache() {
-        dynamicHudEnabledKnown = false;
-        dynamicHudEnabled = false;
-    }
-
     public record HudDelta(
             EnumSet<HudComponent> effectiveHidden,
             EnumSet<HudComponent> toHide,
@@ -173,6 +145,6 @@ public final class PlayerHudState {
     ) {}
 
     public boolean needsHeldItemRepair() {
-        return !heldItemStateInitialized || heldItemRefreshRequested;
+        return heldItem.needsRepair();
     }
 }
