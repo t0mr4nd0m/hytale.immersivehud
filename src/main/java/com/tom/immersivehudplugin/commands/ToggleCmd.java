@@ -16,9 +16,9 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.config.PlayerConfigService;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class ToggleCmd extends AbstractPlayerCommand {
@@ -37,20 +36,17 @@ public final class ToggleCmd extends AbstractPlayerCommand {
     private static final Color SHOW_COLOR = Color.GREEN;
     private static final Color HIDE_COLOR = Color.RED;
 
-    private final HudRuntimeService hudRuntimeService;
-    private final PlayerConfigManager playerConfigManager;
+    private final PlayerConfigService playerConfigService;
 
     public ToggleCmd(
-            HudRuntimeService hudRuntimeService,
-            PlayerConfigManager playerConfigManager
+            PlayerConfigService playerConfigService
     ) {
         super("toggle", "Toggle your HUD components; set component/group hide|show");
 
-        this.hudRuntimeService = hudRuntimeService;
-        this.playerConfigManager = playerConfigManager;
+        this.playerConfigService = playerConfigService;
 
-        addUsageVariant(new ToggleOneVariant(hudRuntimeService, playerConfigManager));
-        addUsageVariant(new SetStateVariant(hudRuntimeService, playerConfigManager));
+        addUsageVariant(new ToggleOneVariant(playerConfigService));
+        addUsageVariant(new SetStateVariant(playerConfigService));
     }
 
     @Override
@@ -77,28 +73,6 @@ public final class ToggleCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw("Use /ihud rules <component> <add|remove> <rule> to update component visibility rules.").color(INFO_COLOR));
         context.sendMessage(Message.raw("Use /ihud profile <profile> to apply a quick configuration based on profiles.").color(INFO_COLOR));
         context.sendMessage(Message.raw("Use /ihud status to view your current configuration.").color(INFO_COLOR));
-    }
-
-    @Nullable
-    private static PlayerConfig requirePlayerConfig(
-            @Nonnull HudRuntimeService hudRuntimeService,
-            @Nonnull PlayerRef playerRef,
-            @Nonnull CommandContext context
-    ) {
-        PlayerConfig playerConfig = hudRuntimeService.requirePlayerConfig(playerRef);
-        if (playerConfig == null) {
-            context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
-            return null;
-        }
-        return playerConfig;
-    }
-
-    private static void persistPlayerHudChanges(
-            @Nonnull HudRuntimeService hudRuntimeService,
-            @Nonnull PlayerConfigManager playerConfigManager,
-            @Nonnull PlayerRef playerRef
-    ) {
-        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
     }
 
     private static RequiredArg<String> componentOnlyArg(AbstractPlayerCommand cmd) {
@@ -163,7 +137,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
 
     private static String availableComponents() {
         return HudComponentRegistry.allList().stream()
-                .map(HudComponentRegistry.HudEntry::key)
+                .map(HudComponent::key)
                 .sorted()
                 .collect(Collectors.joining(", "));
     }
@@ -180,17 +154,12 @@ public final class ToggleCmd extends AbstractPlayerCommand {
     }
 
     private static final class ToggleOneVariant extends AbstractPlayerCommand {
-        private final HudRuntimeService hudRuntimeService;
-        private final PlayerConfigManager playerConfigManager;
+        private final PlayerConfigService playerConfigService;
         private final RequiredArg<String> targetArg;
 
-        ToggleOneVariant(
-                HudRuntimeService hudRuntimeService,
-                PlayerConfigManager playerConfigManager
-        ) {
+        ToggleOneVariant(PlayerConfigService playerConfigService) {
             super("Toggle a component");
-            this.hudRuntimeService = hudRuntimeService;
-            this.playerConfigManager = playerConfigManager;
+            this.playerConfigService = playerConfigService;
             this.targetArg = componentOnlyArg(this);
         }
 
@@ -215,35 +184,32 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            PlayerConfig playerCfg = requirePlayerConfig(hudRuntimeService, playerRef, context);
+            PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
             if (playerCfg == null) {
+                context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
                 return;
             }
 
             HudComponentsConfig hud = playerCfg.getHudComponents();
+            boolean nextHidden = !entry.isHidden(hud);
 
-            boolean currentHidden = entry.staticGetter().get(hud);
-            boolean nextHidden = !currentHidden;
-            entry.staticSetter().set(hud, nextHidden);
+            playerConfigService.updateHudComponents(playerRef, cfg -> {
+                boolean currentHidden = entry.isHidden(cfg);
+                entry.setHidden(cfg, !currentHidden);
+            });
 
-            persistPlayerHudChanges(hudRuntimeService, playerConfigManager, playerRef);
             sendSingleResult(context, entry.label(), nextHidden);
         }
     }
 
     private static final class SetStateVariant extends AbstractPlayerCommand {
-        private final HudRuntimeService hudRuntimeService;
-        private final PlayerConfigManager playerConfigManager;
+        private final PlayerConfigService playerConfigService;
         private final RequiredArg<String> targetArg;
         private final RequiredArg<String> stateArg;
 
-        SetStateVariant(
-                HudRuntimeService hudRuntimeService,
-                PlayerConfigManager playerConfigManager
-        ) {
+        SetStateVariant(PlayerConfigService playerConfigService) {
             super("Set state");
-            this.hudRuntimeService = hudRuntimeService;
-            this.playerConfigManager = playerConfigManager;
+            this.playerConfigService = playerConfigService;
             this.targetArg = componentOrGroupArg(this);
             this.stateArg = hideShowArg(this);
         }
@@ -264,8 +230,9 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             String target = normalize(targetArg.get(context));
             boolean desiredHidden = toHidden(stateArg.get(context));
 
-            PlayerConfig playerCfg = requirePlayerConfig(hudRuntimeService, playerRef, context);
+            PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
             if (playerCfg == null) {
+                context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
                 return;
             }
 
@@ -279,14 +246,20 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                     if (entry.group() != group) {
                         continue;
                     }
-                    boolean currentHidden = entry.staticGetter().get(hud);
+                    boolean currentHidden = entry.isHidden(hud);
                     if (currentHidden != desiredHidden) {
-                        entry.staticSetter().set(hud, desiredHidden);
                         changed++;
                     }
                 }
 
-                persistPlayerHudChanges(hudRuntimeService, playerConfigManager, playerRef);
+                playerConfigService.updateHudComponents(playerRef, cfg -> {
+                    for (var entry : HudComponentRegistry.allList()) {
+                        if (entry.group() == group) {
+                            entry.setHidden(cfg, desiredHidden);
+                        }
+                    }
+                });
+
                 sendGroupResult(context, group.label, desiredHidden, changed);
                 return;
             }
@@ -297,7 +270,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            boolean currentHidden = entry.staticGetter().get(hud);
+            boolean currentHidden = entry.isHidden(hud);
             if (currentHidden == desiredHidden) {
                 context.sendMessage(Message.join(
                         Message.raw("ImmersiveHud " + entry.label() + " already set to ").color(INFO_COLOR),
@@ -306,9 +279,10 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 return;
             }
 
-            entry.staticSetter().set(hud, desiredHidden);
+            playerConfigService.updateHudComponents(playerRef, cfg ->
+                    entry.setHidden(cfg, desiredHidden)
+            );
 
-            persistPlayerHudChanges(hudRuntimeService, playerConfigManager, playerRef);
             sendSingleResult(context, entry.label(), desiredHidden);
         }
     }

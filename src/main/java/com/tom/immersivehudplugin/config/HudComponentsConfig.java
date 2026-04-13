@@ -1,7 +1,7 @@
 package com.tom.immersivehudplugin.config;
 
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -105,7 +105,7 @@ public final class HudComponentsConfig {
     public boolean sanitize() {
         boolean changed = false;
 
-        for (HudEntry entry : HudComponentRegistry.allList()) {
+        for (HudComponent entry : HudComponentRegistry.allList()) {
             String key = normalizeKey(entry.key());
             Boolean value = hiddenByKey.get(key);
 
@@ -116,7 +116,7 @@ public final class HudComponentsConfig {
         }
 
         Set<String> validKeys = HudComponentRegistry.allList().stream()
-                .map(HudEntry::key)
+                .map(HudComponent::key)
                 .map(HudComponentRegistry::normalize)
                 .collect(Collectors.toSet());
 
@@ -141,14 +141,14 @@ public final class HudComponentsConfig {
     }
 
     private void ensureAllEntries() {
-        for (HudEntry entry : HudComponentRegistry.allList()) {
+        for (HudComponent entry : HudComponentRegistry.allList()) {
             String key = normalizeKey(entry.key());
             hiddenByKey.computeIfAbsent(key, _ -> entry.defaultHidden());
         }
     }
 
     private boolean defaultHiddenFor(String normalizedKey) {
-        HudEntry entry = HudComponentRegistry.find(normalizedKey);
+        HudComponent entry = HudComponentRegistry.find(normalizedKey);
         return entry != null && entry.defaultHidden();
     }
 

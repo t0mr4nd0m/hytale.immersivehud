@@ -5,25 +5,26 @@ import com.google.gson.GsonBuilder;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.tom.immersivehudplugin.commands.CommandCollection;
-import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.context.HudContextBuilder;
-import com.tom.immersivehudplugin.managers.ConfigSupport;
-import com.tom.immersivehudplugin.managers.GlobalConfigManager;
-import com.tom.immersivehudplugin.managers.PlayerConfigManager;
+import com.tom.immersivehudplugin.commands.CommandsCollection;
+import com.tom.immersivehudplugin.runtime.context.HudContextBuilder;
+import com.tom.immersivehudplugin.config.PlayerConfigService;
+import com.tom.immersivehudplugin.config.ConfigSupport;
+import com.tom.immersivehudplugin.config.GlobalConfigStore;
+import com.tom.immersivehudplugin.config.PlayerConfigStore;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
-import com.tom.immersivehudplugin.visibility.HudVisibilityService;
+import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 
 public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private String pluginVersion;
 
-    private GlobalConfigManager globalConfigManager;
-    private PlayerConfigManager playerConfigManager;
+    private GlobalConfigStore globalConfigStore;
+    private PlayerConfigStore playerConfigStore;
 
     private HudRuntimeService hudRuntimeService;
     private HudConfigUiService hudConfigUiService;
+    private PlayerConfigService playerConfigService;
 
     public ImmersiveHudPlugin(JavaPluginInit init) {
         super(init);
@@ -49,26 +50,27 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         ConfigSupport configSupport = new ConfigSupport(this, gson);
         this.pluginVersion = this.getManifest().getVersion().toString();
-        this.globalConfigManager = new GlobalConfigManager(this, configSupport);
-        this.playerConfigManager = new PlayerConfigManager(this, configSupport);
-        globalConfigManager.load();
+        this.globalConfigStore = new GlobalConfigStore(this, configSupport);
+        this.playerConfigStore = new PlayerConfigStore(this, configSupport);
+        globalConfigStore.load();
     }
 
     public String getPluginVersion() {
         return pluginVersion;
     }
 
-    public GlobalConfig getImmersiveHudGlobalConfig() {
-        return globalConfigManager.get();
+    public com.tom.immersivehudplugin.config.GlobalConfig getImmersiveHudGlobalConfig() {
+        return globalConfigStore.get();
     }
 
     private void startRuntimeServices() {
-        this.hudRuntimeService = createHudRuntimeService();
+        this.hudRuntimeService = createHudRuntimeCoordinator();
+        this.playerConfigService = createHudSettingsService();
         this.hudConfigUiService = new HudConfigUiService(hudRuntimeService);
         hudRuntimeService.start();
     }
 
-    private HudRuntimeService createHudRuntimeService() {
+    private HudRuntimeService createHudRuntimeCoordinator() {
         HudContextBuilder hudContextBuilder = new HudContextBuilder(
                 DefaultEntityStatTypes.getHealth(),
                 DefaultEntityStatTypes.getStamina(),
@@ -76,23 +78,32 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
                 DefaultEntityStatTypes.getOxygen()
         );
 
-        HudVisibilityService hudVisibilityService = new HudVisibilityService();
+        HudVisibilityCoordinator hudVisibilityCoordinator = new HudVisibilityCoordinator();
 
         return new HudRuntimeService(
                 this,
-                playerConfigManager,
+                playerConfigStore,
                 hudContextBuilder,
-                hudVisibilityService,
+                hudVisibilityCoordinator,
                 this::getImmersiveHudGlobalConfig
         );
     }
 
-    private void registerCommands() {
-        this.getCommandRegistry().registerCommand(new CommandCollection(
+    private PlayerConfigService createHudSettingsService() {
+
+        return new PlayerConfigService(
+                playerConfigStore,
                 hudRuntimeService,
-                playerConfigManager,
+                globalConfigStore::get
+        );
+    }
+
+    private void registerCommands() {
+        this.getCommandRegistry().registerCommand(new CommandsCollection(
+                hudRuntimeService,
                 hudConfigUiService,
-                this::getImmersiveHudGlobalConfig
+                this::getImmersiveHudGlobalConfig,
+                playerConfigService
         ));
     }
 }

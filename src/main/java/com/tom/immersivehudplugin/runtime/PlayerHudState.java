@@ -2,7 +2,7 @@ package com.tom.immersivehudplugin.runtime;
 
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
 import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.utils.HudBarState;
+import com.tom.immersivehudplugin.hud.trigger.HudBarState;
 
 import java.util.EnumSet;
 
@@ -174,9 +174,5 @@ public final class PlayerHudState {
 
     public boolean needsHeldItemRepair() {
         return !heldItemStateInitialized || heldItemRefreshRequested;
-    }
-
-    public void invalidateHeldItemStateForHotbarSwitch() {
-        resetHeldItemState();
     }
 }

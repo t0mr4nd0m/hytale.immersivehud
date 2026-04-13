@@ -3,9 +3,9 @@ package com.tom.immersivehudplugin.config;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
-import com.tom.immersivehudplugin.rules.DynamicHudTriggers;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import java.util.EnumSet;
 
@@ -74,7 +74,7 @@ public final class ConfigJsonMapper {
 
         JsonObject obj = new JsonObject();
 
-        for (HudEntry entry : HudComponentRegistry.allList()) {
+        for (HudComponent entry : HudComponentRegistry.allList()) {
             obj.addProperty(entry.staticConfigKey(), entry.staticGetter().get(cfg));
         }
 
@@ -87,7 +87,7 @@ public final class ConfigJsonMapper {
 
         if (obj == null) { return cfg; }
 
-        for (HudEntry entry : HudComponentRegistry.allList()) {
+        for (HudComponent entry : HudComponentRegistry.allList()) {
             JsonElement el = obj.get(entry.staticConfigKey());
 
             if (el != null
@@ -105,7 +105,7 @@ public final class ConfigJsonMapper {
 
         JsonObject obj = new JsonObject();
 
-        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+        for (HudComponent entry : HudComponentRegistry.dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(cfg) : null;
             if (entry.dynamicConfigKey() != null && ruleCfg != null) {
                 obj.add(entry.dynamicConfigKey(), toJson(ruleCfg, entry));
@@ -121,7 +121,7 @@ public final class ConfigJsonMapper {
 
         if (obj == null) { return cfg; }
 
-        for (HudEntry entry : HudComponentRegistry.dynamicList()) {
+        for (HudComponent entry : HudComponentRegistry.dynamicList()) {
             if (entry.dynamicConfigKey() == null || entry.dynamicGetter() == null) { continue; }
 
             JsonElement sectionEl = obj.get(entry.dynamicConfigKey());
@@ -139,7 +139,7 @@ public final class ConfigJsonMapper {
         return cfg;
     }
 
-    public static JsonObject toJson(DynamicHudRuleConfig cfg, HudEntry entry) {
+    public static JsonObject toJson(DynamicHudRuleConfig cfg, HudComponent entry) {
 
         JsonObject obj = new JsonObject();
         JsonArray arr = new JsonArray();
@@ -158,7 +158,7 @@ public final class ConfigJsonMapper {
     public static DynamicHudRuleConfig fromJsonDynamicHudRuleConfig(JsonObject obj) {
 
         DynamicHudRuleConfig cfg = new DynamicHudRuleConfig();
-        EnumSet<DynamicHudTriggers> rules = EnumSet.noneOf(DynamicHudTriggers.class);
+        EnumSet<HudTrigger> rules = EnumSet.noneOf(HudTrigger.class);
 
         if (obj == null) { cfg.setRules(rules); return cfg; }
 
@@ -172,7 +172,7 @@ public final class ConfigJsonMapper {
             String csv = rulesEl.getAsString();
 
             for (String ruleName : csv.split(",")) {
-                DynamicHudTriggers t = DynamicHudTriggers.fromString(ruleName.trim());
+                HudTrigger t = HudTrigger.fromString(ruleName.trim());
                 if (t != null) {
                     rules.add(t);
                 }
@@ -186,7 +186,7 @@ public final class ConfigJsonMapper {
 
                 if (el == null || el.isJsonNull() || !el.isJsonPrimitive()) { continue; }
 
-                DynamicHudTriggers trigger = DynamicHudTriggers.fromString(el.getAsString());
+                HudTrigger trigger = HudTrigger.fromString(el.getAsString());
                 if (trigger != null) {
                     rules.add(trigger);
                 }

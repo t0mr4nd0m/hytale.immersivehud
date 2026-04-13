@@ -1,12 +1,8 @@
-package com.tom.immersivehudplugin.managers;
+package com.tom.immersivehudplugin.config;
 
 import com.hypixel.hytale.server.core.HytaleServer;
 
 import com.tom.immersivehudplugin.ImmersiveHudPlugin;
-import com.tom.immersivehudplugin.config.ConfigJsonMapper;
-import com.tom.immersivehudplugin.config.ConfigSchemaValidator;
-import com.tom.immersivehudplugin.config.GlobalConfig;
-import com.tom.immersivehudplugin.config.PlayerConfig;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -15,16 +11,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-public final class PlayerConfigManager {
+public final class PlayerConfigStore {
 
     private final ImmersiveHudPlugin plugin;
     private final Path playersDir;
     private final ConfigSupport configSupport;
 
     private final Set<UUID> dirty = ConcurrentHashMap.newKeySet();
-    private final Map<UUID, PlayerConfig> cache = new ConcurrentHashMap<>();
+    private final Map<UUID, com.tom.immersivehudplugin.config.PlayerConfig> cache = new ConcurrentHashMap<>();
 
-    public PlayerConfigManager(
+    public PlayerConfigStore(
             ImmersiveHudPlugin plugin,
             ConfigSupport configSupport
     ) {
@@ -37,7 +33,7 @@ public final class PlayerConfigManager {
         return playersDir.resolve(uuid + ".json");
     }
 
-    public PlayerConfig getCached(UUID uuid) {
+    public com.tom.immersivehudplugin.config.PlayerConfig getCached(UUID uuid) {
         return cache.get(uuid);
     }
 
@@ -46,24 +42,24 @@ public final class PlayerConfigManager {
         dirty.remove(uuid);
     }
 
-    public PlayerConfig loadOrCreate(UUID uuid, GlobalConfig globalCfg) {
-        PlayerConfig cached = cache.get(uuid);
+    public com.tom.immersivehudplugin.config.PlayerConfig loadOrCreate(UUID uuid, GlobalConfig globalCfg) {
+        com.tom.immersivehudplugin.config.PlayerConfig cached = cache.get(uuid);
         if (cached != null) {
             return cached;
         }
 
         Path file = pathFor(uuid);
 
-        ConfigSupport.LoadResult<PlayerConfig> result = configSupport.loadOrCreate(
+        ConfigSupport.LoadResult<com.tom.immersivehudplugin.config.PlayerConfig> result = configSupport.loadOrCreate(
                 file,
                 () -> createDefaultPlayerConfig(globalCfg),
                 ConfigSchemaValidator::isValidPlayerConfig,
                 ConfigJsonMapper::fromJsonPlayer,
-                PlayerConfig::sanitize,
+                com.tom.immersivehudplugin.config.PlayerConfig::sanitize,
                 "player config does not match expected schema"
         );
 
-        PlayerConfig cfg = result.config();
+        com.tom.immersivehudplugin.config.PlayerConfig cfg = result.config();
         cache.put(uuid, cfg);
 
         if (result.changed()) {
@@ -79,7 +75,7 @@ public final class PlayerConfigManager {
             return;
         }
 
-        PlayerConfig cfg = cache.get(uuid);
+        com.tom.immersivehudplugin.config.PlayerConfig cfg = cache.get(uuid);
         if (cfg == null) {
             dirty.remove(uuid);
             return;
@@ -117,8 +113,8 @@ public final class PlayerConfigManager {
         }
     }
 
-    private static PlayerConfig createDefaultPlayerConfig(GlobalConfig globalCfg) {
-        return PlayerConfig.fromDefaults(
+    private static com.tom.immersivehudplugin.config.PlayerConfig createDefaultPlayerConfig(GlobalConfig globalCfg) {
+        return com.tom.immersivehudplugin.config.PlayerConfig.fromDefaults(
                 globalCfg.getDefaultHudComponents(),
                 globalCfg.getDefaultDynamicHud()
         );

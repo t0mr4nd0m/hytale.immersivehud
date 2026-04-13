@@ -13,8 +13,8 @@ import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
-import com.tom.immersivehudplugin.registry.HudComponentRegistry.HudEntry;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
@@ -103,21 +103,21 @@ public final class StatusCmd extends AbstractPlayerCommand {
     ) {
         sendSectionHeader(context, "HudComponents");
 
-        Map<HudComponentRegistry.Group, List<HudEntry>> byGroup = HudComponentRegistry.allList().stream()
+        Map<HudComponentRegistry.Group, List<HudComponent>> byGroup = HudComponentRegistry.allList().stream()
                 .collect(Collectors.groupingBy(
-                        HudEntry::group,
+                        HudComponent::group,
                         java.util.LinkedHashMap::new,
                         Collectors.toList()
                 ));
 
         for (HudComponentRegistry.Group group : HudComponentRegistry.Group.values()) {
 
-            List<HudEntry> entries = byGroup.get(group);
+            List<HudComponent> entries = byGroup.get(group);
             if (entries == null || entries.isEmpty()) { continue; }
 
             sendSectionHeader(context, group.label);
 
-            for (HudEntry entry : entries) {
+            for (HudComponent entry : entries) {
                 sendHudEntryLine(context, entry, hud, dynamic);
             }
         }
@@ -125,11 +125,11 @@ public final class StatusCmd extends AbstractPlayerCommand {
 
     private static void sendHudEntryLine(
             @Nonnull CommandContext context,
-            @Nonnull HudEntry entry,
+            @Nonnull HudComponent entry,
             @Nonnull HudComponentsConfig hud,
             @Nonnull DynamicHudConfig dynamic
     ) {
-        boolean hiddenNow = entry.staticGetter().get(hud);
+        boolean hiddenNow = entry.isHidden(hud);
 
         if (!entry.supportsDynamicRules()) {
             sendStaticComponentLine(context, entry.label(), hiddenNow);

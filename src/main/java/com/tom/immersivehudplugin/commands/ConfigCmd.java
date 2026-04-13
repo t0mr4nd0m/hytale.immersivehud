@@ -14,14 +14,14 @@ import com.tom.immersivehudplugin.ui.HudConfigUiService;
 import javax.annotation.Nonnull;
 import java.awt.Color;
 
-public final class ConfigUICmd extends AbstractPlayerCommand {
+public final class ConfigCmd extends AbstractPlayerCommand {
 
     private static final Color ERROR_COLOR = Color.RED;
 
     private final HudRuntimeService hudRuntimeService;
     private final HudConfigUiService hudConfigUiService;
 
-    public ConfigUICmd(
+    public ConfigCmd(
             HudRuntimeService hudRuntimeService,
             HudConfigUiService hudConfigUiService
     ){

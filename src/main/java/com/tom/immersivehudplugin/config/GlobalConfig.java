@@ -1,6 +1,6 @@
 package com.tom.immersivehudplugin.config;
 
-import com.tom.immersivehudplugin.registry.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 
 public final class GlobalConfig {
 
