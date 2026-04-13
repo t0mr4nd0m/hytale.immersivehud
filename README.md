@@ -172,34 +172,35 @@ HUD components supported by ImmersiveHUD
 
 Rules to define the visibility behaviour of dynamic HUD components
 
-| Rule                    | Trigger condition                        |
-|-------------------------|------------------------------------------|
-| `HOTBAR_INPUT`          | Player changes hotbar selection          |
-| `CHARGING_WEAPON`       | Player is aiming or charging a weapon    |
-| `CONSUMABLE_USE`        | Player is consuming food or potion       |
-| `TARGET_ENTITY`         | Player is targeting an entity            |
-| `INTERACTABLE_BLOCK`    | Player is looking at interactable blocks |
-| `PLAYER_MOVING`         | Player is moving                         |
-| `PLAYER_WALKING`        | Player is walking                        |
-| `PLAYER_RUNNING`        | Player is running                        |
-| `PLAYER_SPRINTING`      | Player is sprinting                      |
-| `PLAYER_MOUNTING`       | Player is mounting                       |
-| `PLAYER_FLYING`         | Player is flying                         |
-| `PLAYER_GLIDING`        | Player is gliding                        |
-| `PLAYER_JUMPING`        | Player is jumping                        |
-| `PLAYER_CROUCHING`      | Player is crouching                      |
-| `PLAYER_CLIMBING`       | Player is climbing                       |
-| `PLAYER_IN_FLUID`       | Player is in fluid                       |
-| `PLAYER_ON_GROUND`      | Player is on ground                      |
-| `PLAYER_FALLING`        | Player is falling                        |
-| `PLAYER_SITTING`        | Player is sitting                        |
-| `PLAYER_ROLLING`        | Player is rolling                        |
-| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon         |
-| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon        |
-| `HEALTH_NOT_FULL`       | Health bar is not full                   |
-| `STAMINA_NOT_FULL`      | Stamina bar is not full                  |
-| `MANA_NOT_FULL`         | Mana bar is not full                     |
-| `OXYGEN_NOT_FULL`       | Oxygen bar is not full                   |
+| Rule                    | Trigger condition                           |
+|-------------------------|---------------------------------------------|
+| `HOTBAR_INPUT`          | Player changes hotbar selection             |
+| `CONSUMABLE_USE`        | Player is consuming food or potion          |
+| `TARGET_ENTITY`         | Player is targeting an entity               |
+| `INTERACTABLE_BLOCK`    | Player is looking at interactable blocks    |
+| `PLAYER_MOVING`         | Player is moving                            |
+| `PLAYER_WALKING`        | Player is walking                           |
+| `PLAYER_RUNNING`        | Player is running                           |
+| `PLAYER_SPRINTING`      | Player is sprinting                         |
+| `PLAYER_MOUNTING`       | Player is mounting                          |
+| `PLAYER_FLYING`         | Player is flying                            |
+| `PLAYER_GLIDING`        | Player is gliding                           |
+| `PLAYER_JUMPING`        | Player is jumping                           |
+| `PLAYER_CROUCHING`      | Player is crouching                         |
+| `PLAYER_CLIMBING`       | Player is climbing                          |
+| `PLAYER_IN_FLUID`       | Player is in fluid                          |
+| `PLAYER_ON_GROUND`      | Player is on ground                         |
+| `PLAYER_FALLING`        | Player is falling                           |
+| `PLAYER_SITTING`        | Player is sitting                           |
+| `PLAYER_ROLLING`        | Player is rolling                           |
+| `CHARGING_WEAPON`       | Player is aiming or charging a weapon       |
+| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon            |
+| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon           |
+| `BLOCKING_ATTACK`       | Player is using a weapon to block an attack |
+| `HEALTH_NOT_FULL`       | Health bar is not full                      |
+| `STAMINA_NOT_FULL`      | Stamina bar is not full                     |
+| `MANA_NOT_FULL`         | Mana bar is not full                        |
+| `OXYGEN_NOT_FULL`       | Oxygen bar is not full                      |
 
 When activating any rule bar `_NOT_FULL`, use `Threshold` to specify the bar level at which the component becomes visible.
 
@@ -461,47 +462,67 @@ ImmersiveHudPlugin.java
 
 commands/
    CommandCollection.java
-   ConfigUICmd.java
+   ConfigCmd.java
    ProfileCmd.java
    RulesCmd.java
    StatusCmd.java
    ToggleCmd.java
+   
 config/
    ConfigJsonMapper.java
    ConfigSchemaValidator.java
+   ConfigSupport.java
    DynamicHudConfig.java
    DynamicHudRuleConfig.java
    GlobalConfig.java
+   GlobalConfigStore.java
    HudComponentsConfig.java
    PlayerConfig.java
-context/
-   HudContextBuilder
-managers/
-   PlayerConfigManager.java
+   PlayerConfigService.java
+   PlayerConfigStore.java
+   
+hud/
+   component/
+      HudComponent.java
+      HudComponentCatalog.java
+      HudComponentRegistry.java
+   trigger/
+      HudBarState.java
+      HudTrigger.java
+      HudTriggerContext.java
+      
 profiles/
    Profile.java
    ProfilePresets.java
-registry/
-   HudComponentRegistry.java
-rules/
-   DynamicHudTriggers.java
-   DynamicHudTriggersCategory.java
+   
 runtime/
-   HudRuntimeService
-   HudSignal
-   HudTimers
-   PlayerHudState
-   PlayerTickContext
+   HudRuntimeService.java
+   HudTickProcessor.java
+   HudTimers.java
+   PlayerHudState.java
+   context/
+      HudContextBuilder.java
+      PlayerTickContext.java
+   signal/
+      HeldItemSignalTracker.java
+      HeldItemState.java
+      MovementSignalTracker.java
+      ReticleSignalTracker.java
+   visibility/
+      HudDeltaApplier.java
+      HudRuleEvaluator.java
+      HudVisibilityCoordinator.java
+      
 ui/
+   HudConfigDynamicRulesRenderer.java
    HudConfigPage.java
+   HudConfigPresenter.java
+   HudConfigProfilesRenderer.java
+   HudConfigRenderIndex.java
    HudConfigUiService.java
    HudConfigUiSession.java
    HudConfigView.java
-utils/
-   HudBarState.java
-   ItemUtils.java
-visibility/
-   HudVisibilityService
+   HudConfigVisibilityRenderer.java
 ```
 
 ---

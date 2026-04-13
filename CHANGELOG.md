@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.2 - Technical update + new trigger BLOCKING_ATTACK
+
+**Code Changes**
+* extensive refactor and code cleaning, simplified package structure, removed redundant logic and renamed classes, improved structure, profiles, commands, and more maintainable runtime system focused on performance and flexibility
+
+**Features**
+* added new trigger `BLOCKING_ATTACK` associated to `reticle` component
+
 ## v1.2.1 - Technical update
 
 **Core Changes**
@@ -43,14 +51,14 @@
 
 **Bug Fixes**
 
-* Trigger logic CHARGING_WEAPON reticle not hiding when hotbar swap interrupt charging weapon
-* Trigger logic HOTBAR_INPUT missing first slot swap
+* Trigger logic `CHARGING_WEAPON` reticle not hiding when hotbar swap interrupt charging weapon
+* Trigger logic `HOTBAR_INPUT` missing first slot swap
 
 ## v1.2.0
 
 * Added Oxygen bar to dynamic components
-* Added threshold configuration for HUD bar components (health, stamina, mana and oxygen)
-* Removed triggers HEALTH_LOW, HEALTH_CRITICAL, STAMINA_LOW, STAMINA_CRITICAL, MANA_LOW and MANA_CRITICAL
+* Added threshold configuration for HUD bar components (`health`, `stamina`, `mana` and `oxygen`)
+* Removed triggers `HEALTH_LOW`, `HEALTH_CRITICAL`, `STAMINA_LOW`, `STAMINA_CRITICAL`, `MANA_LOW` and `MANA_CRITICAL`
 * Config UI redesign (still a WIP)
 
 ## v1.1.0
@@ -62,8 +70,8 @@
 
 * Improved config file system (sorry guys but if you are not using the default configuration you will need to customize your configuration again)
 * Centralized all HUD component definition (Ex. config key, default visibility and default rules) in one class to make it easier to maintain and more stable
-* Added more rules related to player movement status: PLAYER_SWIMMING, PLAYER_FLYING, PLAYER_GLIDING, PLAYER_JUMPING, PLAYER_CROUCHING, PLAYER_CLIMBING, PLAYER_IN_FLUID, PLAYER_ON_GROUND, PLAYER_FALLING, PLAYER_SITTING, PLAYER_ROLLING
-* Fixed bug with packet_watcher not detecting the item in hand properly and not releasing CHARGING_WEAPON rule
+* Added more rules related to player movement status: `PLAYER_SWIMMING`, `PLAYER_FLYING`, `PLAYER_GLIDING`, `PLAYER_JUMPING`, `PLAYER_CROUCHING`, `PLAYER_CLIMBING`, `PLAYER_IN_FLUID`, `PLAYER_ON_GROUND`, `PLAYER_FALLING`, `PLAYER_SITTING` and `PLAYER_ROLLING`
+* Fixed bug with packet_watcher not detecting the item in hand properly and not releasing `CHARGING_WEAPON` rule
 
 ## v1.0.2
 
@@ -71,7 +79,7 @@
 
 ## v1.0.1
 
-* Removed rule 'ALWAYS_HIDDEN' and all the related logic. To get the same behaviour for a component, simply toggle its visibility to hide and clear all its rules
+* Removed rule `ALWAYS_HIDDEN` and all the related logic. To get the same behaviour for a component, simply toggle its visibility to hide and clear all its rules
 
 ## v1.0.0 - Initial release
 
