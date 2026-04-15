@@ -63,13 +63,13 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private void startRuntimeServices() {
-        this.hudRuntimeService = createHudRuntimeCoordinator();
+        this.hudRuntimeService = createHudRuntimeService();
         this.playerConfigService = createHudSettingsService();
         this.hudConfigUiService = new HudConfigUiService(hudRuntimeService);
         hudRuntimeService.start();
     }
 
-    private HudRuntimeService createHudRuntimeCoordinator() {
+    private HudRuntimeService createHudRuntimeService() {
         HudVisibilityCoordinator hudVisibilityCoordinator = new HudVisibilityCoordinator();
 
         return new HudRuntimeService(
