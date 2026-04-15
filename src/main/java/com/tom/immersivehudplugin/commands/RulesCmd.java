@@ -37,14 +37,14 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static final String ACTION_CLEAR = "clear";
     private static final String ACTION_ADD = "add";
     private static final String ACTION_REMOVE = "remove";
+    private static final String ACTION_THRESHOLD = "threshold";
     private static final String ERROR_MESSAGE = "Unknown rules action";
 
     public RulesCmd(PlayerConfigService playerConfigService) {
         super("rules", "List, clear, add, remove, or configure dynamic HUD rules.");
 
         addUsageVariant(new ListClearVariant(playerConfigService));
-        addUsageVariant(new RuleMutationVariant(playerConfigService));
-        addUsageVariant(new ThresholdVariant(playerConfigService));
+        addUsageVariant(new ActionValueVariant(playerConfigService));
     }
 
     @Override
@@ -78,7 +78,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
 
-        private final static Set<String> ACTIONS = Set.of("list", "clear");
+        private static final Set<String> ACTIONS = Set.of(ACTION_LIST, ACTION_CLEAR);
 
         ListClearVariant(PlayerConfigService playerConfigService) {
             super("List or clear rules");
@@ -122,22 +122,22 @@ public final class RulesCmd extends AbstractPlayerCommand {
         }
     }
 
-    private static final class RuleMutationVariant extends AbstractPlayerCommand {
+    private static final class ActionValueVariant extends AbstractPlayerCommand {
         private final PlayerConfigService playerConfigService;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
-        private final RequiredArg<String> ruleArg;
+        private final RequiredArg<String> valueArg;
 
-        private static final Set<String> ACTIONS = Set.of("add", "remove");
+        private static final Set<String> ACTIONS = Set.of(ACTION_ADD, ACTION_REMOVE, ACTION_THRESHOLD);
 
-        RuleMutationVariant(PlayerConfigService playerConfigService) {
-            super("Add or remove a dynamic rule");
+        ActionValueVariant(PlayerConfigService playerConfigService) {
+            super("Add, remove, or configure threshold");
             this.playerConfigService = playerConfigService;
 
             this.componentArg = dynamicComponentArg(this);
             this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
                     .addValidator(CommandValidators.validateArguments(ACTIONS, ERROR_MESSAGE));
-            this.ruleArg = ruleArg(this);
+            this.valueArg = withRequiredArg("value", "Rule or threshold", ArgTypes.STRING);
         }
 
         @Override
@@ -164,62 +164,14 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             String action = HudComponentRegistry.normalize(actionArg.get(context));
-            String rawRule = ruleArg.get(context);
+            String value = valueArg.get(context);
 
             switch (action) {
-                case ACTION_ADD -> handleAddAction(playerConfigService, playerRef, context, resolved, rawRule);
-                case ACTION_REMOVE -> handleRemoveAction(playerConfigService, playerRef, context, resolved, rawRule);
+                case ACTION_ADD -> handleAddAction(playerConfigService, playerRef, context, resolved, value);
+                case ACTION_REMOVE -> handleRemoveAction(playerConfigService, playerRef, context, resolved, value);
+                case ACTION_THRESHOLD -> handleThresholdCommand(playerConfigService, playerRef, context, resolved, value);
                 default -> sendUsage(context);
             }
-        }
-    }
-
-    private static final class ThresholdVariant extends AbstractPlayerCommand {
-        private final PlayerConfigService playerConfigService;
-        private final RequiredArg<String> componentArg;
-        private final RequiredArg<String> actionArg;
-        private final RequiredArg<String> thresholdArg;
-
-        private final static Set<String> ACTIONS = Set.of("threshold");
-
-        ThresholdVariant(PlayerConfigService playerConfigService) {
-            super("Configure threshold");
-            this.playerConfigService = playerConfigService;
-
-            this.componentArg = dynamicComponentArg(this);
-            this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
-                    .addValidator(CommandValidators.validateArguments(ACTIONS, ERROR_MESSAGE));
-            this.thresholdArg = thresholdArg(this);
-        }
-
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
-
-        @Override
-        protected void execute(
-                @Nonnull CommandContext context,
-                @Nonnull Store<EntityStore> store,
-                @Nonnull Ref<EntityStore> ref,
-                @Nonnull PlayerRef playerRef,
-                @Nonnull World world
-        ) {
-            ResolvedRules resolved = resolveRules(
-                    playerConfigService,
-                    playerRef,
-                    componentArg.get(context),
-                    context
-            );
-            if (resolved == null) { return; }
-
-            handleThresholdCommand(
-                    playerConfigService,
-                    playerRef,
-                    context,
-                    resolved,
-                    thresholdArg.get(context)
-            );
         }
     }
 
@@ -244,15 +196,6 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static RequiredArg<String> dynamicComponentArg(AbstractPlayerCommand cmd) {
         return cmd.withRequiredArg("component", "Dynamic HUD component", ArgTypes.STRING)
                 .addValidator(CommandValidators.dynamicComponent());
-    }
-
-    private static RequiredArg<String> ruleArg(AbstractPlayerCommand cmd) {
-        return cmd.withRequiredArg("rule", "Dynamic rule", ArgTypes.STRING)
-                .addValidator(CommandValidators.rule());
-    }
-
-    private static RequiredArg<String> thresholdArg(AbstractPlayerCommand cmd) {
-        return cmd.withRequiredArg("threshold", "Threshold (0-100)", ArgTypes.STRING);
     }
 
     @Nullable
