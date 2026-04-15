@@ -5,6 +5,7 @@ import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class HudComponentRegistry {
 
@@ -48,7 +50,7 @@ public final class HudComponentRegistry {
         public static Group fromKey(@Nullable String key) {
             String normalized = normalize(key);
             for (Group g : values()) {
-                if (g.key.equals(normalized)) {
+                if (normalize(g.key).equals(normalized)) {
                     return g;
                 }
             }
@@ -64,8 +66,9 @@ public final class HudComponentRegistry {
     private static final List<HudComponent> DYNAMIC_LIST;
     private static final Map<String, HudComponent> REGISTRY;
     private static final Map<String, HudComponent> DYNAMIC_REGISTRY;
+    private static final Map<Group, List<HudComponent>> GROUPED;
 
-    public static final List<Group> groupOrder = List.of(
+    public static final List<Group> GROUP_ORDER = List.of(
             Group.CORE,
             Group.BARS,
             Group.UI,
@@ -82,6 +85,12 @@ public final class HudComponentRegistry {
 
         REGISTRY = buildRegistry(ALL_LIST);
         DYNAMIC_REGISTRY = buildRegistry(DYNAMIC_LIST);
+        GROUPED = ALL_LIST.stream()
+                .collect(Collectors.groupingBy(
+                        HudComponent::group,
+                        LinkedHashMap::new,
+                        Collectors.toUnmodifiableList()
+                ));
     }
 
     private static Map<String, HudComponent> buildRegistry(List<HudComponent> entries) {
@@ -110,6 +119,15 @@ public final class HudComponentRegistry {
         return DYNAMIC_REGISTRY.get(normalize(key));
     }
 
+    @Nullable
+    public static Group findGroup(@Nullable String key) {
+        return Group.fromKey(key);
+    }
+
+    public static List<HudComponent> entriesOf(Group group) {
+        return GROUPED.getOrDefault(group, List.of());
+    }
+
     public static String normalize(@Nullable String key) {
         return key == null ? "" : key.trim().toLowerCase(Locale.ROOT).replace("_", "");
     }
@@ -133,20 +151,28 @@ public final class HudComponentRegistry {
 
             if (ruleCfg != null) {
                 ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
-            }
-
-            if (entry.defaultThreshold() != null && ruleCfg != null) {
-                ruleCfg.setThreshold(entry.defaultThreshold());
+                if (entry.supportsThreshold()) {
+                    ruleCfg.setThreshold(entry.defaultThreshold());
+                }
             }
         }
 
         return cfg;
     }
 
+    private static String joinSortedKeys(Stream<String> keys) {
+        return keys.sorted().collect(Collectors.joining(", "));
+    }
+
     public static String availableDynamicComponentsText() {
-        return dynamicList().stream()
-                .map(HudComponent::key)
-                .sorted()
-                .collect(Collectors.joining(", "));
+        return joinSortedKeys(dynamicList().stream().map(HudComponent::key));
+    }
+
+    public static String availableComponentsText() {
+        return joinSortedKeys(allList().stream().map(HudComponent::key));
+    }
+
+    public static String availableGroupsText() {
+        return joinSortedKeys(Arrays.stream(Group.values()).map(g -> g.key));
     }
 }

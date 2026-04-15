@@ -25,11 +25,11 @@ public record HudComponent(
         @Nullable Float defaultThreshold
 ) {
     public HudComponent {
-        allowedRules = allowedRules == null
+        allowedRules = allowedRules == null || allowedRules.isEmpty()
                 ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(allowedRules);
 
-        defaultRules = defaultRules == null
+        defaultRules = defaultRules == null || defaultRules.isEmpty()
                 ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(defaultRules);
 
@@ -39,8 +39,32 @@ public record HudComponent(
             );
         }
 
-        if (defaultThreshold != null) {
-            defaultThreshold = Math.max(0f, Math.min(100f, defaultThreshold));
+        boolean supportsDynamic = dynamicGetter != null;
+        if (supportsDynamic != (dynamicConfigKey != null)) {
+            throw new IllegalArgumentException(
+                    "dynamicGetter and dynamicConfigKey must either both be set or both be null for component: " + key
+            );
+        }
+
+        if (defaultThreshold != null && (defaultThreshold < 0f || defaultThreshold > 100f)) {
+            throw new IllegalArgumentException(
+                    "defaultThreshold must be between 0 and 100 for component: " + key
+            );
+        }
+
+        boolean supportsThreshold = allowedRules.stream()
+                .anyMatch(rule -> rule.source() == HudTrigger.Source.HUD_BAR);
+
+        if (supportsThreshold && defaultThreshold == null) {
+            throw new IllegalArgumentException(
+                    "Components with HUD_BAR rules must define defaultThreshold: " + key
+            );
+        }
+
+        if (!supportsThreshold && defaultThreshold != null) {
+            throw new IllegalArgumentException(
+                    "defaultThreshold is only valid for components with HUD_BAR rules: " + key
+            );
         }
     }
 

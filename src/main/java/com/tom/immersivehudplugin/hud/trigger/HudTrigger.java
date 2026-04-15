@@ -133,7 +133,11 @@ public enum HudTrigger {
 
     public static String availableRulesText() {
         return Arrays.stream(values())
-                .map(rule -> rule.name().toLowerCase(Locale.ROOT))
+                .map(HudTrigger::key)
                 .collect(Collectors.joining(", "));
+    }
+
+    public String key() {
+        return name().toLowerCase(Locale.ROOT);
     }
 }

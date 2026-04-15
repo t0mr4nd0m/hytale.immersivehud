@@ -46,7 +46,7 @@ public final class HudConfigVisibilityRenderer {
         int rowIndex = 0;
         HudComponentRegistry.Group expandedGroup = session.getExpandedVisibilityGroup();
 
-        for (HudComponentRegistry.Group group : HudComponentRegistry.groupOrder) {
+        for (HudComponentRegistry.Group group : HudComponentRegistry.GROUP_ORDER) {
             List<HudComponent> entries = HudComponentRegistry.allList().stream()
                     .filter(entry -> entry.group() == group)
                     .toList();
