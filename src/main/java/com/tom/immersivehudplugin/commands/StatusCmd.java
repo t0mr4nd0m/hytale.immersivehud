@@ -15,17 +15,17 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public final class StatusCmd extends AbstractPlayerCommand {
 
@@ -82,7 +82,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
     ) {
         PlayerConfig playerConfig = hudRuntimeService.requirePlayerConfig(playerRef);
         if (playerConfig == null) {
-            context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
+            context.sendMessage(Message.raw("Failed to load your ImmersiveHud configuration.").color(ERROR_COLOR));
             return null;
         }
         return playerConfig;
@@ -103,17 +103,10 @@ public final class StatusCmd extends AbstractPlayerCommand {
     ) {
         sendSectionHeader(context, "HudComponents");
 
-        Map<HudComponentRegistry.Group, List<HudComponent>> byGroup = HudComponentRegistry.allList().stream()
-                .collect(Collectors.groupingBy(
-                        HudComponent::group,
-                        java.util.LinkedHashMap::new,
-                        Collectors.toList()
-                ));
+        for (HudComponentRegistry.Group group : HudComponentRegistry.GROUP_ORDER) {
 
-        for (HudComponentRegistry.Group group : HudComponentRegistry.Group.values()) {
-
-            List<HudComponent> entries = byGroup.get(group);
-            if (entries == null || entries.isEmpty()) { continue; }
+            List<HudComponent> entries = HudComponentRegistry.entriesOf(group);
+            if (entries.isEmpty()) { continue; }
 
             sendSectionHeader(context, group.label);
 
@@ -136,10 +129,7 @@ public final class StatusCmd extends AbstractPlayerCommand {
             return;
         }
 
-        DynamicHudRuleConfig rule = null;
-        if (entry.dynamicGetter() != null) {
-            rule = entry.dynamicGetter().apply(dynamic);
-        }
+        DynamicHudRuleConfig rule = entry.getDynamicRuleConfig(dynamic);
         sendDynamicComponentLine(context, entry.label(), hiddenNow, rule);
     }
 
@@ -174,18 +164,18 @@ public final class StatusCmd extends AbstractPlayerCommand {
     }
 
     private static String renderRules(@Nullable DynamicHudRuleConfig rule) {
-        if (rule == null) { return "<null>"; }
+        if (rule == null) { return "[]"; }
 
-        var triggers = rule.getRules();
+        EnumSet<HudTrigger> triggers = rule.getRules();
         if (triggers.isEmpty()) { return "[]"; }
 
         StringJoiner joiner = new StringJoiner(", ", "[", "]");
-        for (var trigger : triggers) {
+        for (HudTrigger trigger : triggers) {
             switch (trigger) {
                 case HEALTH_NOT_FULL, STAMINA_NOT_FULL, MANA_NOT_FULL, OXYGEN_NOT_FULL ->
-                        joiner.add(trigger.name().toLowerCase(Locale.ROOT) + "(" + rule.getThreshold() + "%)");
+                        joiner.add(trigger.key() + "(" + rule.getThreshold() + "%)");
                 default ->
-                        joiner.add(trigger.name().toLowerCase(Locale.ROOT));
+                        joiner.add(trigger.key());
             }
         }
         return joiner.toString();

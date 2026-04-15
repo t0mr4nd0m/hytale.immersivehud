@@ -10,8 +10,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.commands.validation.AllowedValuesValidator;
-import com.tom.immersivehudplugin.commands.validation.DynamicHudComponentValidator;
+import com.tom.immersivehudplugin.commands.validation.CommandValidators;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
@@ -24,20 +23,28 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.EnumSet;
+import java.util.Set;
 
 public final class RulesCmd extends AbstractPlayerCommand {
 
     private static final Color INFO_COLOR = Color.LIGHT_GRAY;
     private static final Color WARN_COLOR = Color.YELLOW;
     private static final Color ERROR_COLOR = Color.RED;
-    private static final Color HIDE_COLOR = Color.RED;
+    private static final Color REMOVE_COLOR = Color.RED;
     private static final Color SUCCESS_COLOR = Color.GREEN;
 
-    public RulesCmd(PlayerConfigService playerConfigService) {
-        super("rules", "List, add, remove, clear or configure dynamic HUD rules.");
+    private static final String ACTION_LIST = "list";
+    private static final String ACTION_CLEAR = "clear";
+    private static final String ACTION_ADD = "add";
+    private static final String ACTION_REMOVE = "remove";
+    private static final String ERROR_MESSAGE = "Unknown rules action";
 
-        addUsageVariant(new TwoArgVariant(playerConfigService));
-        addUsageVariant(new ThreeArgVariant(playerConfigService));
+    public RulesCmd(PlayerConfigService playerConfigService) {
+        super("rules", "List, clear, add, remove, or configure dynamic HUD rules.");
+
+        addUsageVariant(new ListClearVariant(playerConfigService));
+        addUsageVariant(new RuleMutationVariant(playerConfigService));
+        addUsageVariant(new ThresholdVariant(playerConfigService));
     }
 
     @Override
@@ -53,6 +60,10 @@ public final class RulesCmd extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
+        sendUsage(context);
+    }
+
+    private static void sendUsage(@Nonnull CommandContext context) {
         context.sendMessage(Message.raw("Usage: /ihud rules <component> list").color(WARN_COLOR));
         context.sendMessage(Message.raw("   or: /ihud rules <component> clear").color(WARN_COLOR));
         context.sendMessage(Message.raw("   or: /ihud rules <component> add <rule>").color(WARN_COLOR));
@@ -62,17 +73,20 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw("Rules: " + HudTrigger.availableRulesText()).color(INFO_COLOR));
     }
 
-    private static final class TwoArgVariant extends AbstractPlayerCommand {
+    private static final class ListClearVariant extends AbstractPlayerCommand {
         private final PlayerConfigService playerConfigService;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
 
-        TwoArgVariant(PlayerConfigService playerConfigService) {
+        private final static Set<String> ACTIONS = Set.of("list", "clear");
+
+        ListClearVariant(PlayerConfigService playerConfigService) {
             super("List or clear rules");
             this.playerConfigService = playerConfigService;
 
             this.componentArg = dynamicComponentArg(this);
-            this.actionArg = allowedArg(this, "action", "list/clear", "list", "clear");
+            this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
+                    .addValidator(CommandValidators.validateArguments(ACTIONS, ERROR_MESSAGE));
         }
 
         @Override
@@ -100,48 +114,30 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
             String action = HudComponentRegistry.normalize(actionArg.get(context));
 
-            if ("list".equals(action)) {
-                sendListMessage(context, resolved);
-                return;
-            }
-
-            if (resolved.rules().getRules().isEmpty()) {
-                context.sendMessage(Message.raw(
-                        resolved.messagePrefix() + " already has no rules."
-                ).color(WARN_COLOR));
-                return;
-            }
-
-            float resetThreshold = clearResolvedRules(playerConfigService, playerRef, resolved);
-
-            if (resolved.supportsThreshold()) {
-                context.sendMessage(Message.raw(
-                        resolved.messagePrefix()
-                                + " rules cleared. Threshold reset to "
-                                + HudRuleSupport.formatThreshold(resetThreshold)
-                                + "%."
-                ).color(SUCCESS_COLOR));
-            } else {
-                context.sendMessage(Message.raw(
-                        resolved.messagePrefix() + " rules cleared."
-                ).color(SUCCESS_COLOR));
+            switch (action) {
+                case ACTION_LIST -> sendListMessage(context, resolved);
+                case ACTION_CLEAR -> handleClearAction(playerConfigService, playerRef, context, resolved);
+                default -> sendUsage(context);
             }
         }
     }
 
-    private static final class ThreeArgVariant extends AbstractPlayerCommand {
+    private static final class RuleMutationVariant extends AbstractPlayerCommand {
         private final PlayerConfigService playerConfigService;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
-        private final RequiredArg<String> valueArg;
+        private final RequiredArg<String> ruleArg;
 
-        ThreeArgVariant(PlayerConfigService playerConfigService) {
-            super("Add, remove rule or configure threshold");
+        private static final Set<String> ACTIONS = Set.of("add", "remove");
+
+        RuleMutationVariant(PlayerConfigService playerConfigService) {
+            super("Add or remove a dynamic rule");
             this.playerConfigService = playerConfigService;
 
             this.componentArg = dynamicComponentArg(this);
-            this.actionArg = allowedArg(this, "action", "add/remove/threshold", "add", "remove", "threshold");
-            this.valueArg = genericValueArg(this);
+            this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
+                    .addValidator(CommandValidators.validateArguments(ACTIONS, ERROR_MESSAGE));
+            this.ruleArg = ruleArg(this);
         }
 
         @Override
@@ -168,44 +164,61 @@ public final class RulesCmd extends AbstractPlayerCommand {
             }
 
             String action = HudComponentRegistry.normalize(actionArg.get(context));
-            String rawValue = valueArg.get(context);
+            String rawRule = ruleArg.get(context);
 
-            if ("threshold".equals(action)) {
-                handleThresholdAction(
-                        playerConfigService,
-                        playerRef,
-                        context,
-                        resolved,
-                        rawValue
-                );
-                return;
+            switch (action) {
+                case ACTION_ADD -> handleAddAction(playerConfigService, playerRef, context, resolved, rawRule);
+                case ACTION_REMOVE -> handleRemoveAction(playerConfigService, playerRef, context, resolved, rawRule);
+                default -> sendUsage(context);
             }
+        }
+    }
 
-            HudTrigger rule = HudTrigger.fromString(rawValue);
-            if (rule == null) {
-                context.sendMessage(Message.raw(
-                        "Unknown rule: " + rawValue + ". Available rules: " + HudTrigger.availableRulesText()
-                ).color(ERROR_COLOR));
-                return;
-            }
+    private static final class ThresholdVariant extends AbstractPlayerCommand {
+        private final PlayerConfigService playerConfigService;
+        private final RequiredArg<String> componentArg;
+        private final RequiredArg<String> actionArg;
+        private final RequiredArg<String> thresholdArg;
 
-            if ("add".equals(action)) {
-                handleAddAction(
-                        playerConfigService,
-                        playerRef,
-                        context,
-                        resolved,
-                        rule
-                );
-                return;
-            }
+        private final static Set<String> ACTIONS = Set.of("threshold");
 
-            handleRemoveAction(
+        ThresholdVariant(PlayerConfigService playerConfigService) {
+            super("Configure threshold");
+            this.playerConfigService = playerConfigService;
+
+            this.componentArg = dynamicComponentArg(this);
+            this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
+                    .addValidator(CommandValidators.validateArguments(ACTIONS, ERROR_MESSAGE));
+            this.thresholdArg = thresholdArg(this);
+        }
+
+        @Override
+        protected boolean canGeneratePermission() {
+            return false;
+        }
+
+        @Override
+        protected void execute(
+                @Nonnull CommandContext context,
+                @Nonnull Store<EntityStore> store,
+                @Nonnull Ref<EntityStore> ref,
+                @Nonnull PlayerRef playerRef,
+                @Nonnull World world
+        ) {
+            ResolvedRules resolved = resolveRules(
+                    playerConfigService,
+                    playerRef,
+                    componentArg.get(context),
+                    context
+            );
+            if (resolved == null) { return; }
+
+            handleThresholdCommand(
                     playerConfigService,
                     playerRef,
                     context,
                     resolved,
-                    rule
+                    thresholdArg.get(context)
             );
         }
     }
@@ -230,22 +243,16 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static RequiredArg<String> dynamicComponentArg(AbstractPlayerCommand cmd) {
         return cmd.withRequiredArg("component", "Dynamic HUD component", ArgTypes.STRING)
-                .addValidator(new DynamicHudComponentValidator());
+                .addValidator(CommandValidators.dynamicComponent());
     }
 
-    private static RequiredArg<String> genericValueArg(AbstractPlayerCommand cmd) {
-        return cmd.withRequiredArg("value", "Rule or threshold", ArgTypes.STRING);
+    private static RequiredArg<String> ruleArg(AbstractPlayerCommand cmd) {
+        return cmd.withRequiredArg("rule", "Dynamic rule", ArgTypes.STRING)
+                .addValidator(CommandValidators.rule());
     }
 
-    @SuppressWarnings("SameParameterValue")
-    private static RequiredArg<String> allowedArg(
-            AbstractPlayerCommand cmd,
-            String name,
-            String description,
-            String... allowedValues
-    ) {
-        return cmd.withRequiredArg(name, description, ArgTypes.STRING)
-                .addValidator(new AllowedValuesValidator(allowedValues));
+    private static RequiredArg<String> thresholdArg(AbstractPlayerCommand cmd) {
+        return cmd.withRequiredArg("threshold", "Threshold (0-100)", ArgTypes.STRING);
     }
 
     @Nullable
@@ -255,12 +262,11 @@ public final class RulesCmd extends AbstractPlayerCommand {
             String rawComponent,
             CommandContext context
     ) {
-        String componentKey = HudComponentRegistry.normalize(rawComponent);
-        HudComponent entry = HudComponentRegistry.findDynamic(componentKey);
+        HudComponent entry = HudComponentRegistry.findDynamic(rawComponent);
 
         if (entry == null) {
             context.sendMessage(Message.raw(
-                    "Unknown dynamic HUD component: " + componentKey
+                    "Unknown dynamic HUD component: " + rawComponent
             ).color(ERROR_COLOR));
             return null;
         }
@@ -268,7 +274,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
             context.sendMessage(Message.raw(
-                    "Failed to load your ImmersiveHud profile."
+                    "Failed to load your ImmersiveHud configuration."
             ).color(ERROR_COLOR));
             return null;
         }
@@ -307,7 +313,37 @@ public final class RulesCmd extends AbstractPlayerCommand {
         ).color(INFO_COLOR));
     }
 
-    private static void handleThresholdAction(
+    private static void handleClearAction(
+            PlayerConfigService playerConfigService,
+            PlayerRef playerRef,
+            CommandContext context,
+            ResolvedRules resolved
+    ) {
+        if (resolved.rules().getRules().isEmpty()) {
+            context.sendMessage(Message.raw(
+                    resolved.messagePrefix() + " already has no rules."
+            ).color(WARN_COLOR));
+            return;
+        }
+
+        float resetThreshold = clearResolvedRules(playerConfigService, playerRef, resolved);
+
+        if (resolved.supportsThreshold()) {
+            context.sendMessage(Message.raw(
+                    resolved.messagePrefix()
+                            + " rules cleared. Threshold reset to "
+                            + HudRuleSupport.formatThreshold(resetThreshold)
+                            + "%."
+            ).color(SUCCESS_COLOR));
+            return;
+        }
+
+        context.sendMessage(Message.raw(
+                resolved.messagePrefix() + " rules cleared."
+        ).color(SUCCESS_COLOR));
+    }
+
+    private static void handleThresholdCommand(
             PlayerConfigService playerConfigService,
             PlayerRef playerRef,
             CommandContext context,
@@ -354,13 +390,28 @@ public final class RulesCmd extends AbstractPlayerCommand {
         ).color(SUCCESS_COLOR));
     }
 
+    private static @Nullable HudTrigger parseRuleOrSendError(CommandContext context, String rawValue) {
+        HudTrigger result = HudTrigger.fromString(rawValue);
+        if (result == null) {
+            context.sendMessage(Message.raw(
+                    "Unknown rule: " + rawValue + ". Available rules: " + HudTrigger.availableRulesText()
+            ).color(ERROR_COLOR));
+        }
+        return result;
+    }
+
     private static void handleAddAction(
             PlayerConfigService playerConfigService,
             PlayerRef playerRef,
             CommandContext context,
             ResolvedRules resolved,
-            HudTrigger rule
+            String rawValue
     ) {
+        HudTrigger rule = parseRuleOrSendError(context, rawValue);
+        if (rule == null) {
+            return;
+        }
+
         if (!resolved.entry().supportsRule(rule)) {
             context.sendMessage(Message.raw(
                     "Rule " + rule.name() + " is not valid for " + resolved.entry().label() + "."
@@ -371,7 +422,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         boolean changed = resolved.rules().addRule(rule);
         if (!changed) {
             context.sendMessage(Message.raw(
-                    "Rule already present on " + resolved.entry().label() + ": " + rule.name()
+                    resolved.messagePrefix() + " rule already present: " + rule.name()
             ).color(WARN_COLOR));
             return;
         }
@@ -379,7 +430,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
         persistResolvedRules(playerConfigService, playerRef, resolved);
 
         context.sendMessage(Message.join(
-                Message.raw(resolved.messagePrefix() + " Added rule ").color(INFO_COLOR),
+                Message.raw(resolved.messagePrefix() + " added rule ").color(INFO_COLOR),
                 Message.raw(rule.name()).color(SUCCESS_COLOR),
                 Message.raw(" -> " + HudRuleSupport.formatRules(resolved.rules().getRules())).color(INFO_COLOR)
         ));
@@ -390,12 +441,17 @@ public final class RulesCmd extends AbstractPlayerCommand {
             PlayerRef playerRef,
             CommandContext context,
             ResolvedRules resolved,
-            HudTrigger rule
+            String rawValue
     ) {
+        HudTrigger rule = parseRuleOrSendError(context, rawValue);
+        if (rule == null) {
+            return;
+        }
+
         boolean changed = resolved.rules().removeRule(rule);
         if (!changed) {
             context.sendMessage(Message.raw(
-                    resolved.messagePrefix() + " Rule not present: " + rule.name()
+                    resolved.messagePrefix() + " rule not present: " + rule.name()
             ).color(WARN_COLOR));
             return;
         }
@@ -403,8 +459,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
         persistResolvedRules(playerConfigService, playerRef, resolved);
 
         context.sendMessage(Message.join(
-                Message.raw(resolved.messagePrefix() + " Removed rule ").color(INFO_COLOR),
-                Message.raw(rule.name()).color(HIDE_COLOR),
+                Message.raw(resolved.messagePrefix() + " removed rule ").color(INFO_COLOR),
+                Message.raw(rule.name()).color(REMOVE_COLOR),
                 Message.raw(" -> " + HudRuleSupport.formatRules(resolved.rules().getRules())).color(INFO_COLOR)
         ));
     }

@@ -44,7 +44,7 @@ public final class ConfigCmd extends AbstractPlayerCommand {
             @Nonnull World world
     ) {
         if (hudRuntimeService.requirePlayerConfig(playerRef) == null) {
-            context.sendMessage(Message.raw("Failed to load your ImmersiveHud profile.").color(ERROR_COLOR));
+            context.sendMessage(Message.raw("Failed to load your ImmersiveHud configuration.").color(ERROR_COLOR));
             return;
         }
 

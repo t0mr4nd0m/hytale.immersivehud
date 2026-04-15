@@ -1,9 +1,5 @@
 package com.tom.immersivehudplugin.commands;
 
-import com.hypixel.hytale.codec.schema.SchemaContext;
-import com.hypixel.hytale.codec.schema.config.Schema;
-import com.hypixel.hytale.codec.validation.ValidationResults;
-import com.hypixel.hytale.codec.validation.Validator;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -14,19 +10,15 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.tom.immersivehudplugin.commands.validation.CommandValidators;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.awt.Color;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class ProfileCmd extends AbstractPlayerCommand {
 
@@ -35,17 +27,13 @@ public final class ProfileCmd extends AbstractPlayerCommand {
     private static final Color SUCCESS_COLOR = Color.GREEN;
 
     private final RequiredArg<String> profileArg;
-
     private final PlayerConfigService playerConfigService;
 
-    public ProfileCmd(
-            PlayerConfigService playerConfigService
-    ) {
-        super("profile", "Apply a predefined ImmersiveHud profile.");
+    public ProfileCmd(PlayerConfigService playerConfigService) {
+        super("profile", "Apply a predefined ImmersiveHud configuration profile.");
         this.playerConfigService = playerConfigService;
-
         this.profileArg = withRequiredArg("profile", "Profile name", ArgTypes.STRING)
-                .addValidator(new HudProfileValidator());
+                .addValidator(CommandValidators.profile());
     }
 
     @Override
@@ -76,30 +64,8 @@ public final class ProfileCmd extends AbstractPlayerCommand {
         playerConfigService.updatePlayerConfig(playerRef, cfg -> ProfilePresets.applyTo(cfg, profile));
 
         context.sendMessage(Message.join(
-                Message.raw("Applied ImmersiveHud profile: ").color(INFO_COLOR),
+                Message.raw("Applied: ").color(INFO_COLOR),
                 Message.raw(profile.name().toLowerCase(Locale.ROOT)).color(SUCCESS_COLOR)
         ));
-    }
-
-    private static String normalize(@Nullable String s) {
-        return s == null ? "" : s.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private static final class HudProfileValidator implements Validator<String> {
-        private final Set<String> allowed = Arrays.stream(Profile.values())
-                .map(v -> v.name().toLowerCase(Locale.ROOT))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        @Override
-        public void accept(@Nullable String input, @Nonnull ValidationResults results) {
-            String normalized = normalize(input);
-            if (!allowed.contains(normalized)) {
-                results.fail("Unknown profile: " + input + ". Available profiles: " + String.join(", ", allowed));
-            }
-        }
-
-        @Override
-        public void updateSchema(SchemaContext context, @Nonnull Schema target) {
-        }
     }
 }
