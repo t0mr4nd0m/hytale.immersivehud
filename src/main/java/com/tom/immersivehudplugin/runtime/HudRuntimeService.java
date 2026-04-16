@@ -2,8 +2,6 @@ package com.tom.immersivehudplugin.runtime;
 
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.HytaleServer;
-import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
-import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
 import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
@@ -12,7 +10,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.config.PlayerConfigStore;
+import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
 import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
@@ -31,18 +29,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
+@SuppressWarnings("FieldCanBeLocal")
 public final class HudRuntimeService {
 
     private final JavaPlugin plugin;
-    private final PlayerConfigStore playerConfigStore;
+    private final PlayerConfigService playerConfigService;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     private final HeldItemSignalTracker heldItemSignalTracker;
-    private final PlayerTickContextFactory tickContextFactory;
     private final MovementSignalTracker movementSignalTracker;
     private final ReticleSignalTracker reticleSignalTracker;
     private final HudSignalPipeline hudSignalPipeline;
     private final HudBarStateUpdater barUpdater;
+    private final PlayerTickContextFactory tickContextFactory;
     private final HudTriggerContextFactory triggerContextFactory;
 
     private final HudTickProcessor hudTickProcessor;
@@ -50,13 +49,12 @@ public final class HudRuntimeService {
     private final Map<UUID, PlayerHudState> playerState = new ConcurrentHashMap<>();
 
     private volatile boolean inboundRegistered;
-    private volatile boolean playerEventsRegistered;
     private volatile ScheduledFuture<?> tickTask;
     private volatile int runningIntervalMs = -1;
 
     public HudRuntimeService(
             JavaPlugin plugin,
-            PlayerConfigStore playerConfigStore,
+            PlayerConfigService playerConfigService,
             HudVisibilityCoordinator hudVisibilityCoordinator,
             Supplier<GlobalConfig> globalConfigSupplier,
             int healthState,
@@ -65,7 +63,7 @@ public final class HudRuntimeService {
             int oxygenState
     ) {
         this.plugin = plugin;
-        this.playerConfigStore = playerConfigStore;
+        this.playerConfigService = playerConfigService;
         this.globalConfigSupplier = globalConfigSupplier;
 
         this.heldItemSignalTracker = new HeldItemSignalTracker();
@@ -97,7 +95,6 @@ public final class HudRuntimeService {
 
     public void start() {
         registerInboundWatcher();
-        registerPlayerEvents();
         restartTickTaskIfNeeded();
     }
 
@@ -109,7 +106,7 @@ public final class HudRuntimeService {
             task.cancel(true);
         }
 
-        playerState.forEach((uuid, state) -> playerConfigStore.save(uuid));
+        playerState.keySet().forEach(playerConfigService::save);
         playerState.clear();
     }
 
@@ -136,12 +133,22 @@ public final class HudRuntimeService {
         }, 0, wantedInterval, TimeUnit.MILLISECONDS);
     }
 
-    public void markPlayerStaticHudDirty(@Nullable PlayerRef playerRef) {
+    public void onPlayerReady(@Nullable PlayerRef playerRef) {
         if (playerRef == null) {
             return;
         }
 
-        stateFor(playerRef.getUuid()).markStaticHudDirty();
+        int hideDelay = hideDelayMs(getGlobalConfig());
+        PlayerHudState state = stateFor(playerRef.getUuid());
+        state.reset(hideDelay);
+    }
+
+    public void onPlayerDisconnect(@Nullable PlayerRef playerRef) {
+        if (playerRef == null) {
+            return;
+        }
+
+        playerState.remove(playerRef.getUuid());
     }
 
     public void onPlayerConfigChanged(@Nullable PlayerRef playerRef) {
@@ -170,29 +177,6 @@ public final class HudRuntimeService {
 
             heldItemSignalTracker.applyPacketBatch(state, updates, now);
             heldItemSignalTracker.cleanupWeaponSignals(state);
-        });
-    }
-
-    private void registerPlayerEvents() {
-        if (playerEventsRegistered) {
-            return;
-        }
-        playerEventsRegistered = true;
-
-        plugin.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
-            UUID uuid = event.getPlayer().getUuid();
-            int hideDelay = hideDelayMs(getGlobalConfig());
-
-            playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
-
-            PlayerHudState state = stateFor(uuid);
-            state.reset(hideDelay);
-        });
-
-        plugin.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class, event -> {
-            UUID uuid = event.getPlayerRef().getUuid();
-            playerState.remove(uuid);
-            playerConfigStore.saveAndUnload(uuid);
         });
     }
 
@@ -235,7 +219,10 @@ public final class HudRuntimeService {
 
         long now = nowMs();
         PlayerHudState state = stateFor(uuid);
-        PlayerConfig playerConfig = getOrLoadPlayerConfigInternal(uuid);
+        PlayerConfig playerConfig = playerConfigService.getCachedPlayerConfig(uuid);
+        if (playerConfig == null) {
+            return;
+        }
 
         hudTickProcessor.processPlayerTick(
                 resolved.playerRef(),
@@ -263,15 +250,6 @@ public final class HudRuntimeService {
 
     private PlayerHudState stateFor(UUID uuid) {
         return playerState.computeIfAbsent(uuid, ignored -> new PlayerHudState());
-    }
-
-    private PlayerConfig getOrLoadPlayerConfigInternal(UUID uuid) {
-        PlayerConfig cached = playerConfigStore.getCached(uuid);
-        if (cached != null) {
-            return cached;
-        }
-
-        return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
     private GlobalConfig getGlobalConfig() {

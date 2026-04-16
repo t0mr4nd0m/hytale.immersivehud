@@ -18,12 +18,15 @@ import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.trigger.HudRuleSupport;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 public final class RulesCmd extends AbstractPlayerCommand {
 
@@ -40,11 +43,14 @@ public final class RulesCmd extends AbstractPlayerCommand {
     private static final String ACTION_THRESHOLD = "threshold";
     private static final String ERROR_MESSAGE = "Unknown rules action";
 
-    public RulesCmd(PlayerConfigService playerConfigService) {
+    public RulesCmd(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService
+    ) {
         super("rules", "List, clear, add, remove, or configure dynamic HUD rules.");
 
-        addUsageVariant(new ListClearVariant(playerConfigService));
-        addUsageVariant(new ActionValueVariant(playerConfigService));
+        addUsageVariant(new ListClearVariant(playerConfigService, hudRuntimeService));
+        addUsageVariant(new ActionValueVariant(playerConfigService, hudRuntimeService));
     }
 
     @Override
@@ -75,14 +81,19 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static final class ListClearVariant extends AbstractPlayerCommand {
         private final PlayerConfigService playerConfigService;
+        private final HudRuntimeService hudRuntimeService;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
 
         private static final Set<String> ACTIONS = Set.of(ACTION_LIST, ACTION_CLEAR);
 
-        ListClearVariant(PlayerConfigService playerConfigService) {
+        ListClearVariant(
+                PlayerConfigService playerConfigService,
+                HudRuntimeService hudRuntimeService
+        ) {
             super("List or clear rules");
             this.playerConfigService = playerConfigService;
+            this.hudRuntimeService = hudRuntimeService;
 
             this.componentArg = dynamicComponentArg(this);
             this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
@@ -115,8 +126,8 @@ public final class RulesCmd extends AbstractPlayerCommand {
             String action = HudComponentRegistry.normalize(actionArg.get(context));
 
             switch (action) {
-                case ACTION_LIST -> sendListMessage(context, resolved);
-                case ACTION_CLEAR -> handleClearAction(playerConfigService, playerRef, context, resolved);
+                case ACTION_LIST -> sendListMessage(playerConfigService, playerRef, context, resolved);
+                case ACTION_CLEAR -> handleClearAction(playerConfigService, hudRuntimeService, playerRef, context, resolved);
                 default -> sendUsage(context);
             }
         }
@@ -124,15 +135,20 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static final class ActionValueVariant extends AbstractPlayerCommand {
         private final PlayerConfigService playerConfigService;
+        private final HudRuntimeService hudRuntimeService;
         private final RequiredArg<String> componentArg;
         private final RequiredArg<String> actionArg;
         private final RequiredArg<String> valueArg;
 
         private static final Set<String> ACTIONS = Set.of(ACTION_ADD, ACTION_REMOVE, ACTION_THRESHOLD);
 
-        ActionValueVariant(PlayerConfigService playerConfigService) {
+        ActionValueVariant(
+                PlayerConfigService playerConfigService,
+                HudRuntimeService hudRuntimeService
+        ) {
             super("Add, remove, or configure threshold");
             this.playerConfigService = playerConfigService;
+            this.hudRuntimeService = hudRuntimeService;
 
             this.componentArg = dynamicComponentArg(this);
             this.actionArg = withRequiredArg("action", String.join("/", ACTIONS), ArgTypes.STRING)
@@ -167,77 +183,29 @@ public final class RulesCmd extends AbstractPlayerCommand {
             String value = valueArg.get(context);
 
             switch (action) {
-                case ACTION_ADD -> handleAddAction(playerConfigService, playerRef, context, resolved, value);
-                case ACTION_REMOVE -> handleRemoveAction(playerConfigService, playerRef, context, resolved, value);
-                case ACTION_THRESHOLD -> handleThresholdCommand(playerConfigService, playerRef, context, resolved, value);
+                case ACTION_ADD -> handleAddAction(playerConfigService, hudRuntimeService, playerRef, context, resolved, value);
+                case ACTION_REMOVE -> handleRemoveAction(playerConfigService, hudRuntimeService, playerRef, context, resolved, value);
+                case ACTION_THRESHOLD -> handleThresholdCommand(playerConfigService, hudRuntimeService, playerRef, context, resolved, value);
                 default -> sendUsage(context);
             }
         }
     }
 
-    private record ResolvedRules(
-            HudComponent entry,
-            DynamicHudRuleConfig rules
-    ) {
-        String messagePrefix() {
-            return "ImmersiveHud " + entry.label();
-        }
-
-        boolean supportsThreshold() {
-            return entry.supportsThreshold();
-        }
-
-        float defaultThresholdOrDefault() {
-            Float value = entry.defaultThreshold();
-            return value != null ? value : DynamicHudRuleConfig.DEFAULT_THRESHOLD;
-        }
-    }
-
-    private static RequiredArg<String> dynamicComponentArg(AbstractPlayerCommand cmd) {
-        return cmd.withRequiredArg("component", "Dynamic HUD component", ArgTypes.STRING)
-                .addValidator(CommandValidators.dynamicComponent());
-    }
-
-    @Nullable
-    private static ResolvedRules resolveRules(
+    private static void sendListMessage(
             PlayerConfigService playerConfigService,
             PlayerRef playerRef,
-            String rawComponent,
-            CommandContext context
-    ) {
-        HudComponent entry = HudComponentRegistry.findDynamic(rawComponent);
-
-        if (entry == null) {
-            context.sendMessage(Message.raw(
-                    "Unknown dynamic HUD component: " + rawComponent
-            ).color(ERROR_COLOR));
-            return null;
-        }
-
-        PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
-        if (playerCfg == null) {
-            context.sendMessage(Message.raw(
-                    "Failed to load your ImmersiveHud configuration."
-            ).color(ERROR_COLOR));
-            return null;
-        }
-
-        DynamicHudRuleConfig rules = entry.getDynamicRuleConfig(playerCfg.getDynamicHud());
-        if (rules == null) {
-            context.sendMessage(Message.raw(
-                    "No dynamic rules found for " + entry.label() + "."
-            ).color(ERROR_COLOR));
-            return null;
-        }
-
-        return new ResolvedRules(entry, rules);
-    }
-
-    private static void sendListMessage(
             CommandContext context,
             ResolvedRules resolved
     ) {
-        String rulesText = HudRuleSupport.formatRules(resolved.rules().getRules());
+        DynamicHudRuleConfig rules = getCurrentRulesConfig(playerConfigService, playerRef, resolved);
+        if (rules == null) {
+            context.sendMessage(Message.raw(
+                    "No dynamic rules found for " + resolved.entry().label() + "."
+            ).color(ERROR_COLOR));
+            return;
+        }
+
+        String rulesText = HudRuleSupport.formatRules(rules.getRules());
 
         if (resolved.supportsThreshold()) {
             context.sendMessage(Message.raw(
@@ -245,7 +213,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
                             + " rules: "
                             + rulesText
                             + " | threshold: "
-                            + HudRuleSupport.formatThreshold(resolved.rules().getThreshold())
+                            + HudRuleSupport.formatThreshold(rules.getThreshold())
                             + "%"
             ).color(INFO_COLOR));
             return;
@@ -258,24 +226,54 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static void handleClearAction(
             PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService,
             PlayerRef playerRef,
             CommandContext context,
             ResolvedRules resolved
     ) {
-        if (resolved.rules().getRules().isEmpty()) {
+        DynamicHudRuleConfig current = getCurrentRulesConfig(playerConfigService, playerRef, resolved);
+        if (current == null) {
+            context.sendMessage(Message.raw(
+                    "No dynamic rules found for " + resolved.entry().label() + "."
+            ).color(ERROR_COLOR));
+            return;
+        }
+
+        if (current.getRules().isEmpty()) {
             context.sendMessage(Message.raw(
                     resolved.messagePrefix() + " already has no rules."
             ).color(WARN_COLOR));
             return;
         }
 
-        float resetThreshold = clearResolvedRules(playerConfigService, playerRef, resolved);
+        float resetThreshold = resolved.defaultThresholdOrDefault();
+
+        RuleMutationResult result = mutateRules(
+                playerConfigService,
+                hudRuntimeService,
+                playerRef,
+                resolved,
+                cfg -> {
+                    cfg.setRules(EnumSet.noneOf(HudTrigger.class));
+                    if (resolved.supportsThreshold()) {
+                        cfg.setThreshold(resetThreshold);
+                    }
+                    return snapshotResult(cfg, true);
+                }
+        );
+
+        if (result == null) {
+            context.sendMessage(Message.raw(
+                    "Failed to update dynamic rules for " + resolved.entry().label() + "."
+            ).color(ERROR_COLOR));
+            return;
+        }
 
         if (resolved.supportsThreshold()) {
             context.sendMessage(Message.raw(
                     resolved.messagePrefix()
                             + " rules cleared. Threshold reset to "
-                            + HudRuleSupport.formatThreshold(resetThreshold)
+                            + HudRuleSupport.formatThreshold(result.threshold())
                             + "%."
             ).color(SUCCESS_COLOR));
             return;
@@ -288,6 +286,7 @@ public final class RulesCmd extends AbstractPlayerCommand {
 
     private static void handleThresholdCommand(
             PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService,
             PlayerRef playerRef,
             CommandContext context,
             ResolvedRules resolved,
@@ -308,18 +307,40 @@ public final class RulesCmd extends AbstractPlayerCommand {
             return;
         }
 
-        boolean hasActiveThresholdRule = setResolvedThreshold(
+        RuleMutationResult result = mutateRules(
                 playerConfigService,
+                hudRuntimeService,
                 playerRef,
                 resolved,
-                threshold
+                cfg -> {
+                    boolean changed = Float.compare(cfg.getThreshold(), threshold) != 0;
+                    cfg.setThreshold(threshold);
+                    return snapshotResult(cfg, changed);
+                }
         );
 
-        if (!hasActiveThresholdRule) {
+        if (result == null) {
+            context.sendMessage(Message.raw(
+                    "Failed to update dynamic rules for " + resolved.entry().label() + "."
+            ).color(ERROR_COLOR));
+            return;
+        }
+
+        if (!result.changed()) {
+            context.sendMessage(Message.raw(
+                    resolved.messagePrefix()
+                            + " threshold already set to "
+                            + HudRuleSupport.formatThreshold(result.threshold())
+                            + "%."
+            ).color(WARN_COLOR));
+            return;
+        }
+
+        if (!result.hasActiveThresholdRule()) {
             context.sendMessage(Message.raw(
                     resolved.messagePrefix()
                             + " threshold set to "
-                            + HudRuleSupport.formatThreshold(threshold)
+                            + HudRuleSupport.formatThreshold(result.threshold())
                             + "%, but no threshold-based rule is currently active."
             ).color(WARN_COLOR));
             return;
@@ -328,12 +349,140 @@ public final class RulesCmd extends AbstractPlayerCommand {
         context.sendMessage(Message.raw(
                 resolved.messagePrefix()
                         + " threshold set to "
-                        + HudRuleSupport.formatThreshold(threshold)
+                        + HudRuleSupport.formatThreshold(result.threshold())
                         + "%."
         ).color(SUCCESS_COLOR));
     }
 
-    private static @Nullable HudTrigger parseRuleOrSendError(CommandContext context, String rawValue) {
+    private static void handleAddAction(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService,
+            PlayerRef playerRef,
+            CommandContext context,
+            ResolvedRules resolved,
+            String rawValue
+    ) {
+        handleRuleToggleAction(
+                playerConfigService,
+                hudRuntimeService,
+                playerRef,
+                context,
+                resolved,
+                rawValue,
+                true,
+                cfgRule -> cfgRule.addRule(parseRuleUnchecked(rawValue)),
+                "added",
+                SUCCESS_COLOR,
+                "rule already present"
+        );
+    }
+
+    private static void handleRemoveAction(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService,
+            PlayerRef playerRef,
+            CommandContext context,
+            ResolvedRules resolved,
+            String rawValue
+    ) {
+        handleRuleToggleAction(
+                playerConfigService,
+                hudRuntimeService,
+                playerRef,
+                context,
+                resolved,
+                rawValue,
+                false,
+                cfgRule -> cfgRule.removeRule(parseRuleUnchecked(rawValue)),
+                "removed",
+                REMOVE_COLOR,
+                "rule not present"
+        );
+    }
+
+    private static void handleRuleToggleAction(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService,
+            PlayerRef playerRef,
+            CommandContext context,
+            ResolvedRules resolved,
+            String rawValue,
+            boolean validateSupportedRule,
+            Function<DynamicHudRuleConfig, Boolean> mutation,
+            String successVerb,
+            Color ruleColor,
+            String unchangedMessage
+    ) {
+        HudTrigger rule = parseRuleOrSendError(context, rawValue);
+        if (rule == null) {
+            return;
+        }
+
+        if (validateSupportedRule && !resolved.entry().supportsRule(rule)) {
+            context.sendMessage(Message.raw(
+                    "Rule " + rule.name() + " is not valid for " + resolved.entry().label() + "."
+            ).color(ERROR_COLOR));
+            return;
+        }
+
+        RuleMutationResult result = mutateRules(
+                playerConfigService,
+                hudRuntimeService,
+                playerRef,
+                resolved,
+                cfg -> snapshotResult(cfg, Boolean.TRUE.equals(mutation.apply(cfg)))
+        );
+
+        if (result == null) {
+            context.sendMessage(Message.raw(
+                    "Failed to update dynamic rules for " + resolved.entry().label() + "."
+            ).color(ERROR_COLOR));
+            return;
+        }
+
+        if (!result.changed()) {
+            context.sendMessage(Message.raw(
+                    resolved.messagePrefix() + " " + unchangedMessage + ": " + rule.name()
+            ).color(WARN_COLOR));
+            return;
+        }
+
+        context.sendMessage(Message.join(
+                Message.raw(resolved.messagePrefix() + " " + successVerb + " rule ").color(INFO_COLOR),
+                Message.raw(rule.name()).color(ruleColor),
+                Message.raw(" -> " + result.rulesText()).color(INFO_COLOR)
+        ));
+    }
+
+    private static RequiredArg<String> dynamicComponentArg(AbstractPlayerCommand cmd) {
+        return cmd.withRequiredArg("component", "Dynamic HUD component", ArgTypes.STRING)
+                .addValidator(CommandValidators.dynamicComponent());
+    }
+
+    private record ResolvedRules(HudComponent entry) {
+        String messagePrefix() {
+            return "ImmersiveHud " + entry.label();
+        }
+
+        boolean supportsThreshold() {
+            return entry.supportsThreshold();
+        }
+
+        float defaultThresholdOrDefault() {
+            Float value = entry.defaultThreshold();
+            return value != null ? value : DynamicHudRuleConfig.DEFAULT_THRESHOLD;
+        }
+    }
+
+    private record RuleMutationResult(
+            boolean changed,
+            String rulesText,
+            float threshold,
+            boolean hasActiveThresholdRule
+    ) {}
+
+    @Nullable
+    private static HudTrigger parseRuleOrSendError(CommandContext context, String rawValue) {
         HudTrigger result = HudTrigger.fromString(rawValue);
         if (result == null) {
             context.sendMessage(Message.raw(
@@ -343,111 +492,101 @@ public final class RulesCmd extends AbstractPlayerCommand {
         return result;
     }
 
-    private static void handleAddAction(
+    @Nullable
+    private static ResolvedRules resolveRules(
             PlayerConfigService playerConfigService,
             PlayerRef playerRef,
-            CommandContext context,
-            ResolvedRules resolved,
-            String rawValue
+            String rawComponent,
+            CommandContext context
     ) {
-        HudTrigger rule = parseRuleOrSendError(context, rawValue);
-        if (rule == null) {
-            return;
-        }
-
-        if (!resolved.entry().supportsRule(rule)) {
+        HudComponent component = HudComponentRegistry.findDynamic(rawComponent);
+        if (component == null) {
             context.sendMessage(Message.raw(
-                    "Rule " + rule.name() + " is not valid for " + resolved.entry().label() + "."
+                    "Unknown dynamic HUD component: " + rawComponent
             ).color(ERROR_COLOR));
-            return;
+            return null;
         }
 
-        boolean changed = resolved.rules().addRule(rule);
-        if (!changed) {
+        PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
+        if (playerCfg == null) {
             context.sendMessage(Message.raw(
-                    resolved.messagePrefix() + " rule already present: " + rule.name()
-            ).color(WARN_COLOR));
-            return;
+                    "Failed to load your ImmersiveHud configuration."
+            ).color(ERROR_COLOR));
+            return null;
         }
 
-        persistResolvedRules(playerConfigService, playerRef, resolved);
+        DynamicHudRuleConfig rules = component.getDynamicRuleConfig(playerCfg.getDynamicHud());
+        if (rules == null) {
+            context.sendMessage(Message.raw(
+                    "No dynamic rules found for " + component.label() + "."
+            ).color(ERROR_COLOR));
+            return null;
+        }
 
-        context.sendMessage(Message.join(
-                Message.raw(resolved.messagePrefix() + " added rule ").color(INFO_COLOR),
-                Message.raw(rule.name()).color(SUCCESS_COLOR),
-                Message.raw(" -> " + HudRuleSupport.formatRules(resolved.rules().getRules())).color(INFO_COLOR)
-        ));
+        return new ResolvedRules(component);
     }
 
-    private static void handleRemoveAction(
-            PlayerConfigService playerConfigService,
-            PlayerRef playerRef,
-            CommandContext context,
-            ResolvedRules resolved,
-            String rawValue
-    ) {
-        HudTrigger rule = parseRuleOrSendError(context, rawValue);
-        if (rule == null) {
-            return;
-        }
-
-        boolean changed = resolved.rules().removeRule(rule);
-        if (!changed) {
-            context.sendMessage(Message.raw(
-                    resolved.messagePrefix() + " rule not present: " + rule.name()
-            ).color(WARN_COLOR));
-            return;
-        }
-
-        persistResolvedRules(playerConfigService, playerRef, resolved);
-
-        context.sendMessage(Message.join(
-                Message.raw(resolved.messagePrefix() + " removed rule ").color(INFO_COLOR),
-                Message.raw(rule.name()).color(REMOVE_COLOR),
-                Message.raw(" -> " + HudRuleSupport.formatRules(resolved.rules().getRules())).color(INFO_COLOR)
-        ));
-    }
-
-    private static void persistResolvedRules(
+    @Nullable
+    private static DynamicHudRuleConfig getCurrentRulesConfig(
             PlayerConfigService playerConfigService,
             PlayerRef playerRef,
             ResolvedRules resolved
     ) {
+        PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
+        if (playerCfg == null) {
+            return null;
+        }
+
+        return resolved.entry().getDynamicRuleConfig(playerCfg.getDynamicHud());
+    }
+
+    private static HudTrigger parseRuleUnchecked(String rawValue) {
+        HudTrigger rule = HudTrigger.fromString(rawValue);
+        if (rule == null) {
+            throw new IllegalStateException("Expected valid rule: " + rawValue);
+        }
+        return rule;
+    }
+
+    private static RuleMutationResult snapshotResult(
+            DynamicHudRuleConfig cfg,
+            boolean changed
+    ) {
+        return new RuleMutationResult(
+                changed,
+                HudRuleSupport.formatRules(cfg.getRules()),
+                cfg.getThreshold(),
+                cfg.hasActiveThresholdRule()
+        );
+    }
+
+    @Nullable
+    private static RuleMutationResult mutateRules(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService,
+            PlayerRef playerRef,
+            ResolvedRules resolved,
+            Function<DynamicHudRuleConfig, RuleMutationResult> mutator
+    ) {
+        AtomicReference<RuleMutationResult> resultRef = new AtomicReference<>();
+
         playerConfigService.updateDynamicHud(playerRef, dynamicCfg -> {
             DynamicHudRuleConfig cfg = resolved.entry().getDynamicRuleConfig(dynamicCfg);
             if (cfg == null) {
                 return;
             }
 
-            cfg.setRules(EnumSet.copyOf(resolved.rules().getRules()));
-            cfg.setThreshold(resolved.rules().getThreshold());
+            RuleMutationResult result = mutator.apply(cfg);
+            if (result != null) {
+                resultRef.set(result);
+            }
         });
-    }
 
-    private static float clearResolvedRules(
-            PlayerConfigService playerConfigService,
-            PlayerRef playerRef,
-            ResolvedRules resolved
-    ) {
-        resolved.rules().setRules(EnumSet.noneOf(HudTrigger.class));
-
-        float resetThreshold = resolved.defaultThresholdOrDefault();
-        if (resolved.supportsThreshold()) {
-            resolved.rules().setThreshold(resetThreshold);
+        RuleMutationResult result = resultRef.get();
+        if (result != null && result.changed()) {
+            hudRuntimeService.onPlayerConfigChanged(playerRef);
         }
 
-        persistResolvedRules(playerConfigService, playerRef, resolved);
-        return resetThreshold;
-    }
-
-    private static boolean setResolvedThreshold(
-            PlayerConfigService playerConfigService,
-            PlayerRef playerRef,
-            ResolvedRules resolved,
-            float threshold
-    ) {
-        resolved.rules().setThreshold(threshold);
-        persistResolvedRules(playerConfigService, playerRef, resolved);
-        return resolved.rules().hasActiveThresholdRule();
+        return result;
     }
 }

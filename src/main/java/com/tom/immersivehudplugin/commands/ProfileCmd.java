@@ -15,6 +15,7 @@ import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -28,10 +29,15 @@ public final class ProfileCmd extends AbstractPlayerCommand {
 
     private final RequiredArg<String> profileArg;
     private final PlayerConfigService playerConfigService;
+    private final HudRuntimeService hudRuntimeService;
 
-    public ProfileCmd(PlayerConfigService playerConfigService) {
+    public ProfileCmd(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService
+    ) {
         super("profile", "Apply a predefined ImmersiveHud configuration profile.");
         this.playerConfigService = playerConfigService;
+        this.hudRuntimeService = hudRuntimeService;
         this.profileArg = withRequiredArg("profile", "Profile name", ArgTypes.STRING)
                 .addValidator(CommandValidators.profile());
     }
@@ -62,6 +68,7 @@ public final class ProfileCmd extends AbstractPlayerCommand {
         }
 
         playerConfigService.updatePlayerConfig(playerRef, cfg -> ProfilePresets.applyTo(cfg, profile));
+        hudRuntimeService.onPlayerConfigChanged(playerRef);
 
         context.sendMessage(Message.join(
                 Message.raw("Applied: ").color(INFO_COLOR),

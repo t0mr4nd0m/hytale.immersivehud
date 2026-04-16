@@ -14,6 +14,7 @@ import com.tom.immersivehudplugin.commands.validation.CommandValidators;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -36,21 +37,27 @@ public final class ToggleCmd extends AbstractPlayerCommand {
     private final RequiredArg<String> stateArg;
 
     private final PlayerConfigService playerConfigService;
+    private final HudRuntimeService hudRuntimeService;
 
-    public ToggleCmd(PlayerConfigService playerConfigService) {
+    public ToggleCmd(
+            PlayerConfigService playerConfigService,
+            HudRuntimeService hudRuntimeService
+    ) {
         super("toggle", "Show or hide HUD components.");
         this.playerConfigService = playerConfigService;
+        this.hudRuntimeService = hudRuntimeService;
 
         this.targetArg = withRequiredArg(
                 "target",
-                "HUD component or group", ArgTypes.STRING)
-                .addValidator(CommandValidators.componentOrGroup());
+                "HUD component or group",
+                ArgTypes.STRING
+        ).addValidator(CommandValidators.componentOrGroup());
 
         this.stateArg = withRequiredArg(
                 "state",
-                "Visibility state " + String.join("/", VISIBILITY_STATES) ,
-                ArgTypes.STRING)
-                .addValidator(CommandValidators.validateArguments(VISIBILITY_STATES, ERROR_MESSAGE));
+                "Visibility state " + String.join("/", VISIBILITY_STATES),
+                ArgTypes.STRING
+        ).addValidator(CommandValidators.validateArguments(VISIBILITY_STATES, ERROR_MESSAGE));
     }
 
     @Override
@@ -76,6 +83,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             playerConfigService.updatePlayerConfig(playerRef, cfg ->
                     component.setHidden(cfg.getHudComponents(), hidden)
             );
+            hudRuntimeService.onPlayerConfigChanged(playerRef);
 
             context.sendMessage(Message.join(
                     Message.raw("HUD component ").color(INFO_COLOR),
@@ -98,6 +106,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                     componentOfGroup.setHidden(cfg.getHudComponents(), hidden);
                 }
             });
+            hudRuntimeService.onPlayerConfigChanged(playerRef);
 
             context.sendMessage(Message.join(
                     Message.raw("HUD group ").color(INFO_COLOR),

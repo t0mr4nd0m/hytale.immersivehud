@@ -1,7 +1,6 @@
 package com.tom.immersivehudplugin.config;
 
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -11,16 +10,13 @@ import java.util.function.Supplier;
 public final class PlayerConfigService {
 
     private final PlayerConfigStore playerConfigStore;
-    private final HudRuntimeService hudRuntimeService;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     public PlayerConfigService(
             PlayerConfigStore playerConfigStore,
-            HudRuntimeService hudRuntimeService,
             Supplier<GlobalConfig> globalConfigSupplier
     ) {
         this.playerConfigStore = playerConfigStore;
-        this.hudRuntimeService = hudRuntimeService;
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
@@ -42,7 +38,26 @@ public final class PlayerConfigService {
         return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
+    @Nullable
+    public PlayerConfig getCachedPlayerConfig(UUID uuid) {
+        return playerConfigStore.getCached(uuid);
+    }
+
+    public void saveAndUnload(@Nullable PlayerRef playerRef) {
+        if (playerRef == null) {
+            return;
+        }
+
+        playerConfigStore.saveAndUnload(playerRef.getUuid());
+    }
+
+    public void save(UUID uuid) {
+        playerConfigStore.save(uuid);
+    }
+
     public void updatePlayerConfig(PlayerRef playerRef, Consumer<PlayerConfig> mutator) {
+        if (playerRef == null) { return; }
+
         UUID uuid = playerRef.getUuid();
         PlayerConfig config = getOrLoadPlayerConfig(uuid);
 
@@ -50,11 +65,6 @@ public final class PlayerConfigService {
 
         playerConfigStore.markDirty(uuid);
         playerConfigStore.saveAsync(uuid);
-        hudRuntimeService.onPlayerConfigChanged(playerRef);
-    }
-
-    public void updateHudComponents(PlayerRef playerRef, Consumer<HudComponentsConfig> mutator) {
-        updatePlayerConfig(playerRef, config -> mutator.accept(config.getHudComponents()));
     }
 
     public void updateDynamicHud(PlayerRef playerRef, Consumer<DynamicHudConfig> mutator) {
