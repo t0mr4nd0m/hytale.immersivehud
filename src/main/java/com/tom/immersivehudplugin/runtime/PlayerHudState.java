@@ -29,7 +29,7 @@ public final class PlayerHudState {
     public boolean staticDirty = true;
 
     public volatile long lastReticleScanMs;
-    public volatile int currentHideDelayMs = GlobalConfig.HIDE_DELAY_MS;
+    public volatile int hideDelayMs = GlobalConfig.HIDE_DELAY_MS;
 
     public void reset(int hideDelay) {
         resetHudVisibilityState();
@@ -38,7 +38,7 @@ public final class PlayerHudState {
         heldItem.reset();
         dynamicHudCache.reset();
 
-        currentHideDelayMs = hideDelay;
+        hideDelayMs = hideDelay;
     }
 
     public void markStaticHudDirty() {

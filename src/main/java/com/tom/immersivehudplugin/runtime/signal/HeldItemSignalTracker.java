@@ -46,12 +46,12 @@ public final class HeldItemSignalTracker {
         }
 
         if (hasChargingStart) {
-            state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMsHint);
+            state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMs);
         }
 
         if (hasHotbarSwap) {
             state.heldItem.refreshRequested = true;
-            state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMsHint);
+            state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMs);
             state.t.clear(HudTrigger.CHARGING_WEAPON);
         }
     }
@@ -154,11 +154,11 @@ public final class HeldItemSignalTracker {
         Item item = resolveItem(itemInHandId);
 
         if (HeldItemState.isConsumable(item)) {
-            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMsHint);
+            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMs);
         }
 
         if (HeldItemState.isWeapon(item)) {
-            state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMsHint);
+            state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMs);
         }
     }
 

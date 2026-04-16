@@ -32,7 +32,7 @@ public final class HudSignalPipeline {
                 ? global.getHideDelayMs()
                 : GlobalConfig.HIDE_DELAY_MS;
 
-        state.hideDelayMsHint = hideDelay;
+        state.hideDelayMs = hideDelay;
 
         movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
         reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);

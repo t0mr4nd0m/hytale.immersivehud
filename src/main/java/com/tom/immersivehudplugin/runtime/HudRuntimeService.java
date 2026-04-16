@@ -195,7 +195,7 @@ public final class HudRuntimeService {
             PlayerHudState state,
             GlobalConfig global
     ) {
-        state.hideDelayMsHint = hideDelayMs(global);
+        state.hideDelayMs = hideDelayMs(global);
 
         ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
         if (resolved == null) {
