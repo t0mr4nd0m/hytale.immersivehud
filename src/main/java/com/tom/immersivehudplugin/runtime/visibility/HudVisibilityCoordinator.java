@@ -9,14 +9,23 @@ import com.tom.immersivehudplugin.runtime.PlayerHudState;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class HudVisibilityCoordinator {
 
     private static final List<HudComponent> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
     private static final List<HudComponent> ALL_ENTRIES = HudComponentRegistry.allList();
 
-    private final HudRuleEvaluator hudRuleEvaluator = new HudRuleEvaluator();
-    private final HudDeltaApplier hudDeltaApplier = new HudDeltaApplier();
+    private final HudRuleEvaluator hudRuleEvaluator;
+    private final HudDeltaApplier hudDeltaApplier;
+
+    public HudVisibilityCoordinator(
+            HudRuleEvaluator hudRuleEvaluator,
+            HudDeltaApplier hudDeltaApplier
+    ) {
+        this.hudRuleEvaluator = Objects.requireNonNull(hudRuleEvaluator, "hudRuleEvaluator");
+        this.hudDeltaApplier = Objects.requireNonNull(hudDeltaApplier, "hudDeltaApplier");
+    }
 
     public boolean hasAnyActiveDynamicRules(
             HudComponentsConfig hudConfig,

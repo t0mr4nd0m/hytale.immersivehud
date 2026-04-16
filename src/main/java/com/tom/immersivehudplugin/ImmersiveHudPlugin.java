@@ -12,6 +12,8 @@ import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.config.PlayerConfigStore;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 import com.tom.immersivehudplugin.runtime.PlayerLifecycleService;
+import com.tom.immersivehudplugin.runtime.visibility.HudDeltaApplier;
+import com.tom.immersivehudplugin.runtime.visibility.HudRuleEvaluator;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
@@ -79,7 +81,10 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private HudRuntimeService createHudRuntimeService() {
-        HudVisibilityCoordinator hudVisibilityCoordinator = new HudVisibilityCoordinator();
+        HudRuleEvaluator hudRuleEvaluator = new HudRuleEvaluator();
+        HudDeltaApplier hudDeltaApplier = new HudDeltaApplier();
+        HudVisibilityCoordinator hudVisibilityCoordinator =
+                new HudVisibilityCoordinator(hudRuleEvaluator, hudDeltaApplier);
 
         return new HudRuntimeService(
                 this,
