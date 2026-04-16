@@ -23,7 +23,6 @@ import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
