@@ -24,6 +24,7 @@ import java.util.Set;
 public final class ToggleCmd extends AbstractPlayerCommand {
 
     private static final Color INFO_COLOR = Color.LIGHT_GRAY;
+    private static final Color WARN_COLOR = Color.YELLOW;
     private static final Color ERROR_COLOR = Color.RED;
     private static final Color SUCCESS_COLOR = Color.GREEN;
 
@@ -33,31 +34,14 @@ public final class ToggleCmd extends AbstractPlayerCommand {
 
     private static final String ERROR_MESSAGE = "Unknown visibility state";
 
-    private final RequiredArg<String> targetArg;
-    private final RequiredArg<String> stateArg;
-
-    private final PlayerConfigService playerConfigService;
-    private final HudRuntimeService hudRuntimeService;
-
     public ToggleCmd(
             PlayerConfigService playerConfigService,
             HudRuntimeService hudRuntimeService
     ) {
-        super("toggle", "Show or hide HUD components.");
-        this.playerConfigService = playerConfigService;
-        this.hudRuntimeService = hudRuntimeService;
+        super("toggle", "Toggle, show or hide HUD components.");
 
-        this.targetArg = withRequiredArg(
-                "target",
-                "HUD component or group",
-                ArgTypes.STRING
-        ).addValidator(CommandValidators.componentOrGroup());
-
-        this.stateArg = withRequiredArg(
-                "state",
-                "Visibility state " + String.join("/", VISIBILITY_STATES),
-                ArgTypes.STRING
-        ).addValidator(CommandValidators.validateArguments(VISIBILITY_STATES, ERROR_MESSAGE));
+        addUsageVariant(new ToggleImplicitVariant(playerConfigService, hudRuntimeService));
+        addUsageVariant(new ToggleExplicitVariant(playerConfigService, hudRuntimeService));
     }
 
     @Override
@@ -73,49 +57,187 @@ public final class ToggleCmd extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        String target = targetArg.get(context);
-        String state = CommandValidators.normalize(stateArg.get(context));
+        sendUsage(context);
+    }
 
-        boolean hidden = HIDE_STATE.equals(CommandValidators.normalize(state));
+    private static void sendUsage(@Nonnull CommandContext context) {
+        context.sendMessage(Message.raw("Usage: /ihud toggle <component|group>").color(WARN_COLOR));
+        context.sendMessage(Message.raw("   or: /ihud toggle <component|group> <hide|show>").color(WARN_COLOR));
+        context.sendMessage(Message.raw("Components: " + HudComponentRegistry.availableComponentsText()).color(INFO_COLOR));
+        context.sendMessage(Message.raw("Groups: " + HudComponentRegistry.availableGroupsText()).color(INFO_COLOR));
+    }
 
-        HudComponent component = HudComponentRegistry.find(target);
-        if (component != null) {
-            playerConfigService.updatePlayerConfig(playerRef, cfg ->
-                    component.setHidden(cfg.getHudComponents(), hidden)
-            );
-            hudRuntimeService.onPlayerConfigChanged(playerRef);
+    private static final class ToggleImplicitVariant extends AbstractPlayerCommand {
 
-            context.sendMessage(Message.join(
-                    Message.raw("HUD component ").color(INFO_COLOR),
-                    Message.raw(component.key()).color(SUCCESS_COLOR),
-                    Message.raw(hidden ? " hidden." : " shown.").color(INFO_COLOR)
-            ));
-            return;
+        private final PlayerConfigService playerConfigService;
+        private final HudRuntimeService hudRuntimeService;
+        private final RequiredArg<String> targetArg;
+
+        ToggleImplicitVariant(
+                PlayerConfigService playerConfigService,
+                HudRuntimeService hudRuntimeService
+        ) {
+            super("Toggle HUD component or group");
+            this.playerConfigService = playerConfigService;
+            this.hudRuntimeService = hudRuntimeService;
+
+            this.targetArg = withRequiredArg(
+                    "target",
+                    "HUD component or group",
+                    ArgTypes.STRING
+            ).addValidator(CommandValidators.componentOrGroup());
         }
 
-        HudComponentRegistry.Group group = HudComponentRegistry.findGroup(target);
-        if (group != null) {
-            List<HudComponent> componentsByGroup = HudComponentRegistry.entriesOf(group);
-            if (componentsByGroup.isEmpty()) {
-                context.sendMessage(Message.raw("HUD group is empty.").color(ERROR_COLOR));
+        @Override
+        protected boolean canGeneratePermission() {
+            return false;
+        }
+
+        @Override
+        protected void execute(
+                @Nonnull CommandContext context,
+                @Nonnull Store<EntityStore> store,
+                @Nonnull Ref<EntityStore> ref,
+                @Nonnull PlayerRef playerRef,
+                @Nonnull World world
+        ) {
+            String target = targetArg.get(context);
+
+            HudComponent component = HudComponentRegistry.find(target);
+            if (component != null) {
+                final boolean[] nextHiddenRef = new boolean[1];
+
+                playerConfigService.updatePlayerConfig(playerRef, cfg -> {
+                    boolean nextHidden = !component.isHidden(cfg.getHudComponents());
+                    component.setHidden(cfg.getHudComponents(), nextHidden);
+                    nextHiddenRef[0] = nextHidden;
+                });
+                hudRuntimeService.onPlayerConfigChanged(playerRef);
+
+                context.sendMessage(Message.join(
+                        Message.raw("HUD component ").color(INFO_COLOR),
+                        Message.raw(component.key()).color(SUCCESS_COLOR),
+                        Message.raw(nextHiddenRef[0] ? " hidden." : " shown.").color(INFO_COLOR)
+                ));
                 return;
             }
 
-            playerConfigService.updatePlayerConfig(playerRef, cfg -> {
-                for (HudComponent componentOfGroup : componentsByGroup) {
-                    componentOfGroup.setHidden(cfg.getHudComponents(), hidden);
+            HudComponentRegistry.Group group = HudComponentRegistry.findGroup(target);
+            if (group != null) {
+                List<HudComponent> componentsByGroup = HudComponentRegistry.entriesOf(group);
+                if (componentsByGroup.isEmpty()) {
+                    context.sendMessage(Message.raw("HUD group is empty.").color(ERROR_COLOR));
+                    return;
                 }
-            });
-            hudRuntimeService.onPlayerConfigChanged(playerRef);
 
-            context.sendMessage(Message.join(
-                    Message.raw("HUD group ").color(INFO_COLOR),
-                    Message.raw(group.key).color(SUCCESS_COLOR),
-                    Message.raw(hidden ? " hidden." : " shown.").color(INFO_COLOR)
-            ));
-            return;
+                final boolean[] nextHiddenRef = new boolean[1];
+
+                playerConfigService.updatePlayerConfig(playerRef, cfg -> {
+                    boolean nextHidden = !componentsByGroup.get(0).isHidden(cfg.getHudComponents());
+                    for (HudComponent componentOfGroup : componentsByGroup) {
+                        componentOfGroup.setHidden(cfg.getHudComponents(), nextHidden);
+                    }
+                    nextHiddenRef[0] = nextHidden;
+                });
+                hudRuntimeService.onPlayerConfigChanged(playerRef);
+
+                context.sendMessage(Message.join(
+                        Message.raw("HUD group ").color(INFO_COLOR),
+                        Message.raw(group.key).color(SUCCESS_COLOR),
+                        Message.raw(nextHiddenRef[0] ? " hidden." : " shown.").color(INFO_COLOR)
+                ));
+                return;
+            }
+
+            context.sendMessage(Message.raw("Unknown HUD component or group.").color(ERROR_COLOR));
+        }
+    }
+
+    private static final class ToggleExplicitVariant extends AbstractPlayerCommand {
+
+        private final PlayerConfigService playerConfigService;
+        private final HudRuntimeService hudRuntimeService;
+        private final RequiredArg<String> targetArg;
+        private final RequiredArg<String> stateArg;
+
+        ToggleExplicitVariant(
+                PlayerConfigService playerConfigService,
+                HudRuntimeService hudRuntimeService
+        ) {
+            super("Show or hide HUD component or group");
+            this.playerConfigService = playerConfigService;
+            this.hudRuntimeService = hudRuntimeService;
+
+            this.targetArg = withRequiredArg(
+                    "target",
+                    "HUD component or group",
+                    ArgTypes.STRING
+            ).addValidator(CommandValidators.componentOrGroup());
+
+            this.stateArg = withRequiredArg(
+                    "state",
+                    "Visibility state " + String.join("/", VISIBILITY_STATES),
+                    ArgTypes.STRING
+            ).addValidator(CommandValidators.validateArguments(VISIBILITY_STATES, ERROR_MESSAGE));
         }
 
-        context.sendMessage(Message.raw("Unknown HUD component or group.").color(ERROR_COLOR));
+        @Override
+        protected boolean canGeneratePermission() {
+            return false;
+        }
+
+        @Override
+        protected void execute(
+                @Nonnull CommandContext context,
+                @Nonnull Store<EntityStore> store,
+                @Nonnull Ref<EntityStore> ref,
+                @Nonnull PlayerRef playerRef,
+                @Nonnull World world
+        ) {
+            String target = targetArg.get(context);
+            String state = CommandValidators.normalize(stateArg.get(context));
+
+            boolean hidden = HIDE_STATE.equals(state);
+
+            HudComponent component = HudComponentRegistry.find(target);
+            if (component != null) {
+                playerConfigService.updatePlayerConfig(playerRef, cfg ->
+                        component.setHidden(cfg.getHudComponents(), hidden)
+                );
+                hudRuntimeService.onPlayerConfigChanged(playerRef);
+
+                context.sendMessage(Message.join(
+                        Message.raw("HUD component ").color(INFO_COLOR),
+                        Message.raw(component.key()).color(SUCCESS_COLOR),
+                        Message.raw(hidden ? " hidden." : " shown.").color(INFO_COLOR)
+                ));
+                return;
+            }
+
+            HudComponentRegistry.Group group = HudComponentRegistry.findGroup(target);
+            if (group != null) {
+                List<HudComponent> componentsByGroup = HudComponentRegistry.entriesOf(group);
+                if (componentsByGroup.isEmpty()) {
+                    context.sendMessage(Message.raw("HUD group is empty.").color(ERROR_COLOR));
+                    return;
+                }
+
+                playerConfigService.updatePlayerConfig(playerRef, cfg -> {
+                    for (HudComponent componentOfGroup : componentsByGroup) {
+                        componentOfGroup.setHidden(cfg.getHudComponents(), hidden);
+                    }
+                });
+                hudRuntimeService.onPlayerConfigChanged(playerRef);
+
+                context.sendMessage(Message.join(
+                        Message.raw("HUD group ").color(INFO_COLOR),
+                        Message.raw(group.key).color(SUCCESS_COLOR),
+                        Message.raw(hidden ? " hidden." : " shown.").color(INFO_COLOR)
+                ));
+                return;
+            }
+
+            context.sendMessage(Message.raw("Unknown HUD component or group.").color(ERROR_COLOR));
+        }
     }
 }
