@@ -118,7 +118,7 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 | `toggle`  | `<group>` `<state>`                | Hides/Shows all components in a group                       | /ihud toggle ui hide                    |
 | `rules`   | `<component>` list                 | List rules from a component                                 | /ihud rules health list                 |
 | `rules`   | `<component>` clear                | Clear rules from a component                                | /ihud rules health clear                |
-| `rules`   | `<component>` add/remove `<rule>`  | Add or remove rules to/from component                       | /ihud rules health add  HEALTH_CRITICAL |
+| `rules`   | `<component>` add/remove `<rule>`  | Add or remove rules to/from component                       | /ihud rules health add  HEALTH_NOT_FULL |
 | `rules`   | `<component>` threshold `<value>`  | Set the threshold from which the bar will be visible        | /ihud rules health threshold 75         |
 | `profile` | `<profile>`                        | Apply quick IHud configuration based on different profiles  | /ihud profile immersive                 |
 
@@ -462,13 +462,15 @@ src/main/java/com/tom/immersivehudplugin
 ImmersiveHudPlugin.java
 
 commands/
-   CommandCollection.java
+   IHudCommands.java
    ConfigCmd.java
    ProfileCmd.java
    RulesCmd.java
    StatusCmd.java
    ToggleCmd.java
-   
+   validation/
+      CommandValidators.java
+      PredicateValidator.java   
 config/
    ConfigJsonMapper.java
    ConfigSchemaValidator.java
@@ -489,6 +491,7 @@ hud/
       HudComponentRegistry.java
    trigger/
       HudBarState.java
+      HudRuleSupport.java
       HudTrigger.java
       HudTriggerContext.java
       
@@ -497,16 +500,21 @@ profiles/
    ProfilePresets.java
    
 runtime/
+   DynamicHudCache.java
    HudRuntimeService.java
    HudTickProcessor.java
    HudTimers.java
+   PlayerHeldItemState.java
    PlayerHudState.java
    context/
-      HudContextBuilder.java
+      HudStateUpdater.java
+      HudTriggerContextFactory.java
       PlayerTickContext.java
+      PLayerTickContextFactory.java
    signal/
       HeldItemSignalTracker.java
       HeldItemState.java
+      HudSignalPipeline.java
       MovementSignalTracker.java
       ReticleSignalTracker.java
    visibility/
