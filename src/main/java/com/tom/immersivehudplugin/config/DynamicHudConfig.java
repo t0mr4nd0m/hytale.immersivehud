@@ -83,6 +83,14 @@ public final class DynamicHudConfig {
         setByKey("oxygen", value);
     }
 
+    public DynamicHudRuleConfig getStatusIcons() {
+        return getByKey("statusicons");
+    }
+
+    public void setStatusIcons(@Nullable DynamicHudRuleConfig value) {
+        setByKey("statusicons", value);
+    }
+
     @Nonnull
     public DynamicHudRuleConfig getByKey(@Nullable String key) {
         String normalized = normalizeKey(key);
@@ -161,9 +169,5 @@ public final class DynamicHudConfig {
                 .map(HudComponent::key)
                 .map(HudComponentRegistry::normalize)
                 .collect(Collectors.toSet());
-    }
-
-    public boolean hasRules(@Nullable String key) {
-        return !getByKey(key).getRules().isEmpty();
     }
 }
