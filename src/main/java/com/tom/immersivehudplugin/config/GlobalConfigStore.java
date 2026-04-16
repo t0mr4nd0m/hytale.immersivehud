@@ -12,7 +12,7 @@ public final class GlobalConfigStore {
     private final ConfigSupport configSupport;
     private final Path configPath;
 
-    private com.tom.immersivehudplugin.config.GlobalConfig globalConfig = new com.tom.immersivehudplugin.config.GlobalConfig();
+    private GlobalConfig globalConfig = new GlobalConfig();
 
     public GlobalConfigStore(
             ImmersiveHudPlugin plugin,
@@ -29,7 +29,7 @@ public final class GlobalConfigStore {
 
     public void load() {
 
-        ConfigSupport.LoadResult<com.tom.immersivehudplugin.config.GlobalConfig> result = configSupport.loadOrCreate(
+        ConfigSupport.LoadResult<GlobalConfig> result = configSupport.loadOrCreate(
                 configPath,
                 this::createDefaultConfig,
                 ConfigSchemaValidator::isValidGlobalConfig,
@@ -59,14 +59,14 @@ public final class GlobalConfigStore {
         }
     }
 
-    private com.tom.immersivehudplugin.config.GlobalConfig createDefaultConfig() {
-        com.tom.immersivehudplugin.config.GlobalConfig cfg = new com.tom.immersivehudplugin.config.GlobalConfig();
+    private GlobalConfig createDefaultConfig() {
+        com.tom.immersivehudplugin.config.GlobalConfig cfg = new GlobalConfig();
         migrateIfNeeded(cfg);
         cfg.sanitize();
         return cfg;
     }
 
-    private boolean migrateIfNeeded(com.tom.immersivehudplugin.config.GlobalConfig cfg) {
+    private boolean migrateIfNeeded(GlobalConfig cfg) {
         boolean changed = false;
 
         String pluginVersion = plugin.getPluginVersion();
