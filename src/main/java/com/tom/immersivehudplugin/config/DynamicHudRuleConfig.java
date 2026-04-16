@@ -175,4 +175,14 @@ public final class DynamicHudRuleConfig {
     public boolean hasActiveThresholdRule() {
         return getRules().stream().anyMatch(rule -> rule.source() == HudTrigger.Source.HUD_BAR);
     }
+
+    public boolean hasRules() {
+        return !getRules().isEmpty();
+    }
+
+    public static DynamicHudRuleConfig empty() {
+        return EMPTY;
+    }
+
+    private static final DynamicHudRuleConfig EMPTY = new DynamicHudRuleConfig();
 }
