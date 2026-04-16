@@ -1,11 +1,14 @@
 package com.tom.immersivehudplugin.hud.component;
 
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
+import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.AmmoIndicator;
 import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.BlockVariantSelector;
@@ -33,22 +36,19 @@ import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.Status
 import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.UtilitySlotSelector;
 
 final class HudComponentCatalog {
-
-    private HudComponentCatalog() {}
+    private HudComponentCatalog() {
+    }
 
     static List<HudComponent> createAll() {
-
         return List.of(
-                new HudComponent(
-                        "health", "Health",
+                dynamicComponent(
+                        "health",
+                        "Health",
                         HudComponentRegistry.Group.BARS,
                         Health,
-                        "HideHealth",
-                        "Health",
                         HudComponentsConfig::isHideHealthHud,
                         HudComponentsConfig::setHideHealthHud,
                         DynamicHudConfig::getHealth,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.HEALTH_NOT_FULL
@@ -56,16 +56,14 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.HEALTH_NOT_FULL),
                         100f
                 ),
-                new HudComponent(
-                        "stamina", "Stamina",
+                dynamicComponent(
+                        "stamina",
+                        "Stamina",
                         HudComponentRegistry.Group.BARS,
                         Stamina,
-                        "HideStamina",
-                        "Stamina",
                         HudComponentsConfig::isHideStaminaHud,
                         HudComponentsConfig::setHideStaminaHud,
                         DynamicHudConfig::getStamina,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.STAMINA_NOT_FULL
@@ -73,16 +71,14 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.STAMINA_NOT_FULL),
                         100f
                 ),
-                new HudComponent(
-                        "mana", "Mana",
+                dynamicComponent(
+                        "mana",
+                        "Mana",
                         HudComponentRegistry.Group.BARS,
                         Mana,
-                        "HideMana",
-                        "Mana",
                         HudComponentsConfig::isHideManaHud,
                         HudComponentsConfig::setHideManaHud,
                         DynamicHudConfig::getMana,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.MANA_NOT_FULL
@@ -90,16 +86,14 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.MANA_NOT_FULL),
                         100f
                 ),
-                new HudComponent(
-                        "oxygen", "Oxygen",
+                dynamicComponent(
+                        "oxygen",
+                        "Oxygen",
                         HudComponentRegistry.Group.BARS,
                         Oxygen,
-                        "HideOxygen",
-                        "Oxygen",
                         HudComponentsConfig::isHideOxygenHud,
                         HudComponentsConfig::setHideOxygenHud,
                         DynamicHudConfig::getOxygen,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.OXYGEN_NOT_FULL
@@ -107,16 +101,14 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.OXYGEN_NOT_FULL),
                         100f
                 ),
-                new HudComponent(
-                        "compass", "Compass",
+                dynamicComponent(
+                        "compass",
+                        "Compass",
                         HudComponentRegistry.Group.CORE,
                         Compass,
-                        "HideCompass",
-                        "Compass",
                         HudComponentsConfig::isHideCompassHud,
                         HudComponentsConfig::setHideCompassHud,
                         DynamicHudConfig::getCompass,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.PLAYER_MOVING,
@@ -141,16 +133,14 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.PLAYER_MOVING),
                         null
                 ),
-                new HudComponent(
-                        "hotbar", "Hotbar",
+                dynamicComponent(
+                        "hotbar",
+                        "Hotbar",
                         HudComponentRegistry.Group.CORE,
                         Hotbar,
-                        "HideHotbar",
-                        "Hotbar",
                         HudComponentsConfig::isHideHotbarHud,
                         HudComponentsConfig::setHideHotbarHud,
                         DynamicHudConfig::getHotbar,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.CONSUMABLE_USE,
@@ -160,16 +150,14 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.HOTBAR_INPUT),
                         null
                 ),
-                new HudComponent(
-                        "reticle", "Reticle",
+                dynamicComponent(
+                        "reticle",
+                        "Reticle",
                         HudComponentRegistry.Group.CORE,
                         Reticle,
-                        "HideReticle",
-                        "Reticle",
                         HudComponentsConfig::isHideReticleHud,
                         HudComponentsConfig::setHideReticleHud,
                         DynamicHudConfig::getReticle,
-                        true,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.CHARGING_WEAPON,
@@ -189,244 +177,213 @@ final class HudComponentCatalog {
                         ),
                         null
                 ),
-                new HudComponent(
-                        "inputbindings", "Input Bindings",
-                        HudComponentRegistry.Group.UI,
-                        InputBindings,
-                        "HideInputBindings",
-                        null,
-                        HudComponentsConfig::isHideInputBindingsHud,
-                        HudComponentsConfig::setHideInputBindingsHud,
-                        null,
-                        true,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
-                ),
-                new HudComponent(
-                        "notifications", "Notifications",
-                        HudComponentRegistry.Group.UI,
-                        Notifications,
-                        "HideNotifications",
-                        null,
-                        HudComponentsConfig::isHideNotificationsHud,
-                        HudComponentsConfig::setHideNotificationsHud,
-                        null,
-                        true,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
-                ),
-                new HudComponent(
-                        "statusicons", "Status Icons",
+                dynamicComponent(
+                        "statusicons",
+                        "Status Icons",
                         HudComponentRegistry.Group.UI,
                         StatusIcons,
-                        "HideStatusIcons",
-                        null,
                         HudComponentsConfig::isHideStatusIconsHud,
                         HudComponentsConfig::setHideStatusIconsHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
+                        DynamicHudConfig::getStatusIcons,
+                        EnumSet.of(HudTrigger.HOTBAR_INPUT),
+                        EnumSet.of(HudTrigger.HOTBAR_INPUT),
                         null
                 ),
-                new HudComponent(
-                        "speedometer", "Speedometer",
+                staticComponent(
+                        "inputbindings",
+                        "Input Bindings",
                         HudComponentRegistry.Group.UI,
-                        Speedometer,
-                        "HideSpeedometer",
-                        null,
-                        HudComponentsConfig::isHideSpeedometerHud,
-                        HudComponentsConfig::setHideSpeedometerHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        InputBindings,
+                        HudComponentsConfig::isHideInputBindingsHud,
+                        HudComponentsConfig::setHideInputBindingsHud,
+                        true
                 ),
-                new HudComponent(
-                        "ammo", "Ammo Indicator",
+                staticComponent(
+                        "ammo",
+                        "Ammo Indicator",
                         HudComponentRegistry.Group.UI,
                         AmmoIndicator,
-                        "HideAmmoIndicator",
-                        null,
                         HudComponentsConfig::isHideAmmoIndicatorHud,
                         HudComponentsConfig::setHideAmmoIndicatorHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "utilityslotselector", "Utility Slot Selector",
+                staticComponent(
+                        "notifications",
+                        "Notifications",
+                        HudComponentRegistry.Group.UI,
+                        Notifications,
+                        HudComponentsConfig::isHideNotificationsHud,
+                        HudComponentsConfig::setHideNotificationsHud,
+                        true
+                ),
+                staticComponent(
+                        "speedometer",
+                        "Speedometer",
+                        HudComponentRegistry.Group.UI,
+                        Speedometer,
+                        HudComponentsConfig::isHideSpeedometerHud,
+                        HudComponentsConfig::setHideSpeedometerHud,
+                        false
+                ),
+                staticComponent(
+                        "utilityslotselector",
+                        "Utility Slot Selector",
                         HudComponentRegistry.Group.UI,
                         UtilitySlotSelector,
-                        "HideUtilitySlotSelector",
-                        null,
                         HudComponentsConfig::isHideUtilitySlotSelectorHud,
                         HudComponentsConfig::setHideUtilitySlotSelectorHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "chat", "Chat",
+                staticComponent(
+                        "chat",
+                        "Chat",
                         HudComponentRegistry.Group.SOCIAL,
                         Chat,
-                        "HideChat",
-                        null,
                         HudComponentsConfig::isHideChatHud,
                         HudComponentsConfig::setHideChatHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "requests", "Requests",
+                staticComponent(
+                        "requests",
+                        "Requests",
                         HudComponentRegistry.Group.SOCIAL,
                         Requests,
-                        "HideRequests",
-                        null,
                         HudComponentsConfig::isHideRequestsHud,
                         HudComponentsConfig::setHideRequestsHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "killfeed", "Kill Feed",
+                staticComponent(
+                        "killfeed",
+                        "Kill Feed",
                         HudComponentRegistry.Group.SOCIAL,
                         KillFeed,
-                        "HideKillFeed",
-                        null,
                         HudComponentsConfig::isHideKillFeedHud,
                         HudComponentsConfig::setHideKillFeedHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "playerlist", "Player List",
+                staticComponent(
+                        "playerlist",
+                        "Player List",
                         HudComponentRegistry.Group.SOCIAL,
                         PlayerList,
-                        "HidePlayerList",
-                        null,
                         HudComponentsConfig::isHidePlayerListHud,
                         HudComponentsConfig::setHidePlayerListHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "eventtitle", "Event Title",
+                staticComponent(
+                        "eventtitle",
+                        "Event Title",
                         HudComponentRegistry.Group.PANELS,
                         EventTitle,
-                        "HideEventTitle",
-                        null,
                         HudComponentsConfig::isHideEventTitleHud,
                         HudComponentsConfig::setHideEventTitleHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "objectivepanel", "Objective Panel",
+                staticComponent(
+                        "objectivepanel",
+                        "Objective Panel",
                         HudComponentRegistry.Group.PANELS,
                         ObjectivePanel,
-                        "HideObjectivePanel",
-                        null,
                         HudComponentsConfig::isHideObjectivePanelHud,
                         HudComponentsConfig::setHideObjectivePanelHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "portalpanel", "Portal Panel",
+                staticComponent(
+                        "portalpanel",
+                        "Portal Panel",
                         HudComponentRegistry.Group.PANELS,
                         PortalPanel,
-                        "HidePortalPanel",
-                        null,
                         HudComponentsConfig::isHidePortalPanelHud,
                         HudComponentsConfig::setHidePortalPanelHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "sleep", "Sleep",
+                staticComponent(
+                        "sleep",
+                        "Sleep",
                         HudComponentRegistry.Group.PANELS,
                         Sleep,
-                        "HideSleep",
-                        null,
                         HudComponentsConfig::isHideSleepHud,
                         HudComponentsConfig::setHideSleepHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "blockvariantselector", "Block Variant Selector",
+                staticComponent(
+                        "blockvariantselector",
+                        "Block Variant Selector",
                         HudComponentRegistry.Group.BUILDER,
                         BlockVariantSelector,
-                        "HideBlockVariantSelector",
-                        null,
                         HudComponentsConfig::isHideBlockVariantSelectorHud,
                         HudComponentsConfig::setHideBlockVariantSelectorHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "buildertoolslegend", "Builder Tools Legend",
+                staticComponent(
+                        "buildertoolslegend",
+                        "Builder Tools Legend",
                         HudComponentRegistry.Group.BUILDER,
                         BuilderToolsLegend,
-                        "HideBuilderToolsLegend",
-                        null,
                         HudComponentsConfig::isHideBuilderToolsLegendHud,
                         HudComponentsConfig::setHideBuilderToolsLegendHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 ),
-                new HudComponent(
-                        "buildertoolsmaterialslotselector", "Builder Tools Material Slot Selector",
+                staticComponent(
+                        "buildertoolsmaterialslotselector",
+                        "Builder Tools Material Slot Selector",
                         HudComponentRegistry.Group.BUILDER,
                         BuilderToolsMaterialSlotSelector,
-                        "HideBuilderToolsMaterialSlotSelector",
-                        null,
                         HudComponentsConfig::isHideBuilderToolsMaterialSlotSelectorHud,
                         HudComponentsConfig::setHideBuilderToolsMaterialSlotSelectorHud,
-                        null,
-                        false,
-                        EnumSet.noneOf(HudTrigger.class),
-                        EnumSet.noneOf(HudTrigger.class),
-                        null
+                        false
                 )
+        );
+    }
+
+    private static HudComponent dynamicComponent(
+            String key,
+            String label,
+            HudComponentRegistry.Group group,
+            com.hypixel.hytale.protocol.packets.interface_.HudComponent hudComponent,
+            HudComponentRegistry.BoolGetter<HudComponentsConfig> staticGetter,
+            HudComponentRegistry.BoolSetter<HudComponentsConfig> staticSetter,
+            Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
+            EnumSet<HudTrigger> allowedRules,
+            EnumSet<HudTrigger> defaultRules,
+            @Nullable Float defaultThreshold
+    ) {
+        return new HudComponent(
+                key,
+                label,
+                group,
+                hudComponent,
+                staticGetter,
+                staticSetter,
+                dynamicGetter,
+                true,
+                allowedRules,
+                defaultRules,
+                defaultThreshold
+        );
+    }
+
+    private static HudComponent staticComponent(
+            String key,
+            String label,
+            HudComponentRegistry.Group group,
+            com.hypixel.hytale.protocol.packets.interface_.HudComponent hudComponent,
+            HudComponentRegistry.BoolGetter<HudComponentsConfig> staticGetter,
+            HudComponentRegistry.BoolSetter<HudComponentsConfig> staticSetter,
+            boolean defaultHidden
+    ) {
+        return new HudComponent(
+                key,
+                label,
+                group,
+                hudComponent,
+                staticGetter,
+                staticSetter,
+                null,
+                defaultHidden,
+                EnumSet.noneOf(HudTrigger.class),
+                EnumSet.noneOf(HudTrigger.class),
+                null
         );
     }
 }

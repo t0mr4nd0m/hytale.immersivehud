@@ -146,14 +146,11 @@ public final class HudComponentRegistry {
         DynamicHudConfig cfg = new DynamicHudConfig();
 
         for (HudComponent entry : dynamicList()) {
-
             DynamicHudRuleConfig ruleCfg = entry.getDynamicRuleConfig(cfg);
+            ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
 
-            if (ruleCfg != null) {
-                ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
-                if (entry.supportsThreshold()) {
-                    ruleCfg.setThreshold(entry.defaultThreshold());
-                }
+            if (entry.supportsThreshold()) {
+                ruleCfg.setThreshold(entry.defaultThreshold());
             }
         }
 

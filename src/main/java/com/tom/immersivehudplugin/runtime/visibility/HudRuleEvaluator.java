@@ -23,26 +23,26 @@ public final class HudRuleEvaluator {
     ) {
         state.clearDynamicHidden();
 
-        for (HudComponent entry : DYNAMIC_ENTRIES) {
-            if (!entry.isHidden(hudConfig)) {
+        for (HudComponent component : DYNAMIC_ENTRIES) {
+            if (!component.isHidden(hudConfig)) {
                 continue;
             }
 
-            DynamicHudRuleConfig ruleConfig = entry.getDynamicRuleConfig(dynamicConfig);
-            if (!hasActiveRules(ruleConfig)) {
+            if (!component.hasActiveRules(dynamicConfig)) {
                 // Components without active rules are treated as static and handled
                 // by HudVisibilityCoordinator (not here)
                 continue;
             }
 
+            DynamicHudRuleConfig ruleConfig = component.getDynamicRuleConfig(dynamicConfig);
+            if  (ruleConfig == null) {
+                continue;
+            }
+
             if (!shouldShowDynamic(ruleConfig, triggersContext)) {
-                state.addDynamicHidden(entry.hudComponent());
+                state.addDynamicHidden(component.hudComponent());
             }
         }
-    }
-
-    private boolean hasActiveRules(DynamicHudRuleConfig ruleConfig) {
-        return ruleConfig != null && !ruleConfig.getRules().isEmpty();
     }
 
     private boolean shouldShowDynamic(

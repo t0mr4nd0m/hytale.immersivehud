@@ -9,39 +9,39 @@ import java.util.stream.Collectors;
 
 public enum HudTrigger {
 
-    HOTBAR_INPUT            (Category.INTERACTION, Source.SIGNAL),
-    CONSUMABLE_USE          (Category.INTERACTION, Source.SIGNAL),
-    TARGET_ENTITY           (Category.INTERACTION, Source.SIGNAL),
-    INTERACTABLE_BLOCK      (Category.INTERACTION, Source.SIGNAL),
+    HOTBAR_INPUT            (Category.INTERACTION, Source.SIGNAL, false),
+    CONSUMABLE_USE          (Category.INTERACTION, Source.SIGNAL, false),
+    TARGET_ENTITY           (Category.INTERACTION, Source.SIGNAL, false),
+    INTERACTABLE_BLOCK      (Category.INTERACTION, Source.SIGNAL, false),
 
-    PLAYER_MOVING           (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_WALKING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_RUNNING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_SPRINTING        (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_MOUNTING         (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_SWIMMING         (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_FLYING           (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_GLIDING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_JUMPING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_CROUCHING        (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_CLIMBING         (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_FALLING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_ROLLING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_IDLE             (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_SITTING          (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_SLEEPING         (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_IN_FLUID         (Category.MOVEMENT, Source.SIGNAL),
-    PLAYER_ON_GROUND        (Category.MOVEMENT, Source.SIGNAL),
+    PLAYER_MOVING           (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_WALKING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_RUNNING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_SPRINTING        (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_MOUNTING         (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_SWIMMING         (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_FLYING           (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_GLIDING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_JUMPING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_CROUCHING        (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_CLIMBING         (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_FALLING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_ROLLING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_IDLE             (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_SITTING          (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_SLEEPING         (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_IN_FLUID         (Category.MOVEMENT, Source.SIGNAL, false),
+    PLAYER_ON_GROUND        (Category.MOVEMENT, Source.SIGNAL, false),
 
-    CHARGING_WEAPON         (Category.COMBAT, Source.SIGNAL),
-    HOLDING_RANGED_WEAPON   (Category.COMBAT, Source.SIGNAL),
-    HOLDING_MELEE_WEAPON    (Category.COMBAT, Source.SIGNAL),
-    BLOCKING_ATTACK         (Category.COMBAT, Source.SIGNAL),
+    CHARGING_WEAPON         (Category.COMBAT, Source.SIGNAL, false),
+    HOLDING_RANGED_WEAPON   (Category.COMBAT, Source.SIGNAL, false),
+    HOLDING_MELEE_WEAPON    (Category.COMBAT, Source.SIGNAL, false),
+    BLOCKING_ATTACK         (Category.COMBAT, Source.SIGNAL, false),
 
-    HEALTH_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR),
-    STAMINA_NOT_FULL        (Category.HUD_BAR , Source.HUD_BAR),
-    MANA_NOT_FULL           (Category.HUD_BAR , Source.HUD_BAR),
-    OXYGEN_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR);
+    HEALTH_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR, true),
+    STAMINA_NOT_FULL        (Category.HUD_BAR , Source.HUD_BAR, true),
+    MANA_NOT_FULL           (Category.HUD_BAR , Source.HUD_BAR, true),
+    OXYGEN_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR, true);
 
     public enum Category {
         COMBAT      ("COMBAT"),
@@ -67,10 +67,12 @@ public enum HudTrigger {
 
     private final Category category;
     private final Source source;
+    private final boolean usesThreshold;
 
-    HudTrigger(Category category, Source source) {
+    HudTrigger(Category category, Source source, Boolean usesThreshold) {
         this.category = category;
         this.source = source;
+        this.usesThreshold = usesThreshold;
     }
 
     public Category category() {
@@ -79,6 +81,10 @@ public enum HudTrigger {
 
     public Source source() {
         return source;
+    }
+
+    public boolean usesThreshold() {
+        return usesThreshold;
     }
 
     public boolean matches(DynamicHudRuleConfig ruleConfig, HudTriggerContext ctx) {

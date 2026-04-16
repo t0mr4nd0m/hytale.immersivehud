@@ -22,12 +22,12 @@ public final class HudVisibilityCoordinator {
             HudComponentsConfig hudConfig,
             DynamicHudConfig dynamicConfig
     ) {
-        for (HudComponent entry : DYNAMIC_ENTRIES) {
-            if (!entry.isHidden(hudConfig)) {
+        for (HudComponent component : DYNAMIC_ENTRIES) {
+            if (!component.isHidden(hudConfig)) {
                 continue;
             }
 
-            if (hasActiveRules(entry, dynamicConfig)) {
+            if (component.hasActiveRules(dynamicConfig)) {
                 return true;
             }
         }
@@ -59,18 +59,18 @@ public final class HudVisibilityCoordinator {
     ) {
         state.clearStaticHidden();
 
-        for (HudComponent entry : ALL_ENTRIES) {
-            if (!entry.isHidden(hudConfig)) {
+        for (HudComponent component : ALL_ENTRIES) {
+            if (!component.isHidden(hudConfig)) {
                 continue;
             }
 
-            if (!entry.supportsDynamicRules()) {
-                state.addStaticHidden(entry.hudComponent());
+            if (!component.supportsDynamicRules()) {
+                state.addStaticHidden(component.hudComponent());
                 continue;
             }
 
-            if (!hasActiveRules(entry, dynamicConfig)) {
-                state.addStaticHidden(entry.hudComponent());
+            if (!component.hasActiveRules(dynamicConfig)) {
+                state.addStaticHidden(component.hudComponent());
             }
         }
 
@@ -89,9 +89,5 @@ public final class HudVisibilityCoordinator {
 
     public void applyHudDelta(PlayerTickContext tickContext, PlayerHudState state) {
         hudDeltaApplier.apply(tickContext, state);
-    }
-
-    private boolean hasActiveRules(HudComponent entry, DynamicHudConfig dynamicConfig) {
-        return dynamicConfig.hasRules(entry.key());
     }
 }

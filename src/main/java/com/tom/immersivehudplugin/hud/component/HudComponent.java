@@ -14,8 +14,6 @@ public record HudComponent(
         String label,
         HudComponentRegistry.Group group,
         com.hypixel.hytale.protocol.packets.interface_.HudComponent hudComponent,
-        String staticConfigKey,
-        @Nullable String dynamicConfigKey,
         HudComponentRegistry.BoolGetter<HudComponentsConfig> staticGetter,
         HudComponentRegistry.BoolSetter<HudComponentsConfig> staticSetter,
         @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
@@ -39,42 +37,51 @@ public record HudComponent(
             );
         }
 
-        boolean supportsDynamic = dynamicGetter != null;
-        boolean hasDynamicKey = dynamicConfigKey != null;
-        if (supportsDynamic != hasDynamicKey) {
-            throw new IllegalArgumentException(
-                    "dynamicGetter and dynamicConfigKey must either both be set or both be null for component: " + key
-            );
-        }
-
         if (defaultThreshold != null && (defaultThreshold < 0f || defaultThreshold > 100f)) {
             throw new IllegalArgumentException(
                     "defaultThreshold must be between 0 and 100 for component: " + key
             );
         }
 
-        boolean supportsThreshold = allowedRules.stream()
-                .anyMatch(rule -> rule.source() == HudTrigger.Source.HUD_BAR);
+        long thresholdRuleCount = allowedRules.stream()
+                .filter(HudTrigger::usesThreshold)
+                .count();
+
+        if (thresholdRuleCount > 1) {
+            throw new IllegalArgumentException(
+                    "Components cannot define more than one threshold rule: " + key
+            );
+        }
+
+        boolean supportsThreshold = thresholdRuleCount == 1;
 
         if (supportsThreshold && defaultThreshold == null) {
             throw new IllegalArgumentException(
-                    "Components with HUD_BAR rules must define defaultThreshold: " + key
+                    "Components with threshold rules must define defaultThreshold: " + key
             );
         }
 
         if (!supportsThreshold && defaultThreshold != null) {
             throw new IllegalArgumentException(
-                    "defaultThreshold is only valid for components with HUD_BAR rules: " + key
+                    "defaultThreshold is only valid for components with threshold rules: " + key
             );
         }
     }
 
     public boolean supportsDynamicRules() {
-        return dynamicGetter != null && dynamicConfigKey != null;
+        return dynamicGetter != null;
     }
 
     public boolean supportsThreshold() {
-        return defaultThreshold != null;
+        return thresholdRule() != null;
+    }
+
+    @Nullable
+    public HudTrigger thresholdRule() {
+        return allowedRules.stream()
+                .filter(HudTrigger::usesThreshold)
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean supportsRule(@Nullable HudTrigger rule) {
@@ -89,8 +96,13 @@ public record HudComponent(
         staticSetter.set(hudConfig, hidden);
     }
 
-    @Nullable
     public DynamicHudRuleConfig getDynamicRuleConfig(DynamicHudConfig dynamicConfig) {
-        return dynamicGetter != null ? dynamicGetter.apply(dynamicConfig) : null;
+        return (dynamicGetter == null)
+                ? DynamicHudRuleConfig.empty()
+                : dynamicGetter.apply(dynamicConfig);
+    }
+
+    public boolean hasActiveRules(DynamicHudConfig cfg) {
+        return getDynamicRuleConfig(cfg).hasRules();
     }
 }
