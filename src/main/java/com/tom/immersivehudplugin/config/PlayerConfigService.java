@@ -25,7 +25,7 @@ public final class PlayerConfigService {
     }
 
     @Nullable
-    public com.tom.immersivehudplugin.config.PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
+    public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
         if (playerRef == null) {
             return null;
         }
@@ -33,8 +33,8 @@ public final class PlayerConfigService {
         return getOrLoadPlayerConfig(playerRef.getUuid());
     }
 
-    public com.tom.immersivehudplugin.config.PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
-        com.tom.immersivehudplugin.config.PlayerConfig cached = playerConfigStore.getCached(uuid);
+    public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
+        PlayerConfig cached = playerConfigStore.getCached(uuid);
         if (cached != null) {
             return cached;
         }
@@ -42,10 +42,15 @@ public final class PlayerConfigService {
         return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
-    public void updatePlayerConfig(PlayerRef playerRef, Consumer<com.tom.immersivehudplugin.config.PlayerConfig> mutator) {
-        com.tom.immersivehudplugin.config.PlayerConfig config = getOrLoadPlayerConfig(playerRef.getUuid());
+    public void updatePlayerConfig(PlayerRef playerRef, Consumer<PlayerConfig> mutator) {
+        UUID uuid = playerRef.getUuid();
+        PlayerConfig config = getOrLoadPlayerConfig(uuid);
+
         mutator.accept(config);
-        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
+
+        playerConfigStore.markDirty(uuid);
+        playerConfigStore.saveAsync(uuid);
+        hudRuntimeService.onPlayerConfigChanged(playerRef);
     }
 
     public void updateHudComponents(PlayerRef playerRef, Consumer<HudComponentsConfig> mutator) {

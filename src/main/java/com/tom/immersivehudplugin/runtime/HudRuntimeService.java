@@ -141,43 +141,17 @@ public final class HudRuntimeService {
             return;
         }
 
+        stateFor(playerRef.getUuid()).markStaticHudDirty();
+    }
+
+    public void onPlayerConfigChanged(@Nullable PlayerRef playerRef) {
+        if (playerRef == null) {
+            return;
+        }
+
         PlayerHudState state = stateFor(playerRef.getUuid());
         state.markStaticHudDirty();
         state.invalidateDynamicHudEnabledCache();
-    }
-
-    public void markPlayerConfigDirty(UUID uuid) {
-        playerConfigStore.markDirty(uuid);
-
-        PlayerHudState state = playerState.get(uuid);
-        if (state != null) {
-            state.invalidateDynamicHudEnabledCache();
-        }
-    }
-
-    @Nullable
-    public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
-        if (playerRef == null) {
-            return null;
-        }
-
-        return getOrLoadPlayerConfig(playerRef.getUuid());
-    }
-
-    public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
-        PlayerConfig cached = playerConfigStore.getCached(uuid);
-        if (cached != null) {
-            return cached;
-        }
-
-        return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
-    }
-
-    public void applyAndSavePlayerConfig(PlayerRef playerRef) {
-        UUID uuid = playerRef.getUuid();
-        markPlayerConfigDirty(uuid);
-        playerConfigStore.saveAsync(uuid);
-        markPlayerStaticHudDirty(playerRef);
     }
 
     private void registerInboundWatcher() {
@@ -209,7 +183,7 @@ public final class HudRuntimeService {
             UUID uuid = event.getPlayer().getUuid();
             int hideDelay = hideDelayMs(getGlobalConfig());
 
-            getOrLoadPlayerConfig(uuid);
+            playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
 
             PlayerHudState state = stateFor(uuid);
             state.reset(hideDelay);
@@ -261,7 +235,7 @@ public final class HudRuntimeService {
 
         long now = nowMs();
         PlayerHudState state = stateFor(uuid);
-        PlayerConfig playerConfig = getOrLoadPlayerConfig(uuid);
+        PlayerConfig playerConfig = getOrLoadPlayerConfigInternal(uuid);
 
         hudTickProcessor.processPlayerTick(
                 resolved.playerRef(),
@@ -289,6 +263,15 @@ public final class HudRuntimeService {
 
     private PlayerHudState stateFor(UUID uuid) {
         return playerState.computeIfAbsent(uuid, ignored -> new PlayerHudState());
+    }
+
+    private PlayerConfig getOrLoadPlayerConfigInternal(UUID uuid) {
+        PlayerConfig cached = playerConfigStore.getCached(uuid);
+        if (cached != null) {
+            return cached;
+        }
+
+        return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
     private GlobalConfig getGlobalConfig() {
@@ -356,5 +339,21 @@ public final class HudRuntimeService {
         }
 
         return new ResolvedPlayerWorld(uuid, playerRef, expectedWorldUuid, world);
+    }
+
+    @Nullable
+    public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
+        if (playerRef == null) {
+            return null;
+        }
+
+        return getOrLoadPlayerConfigInternal(playerRef.getUuid());
+    }
+
+    public void applyAndSavePlayerConfig(PlayerRef playerRef) {
+        UUID uuid = playerRef.getUuid();
+        playerConfigStore.markDirty(uuid);
+        playerConfigStore.saveAsync(uuid);
+        onPlayerConfigChanged(playerRef);
     }
 }
