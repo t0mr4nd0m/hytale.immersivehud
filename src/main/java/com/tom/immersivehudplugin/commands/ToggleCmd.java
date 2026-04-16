@@ -133,7 +133,7 @@ public final class ToggleCmd extends AbstractPlayerCommand {
                 final boolean[] nextHiddenRef = new boolean[1];
 
                 playerConfigService.updatePlayerConfig(playerRef, cfg -> {
-                    boolean nextHidden = !componentsByGroup.get(0).isHidden(cfg.getHudComponents());
+                    boolean nextHidden = !componentsByGroup.getFirst().isHidden(cfg.getHudComponents());
                     for (HudComponent componentOfGroup : componentsByGroup) {
                         componentOfGroup.setHidden(cfg.getHudComponents(), nextHidden);
                     }
