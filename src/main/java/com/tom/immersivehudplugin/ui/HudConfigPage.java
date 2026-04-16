@@ -155,21 +155,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 sendUpdate(commands, new UIEventBuilder(), false);
             }
 
-            case "DYN_REVEAL_MORE" -> {
-                String componentKey = data.getComponent();
-                HudComponent entry = HudComponentRegistry.find(componentKey);
-
-                if (entry != null) {
-                    session.revealMoreTriggers(componentKey);
-
-                    UICommandBuilder commands = new UICommandBuilder();
-                    UIEventBuilder events = new UIEventBuilder();
-
-                    dynamicRulesRenderer.updateDynamicExtraTriggers(commands, events, session, entry);
-                    sendUpdate(commands, events, false);
-                }
-            }
-
             case "APPLY" -> {
                 uiService.apply(playerRef);
                 uiService.closePage(ref, store);

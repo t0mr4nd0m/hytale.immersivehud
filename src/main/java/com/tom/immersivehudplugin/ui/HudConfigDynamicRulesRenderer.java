@@ -9,14 +9,12 @@ import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 
 public final class HudConfigDynamicRulesRenderer {
 
     private static final String DYNAMIC_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRulesView.ui";
     private static final String DYNAMIC_SECTION_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRulesSection.ui";
     private static final String DYNAMIC_RULE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRuleRow.ui";
-    private static final String DYNAMIC_MORE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigDynamicRuleMoreRow.ui";
 
     private final HudConfigRenderIndex renderIndex;
 
@@ -59,7 +57,6 @@ public final class HudConfigDynamicRulesRenderer {
 
             renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
             renderDynamicThresholdControls(commands, events, session, entry, componentRoot);
-            renderDynamicExtraTriggers(commands, events, session, entry, componentRoot);
 
             componentIndex++;
         }
@@ -94,21 +91,6 @@ public final class HudConfigDynamicRulesRenderer {
             String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
             commands.set(checkBoxSelector + ".Value", enabled);
         }
-    }
-
-    public void updateDynamicExtraTriggers(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponent entry
-    ) {
-        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) {
-            return;
-        }
-
-        String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
-        renderDynamicExtraTriggers(commands, events, session, entry, componentRoot);
     }
 
     public void updateDynamicThresholdControls(
@@ -150,58 +132,6 @@ public final class HudConfigDynamicRulesRenderer {
 
         for (HudTrigger trigger : session.getBaseRulesInDisplayOrder(entry)) {
             rowIndex = renderDynamicRuleRow(commands, events, session, entry, rulesListSelector, "base", rowIndex, trigger);
-        }
-    }
-
-    private void renderDynamicExtraTriggers(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponent entry,
-            @Nonnull String componentRoot
-    ) {
-        List<HudTrigger> extraRules = session.getExtraRulesInDisplayOrder(entry);
-        boolean revealed = session.isMoreTriggersRevealed(entry.key());
-
-        String extraHostSelector = componentRoot + " #DynamicExtraTriggersList";
-        commands.clear(extraHostSelector);
-
-        if (extraRules.isEmpty()) {
-            return;
-        }
-
-        int rowIndex = 0;
-
-        if (!revealed) {
-            commands.append(extraHostSelector, DYNAMIC_MORE_ROW_UI);
-
-            String rowRootSelector = extraHostSelector + "[" + rowIndex + "]";
-            String buttonSelector = rowRootSelector + " #DynamicMoreTriggersButton";
-            String labelSelector = rowRootSelector + " #DynamicMoreTriggersLabel";
-
-            commands.set(labelSelector + ".TextSpans", Message.raw("MORE TRIGGERS"));
-
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    buttonSelector,
-                    HudConfigPage.PageEventData.action("DYN_REVEAL_MORE")
-                            .append("Component", entry.key()),
-                    false
-            );
-            return;
-        }
-
-        for (HudTrigger trigger : extraRules) {
-            rowIndex = renderDynamicRuleRow(
-                    commands,
-                    events,
-                    session,
-                    entry,
-                    extraHostSelector,
-                    "extra",
-                    rowIndex,
-                    trigger
-            );
         }
     }
 
