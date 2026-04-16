@@ -30,6 +30,8 @@ public final class HudRuleEvaluator {
 
             DynamicHudRuleConfig ruleConfig = entry.getDynamicRuleConfig(dynamicConfig);
             if (!hasActiveRules(ruleConfig)) {
+                // Components without active rules are treated as static and handled
+                // by HudVisibilityCoordinator (not here)
                 continue;
             }
 

@@ -140,7 +140,7 @@ public final class HudTickProcessor {
 
         if (!state.hasDynamicHudEnabledCache()) {
             state.cacheDynamicHudEnabled(
-                    hudVisibilityCoordinator.hasAnyDynamicHudEnabled(
+                    hudVisibilityCoordinator.hasAnyActiveDynamicRules(
                             evaluation.hudConfig(),
                             evaluation.dynamicConfig()
                     )

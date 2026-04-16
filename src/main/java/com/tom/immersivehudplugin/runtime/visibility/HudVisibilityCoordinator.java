@@ -18,7 +18,7 @@ public final class HudVisibilityCoordinator {
     private final HudRuleEvaluator hudRuleEvaluator = new HudRuleEvaluator();
     private final HudDeltaApplier hudDeltaApplier = new HudDeltaApplier();
 
-    public boolean hasAnyDynamicHudEnabled(
+    public boolean hasAnyActiveDynamicRules(
             HudComponentsConfig hudConfig,
             DynamicHudConfig dynamicConfig
     ) {
