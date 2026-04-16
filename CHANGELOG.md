@@ -1,12 +1,13 @@
 # Changelog
 
-## v1.2.3 - Technical update + redefined StatusIcons as a dynamic component
+## v1.2.3 - Technical update + added StatusIcons to dynamic components
 
 **Code Changes**
 * extensive refactor and code cleaning to avoid duplication, remove dead code, improve logic and readability, etc... 
 
 **New Feature**
 * added StatusIcons to dynamic component catalog, associated to trigger 'HOTBAR_INPUT'. However, doing so, I've found that the component cannot be hide using Hytale API (Am I doing something wrong? Maybe is it a bug from Hytale API?). Further testing and analysis will be required.
+* minor tweaks to **'Immersive'** profile to reduce even more hud visibility.
 
 ## v1.2.2 - Technical update + new trigger BLOCKING_ATTACK
 

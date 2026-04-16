@@ -40,9 +40,6 @@ public final class ProfilePresets {
         HudComponentsConfig hud = cfg.getHudComponents();
         DynamicHudConfig dyn = cfg.getDynamicHud();
 
-        hud.setHideRequestsHud(true);
-        hud.setHideKillFeedHud(true);
-        hud.setHidePlayerListHud(true);
         hud.setHideNotificationsHud(true);
         hud.setHideInputBindingsHud(true);
 
@@ -52,9 +49,8 @@ public final class ProfilePresets {
         dyn.getOxygen().setRules(EnumSet.noneOf(HudTrigger.class));
 
         dyn.getCompass().setRules(EnumSet.of(
-                HudTrigger.PLAYER_RUNNING,
+                HudTrigger.PLAYER_CROUCHING,
                 HudTrigger.PLAYER_MOUNTING,
-                HudTrigger.PLAYER_SWIMMING,
                 HudTrigger.PLAYER_FLYING,
                 HudTrigger.PLAYER_GLIDING
         ));
