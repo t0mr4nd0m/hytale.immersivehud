@@ -40,7 +40,8 @@ public record HudComponent(
         }
 
         boolean supportsDynamic = dynamicGetter != null;
-        if (supportsDynamic != (dynamicConfigKey != null)) {
+        boolean hasDynamicKey = dynamicConfigKey != null;
+        if (supportsDynamic != hasDynamicKey) {
             throw new IllegalArgumentException(
                     "dynamicGetter and dynamicConfigKey must either both be set or both be null for component: " + key
             );
