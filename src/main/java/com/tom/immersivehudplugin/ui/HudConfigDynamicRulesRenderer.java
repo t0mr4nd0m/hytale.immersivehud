@@ -226,7 +226,7 @@ public final class HudConfigDynamicRulesRenderer {
 
         commands.set(
                 labelSelector + ".TextSpans",
-                Message.raw(HudTrigger.prettyName(trigger).toUpperCase())
+                Message.raw(HudTrigger.displayNameUpper(trigger))
         );
         commands.set(checkBoxSelector + ".Value", enabled);
 

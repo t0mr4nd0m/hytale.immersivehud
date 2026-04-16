@@ -116,7 +116,7 @@ public enum HudTrigger {
         }
     }
 
-    public static String prettyName(HudTrigger trigger) {
+    public static String displayNameUpper(HudTrigger trigger) {
         return Arrays.stream(trigger.name().split("_"))
                 .map(String::toUpperCase)
                 .collect(Collectors.joining(" "));
