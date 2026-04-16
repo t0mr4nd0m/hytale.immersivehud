@@ -8,7 +8,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
 import javax.annotation.Nonnull;
@@ -18,15 +18,15 @@ public final class ConfigCmd extends AbstractPlayerCommand {
 
     private static final Color ERROR_COLOR = Color.RED;
 
-    private final HudRuntimeService hudRuntimeService;
+    private final PlayerConfigService playerConfigService;
     private final HudConfigUiService hudConfigUiService;
 
     public ConfigCmd(
-            HudRuntimeService hudRuntimeService,
+            PlayerConfigService playerConfigService,
             HudConfigUiService hudConfigUiService
     ){
         super("config", "Open the ImmersiveHud configuration UI");
-        this.hudRuntimeService = hudRuntimeService;
+        this.playerConfigService = playerConfigService;
         this.hudConfigUiService = hudConfigUiService;
     }
 
@@ -43,7 +43,7 @@ public final class ConfigCmd extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        if (hudRuntimeService.requirePlayerConfig(playerRef) == null) {
+        if (playerConfigService.requirePlayerConfig(playerRef) == null) {
             context.sendMessage(Message.raw("Failed to load your ImmersiveHud configuration.").color(ERROR_COLOR));
             return;
         }

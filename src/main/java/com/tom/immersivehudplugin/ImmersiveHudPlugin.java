@@ -64,8 +64,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private void startRuntimeServices() {
         this.hudRuntimeService = createHudRuntimeService();
-        this.playerConfigService = createHudSettingsService();
-        this.hudConfigUiService = new HudConfigUiService(hudRuntimeService);
+        this.playerConfigService = createPlayerConfigService();
+        this.hudConfigUiService = new HudConfigUiService(playerConfigService);
         hudRuntimeService.start();
     }
 
@@ -84,7 +84,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         );
     }
 
-    private PlayerConfigService createHudSettingsService() {
+    private PlayerConfigService createPlayerConfigService() {
 
         return new PlayerConfigService(
                 playerConfigStore,
@@ -95,7 +95,6 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private void registerCommands() {
         this.getCommandRegistry().registerCommand(new IHudCommands(
-                hudRuntimeService,
                 hudConfigUiService,
                 this::getImmersiveHudGlobalConfig,
                 playerConfigService

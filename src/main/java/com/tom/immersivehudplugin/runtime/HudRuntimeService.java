@@ -340,20 +340,4 @@ public final class HudRuntimeService {
 
         return new ResolvedPlayerWorld(uuid, playerRef, expectedWorldUuid, world);
     }
-
-    @Nullable
-    public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
-        if (playerRef == null) {
-            return null;
-        }
-
-        return getOrLoadPlayerConfigInternal(playerRef.getUuid());
-    }
-
-    public void applyAndSavePlayerConfig(PlayerRef playerRef) {
-        UUID uuid = playerRef.getUuid();
-        playerConfigStore.markDirty(uuid);
-        playerConfigStore.saveAsync(uuid);
-        onPlayerConfigChanged(playerRef);
-    }
 }

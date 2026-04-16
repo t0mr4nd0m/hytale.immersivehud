@@ -7,7 +7,7 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
-import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.config.PlayerConfigService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,14 +17,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class HudConfigUiService {
 
-    private final HudRuntimeService hudRuntimeService;
+    private final PlayerConfigService playerConfigService;
 
     private final Map<UUID, HudConfigUiSession> sessions = new ConcurrentHashMap<>();
 
     public HudConfigUiService(
-            @Nonnull HudRuntimeService hudRuntimeService
+            @Nonnull PlayerConfigService playerConfigService
     ) {
-        this.hudRuntimeService = hudRuntimeService;
+        this.playerConfigService = playerConfigService;
     }
 
     public void open(
@@ -32,7 +32,7 @@ public final class HudConfigUiService {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store
     ) {
-        PlayerConfig playerCfg = hudRuntimeService.requirePlayerConfig(playerRef);
+        PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
         if (playerCfg == null) {
             return;
         }
@@ -57,21 +57,15 @@ public final class HudConfigUiService {
     }
 
     public boolean apply(@Nonnull PlayerRef playerRef) {
-
         HudConfigUiSession session = getSession(playerRef);
         if (session == null) {
             return false;
         }
 
-        PlayerConfig live = hudRuntimeService.requirePlayerConfig(playerRef);
-        if (live == null) {
-            return false;
-        }
-
-        live.setHudComponents(session.getDraftHudComponents().copy());
-        live.setDynamicHud(session.getDraftDynamicHud().copy());
-
-        hudRuntimeService.applyAndSavePlayerConfig(playerRef);
+        playerConfigService.updatePlayerConfig(playerRef, config -> {
+            config.setHudComponents(session.getDraftHudComponents().copy());
+            config.setDynamicHud(session.getDraftDynamicHud().copy());
+        });
 
         discard(playerRef);
         return true;
