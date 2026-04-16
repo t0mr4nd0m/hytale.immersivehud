@@ -71,8 +71,8 @@ public final class HudConfigPresenter {
             DynamicHudConfig b
     ) {
         for (var entry : HudComponentRegistry.dynamicList()) {
-            DynamicHudRuleConfig ra = entry.getDynamicRuleConfig(a);
-            DynamicHudRuleConfig rb = entry.getDynamicRuleConfig(b);
+            DynamicHudRuleConfig ra = entry.requireDynamicRuleConfig(a);
+            DynamicHudRuleConfig rb = entry.requireDynamicRuleConfig(b);
 
             if (!ra.getRules().equals(rb.getRules())) {
                 return false;

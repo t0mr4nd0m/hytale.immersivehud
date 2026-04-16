@@ -179,10 +179,4 @@ public final class DynamicHudRuleConfig {
     public boolean hasRules() {
         return !getRules().isEmpty();
     }
-
-    public static DynamicHudRuleConfig empty() {
-        return EMPTY;
-    }
-
-    private static final DynamicHudRuleConfig EMPTY = new DynamicHudRuleConfig();
 }

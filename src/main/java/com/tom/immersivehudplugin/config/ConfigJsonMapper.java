@@ -130,7 +130,7 @@ public final class ConfigJsonMapper {
         JsonObject obj = new JsonObject();
 
         for (HudComponent entry : HudComponentRegistry.dynamicList()) {
-            DynamicHudRuleConfig ruleCfg = entry.getDynamicRuleConfig(cfg);
+            DynamicHudRuleConfig ruleCfg = entry.requireDynamicRuleConfig(cfg);
             obj.add(dynamicConfigKey(entry.key()), toJson(ruleCfg, entry));
         }
 
@@ -151,7 +151,7 @@ public final class ConfigJsonMapper {
             }
 
             DynamicHudRuleConfig loaded = fromJsonDynamicHudRuleConfig(sectionEl.getAsJsonObject());
-            DynamicHudRuleConfig target = entry.getDynamicRuleConfig(cfg);
+            DynamicHudRuleConfig target = entry.requireDynamicRuleConfig(cfg);
 
             target.setRules(loaded.getRules());
             target.setThreshold(loaded.getThreshold());

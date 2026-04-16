@@ -96,13 +96,21 @@ public record HudComponent(
         staticSetter.set(hudConfig, hidden);
     }
 
+    @Nullable
     public DynamicHudRuleConfig getDynamicRuleConfig(DynamicHudConfig dynamicConfig) {
-        return (dynamicGetter == null)
-                ? DynamicHudRuleConfig.empty()
-                : dynamicGetter.apply(dynamicConfig);
+        return dynamicGetter != null ? dynamicGetter.apply(dynamicConfig) : null;
+    }
+
+    public DynamicHudRuleConfig requireDynamicRuleConfig(DynamicHudConfig cfg) {
+        DynamicHudRuleConfig ruleCfg = getDynamicRuleConfig(cfg);
+        if (ruleCfg == null) {
+            throw new IllegalStateException("Entry is not dynamic-capable: " + key);
+        }
+        return ruleCfg;
     }
 
     public boolean hasActiveRules(DynamicHudConfig cfg) {
-        return getDynamicRuleConfig(cfg).hasRules();
+        DynamicHudRuleConfig rules = getDynamicRuleConfig(cfg);
+        return rules != null && rules.hasRules();
     }
 }
