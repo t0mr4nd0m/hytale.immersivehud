@@ -13,10 +13,7 @@ import java.util.List;
 public final class HudVisibilityCoordinator {
 
     private static final List<HudComponent> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
-    private static final List<HudComponent> STATIC_ENTRIES =
-            HudComponentRegistry.allList().stream()
-                    .filter(entry -> !entry.supportsDynamicRules())
-                    .toList();
+    private static final List<HudComponent> ALL_ENTRIES = HudComponentRegistry.allList();
 
     private final HudRuleEvaluator hudRuleEvaluator = new HudRuleEvaluator();
     private final HudDeltaApplier hudDeltaApplier = new HudDeltaApplier();
@@ -26,19 +23,27 @@ public final class HudVisibilityCoordinator {
             DynamicHudConfig dynamicConfig
     ) {
         for (HudComponent entry : DYNAMIC_ENTRIES) {
-            if (entry.isHidden(hudConfig) && dynamicConfig.hasRules(entry.key())) {
+            if (!entry.isHidden(hudConfig)) {
+                continue;
+            }
+
+            if (hasActiveRules(entry, dynamicConfig)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void ensureStaticHudBuilt(PlayerHudState state, HudComponentsConfig hudConfig) {
+    public void ensureStaticHudBuilt(
+            PlayerHudState state,
+            HudComponentsConfig hudConfig,
+            DynamicHudConfig dynamicConfig
+    ) {
         if (state.staticHudInitialized && !state.staticDirty) {
             return;
         }
 
-        rebuildStaticHidden(state, hudConfig);
+        rebuildStaticHidden(state, hudConfig, dynamicConfig);
     }
 
     public void clearDynamicHidden(PlayerHudState state) {
@@ -47,11 +52,24 @@ public final class HudVisibilityCoordinator {
         }
     }
 
-    public void rebuildStaticHidden(PlayerHudState state, HudComponentsConfig hudConfig) {
+    public void rebuildStaticHidden(
+            PlayerHudState state,
+            HudComponentsConfig hudConfig,
+            DynamicHudConfig dynamicConfig
+    ) {
         state.clearStaticHidden();
 
-        for (HudComponent entry : STATIC_ENTRIES) {
-            if (entry.isHidden(hudConfig)) {
+        for (HudComponent entry : ALL_ENTRIES) {
+            if (!entry.isHidden(hudConfig)) {
+                continue;
+            }
+
+            if (!entry.supportsDynamicRules()) {
+                state.addStaticHidden(entry.hudComponent());
+                continue;
+            }
+
+            if (!hasActiveRules(entry, dynamicConfig)) {
                 state.addStaticHidden(entry.hudComponent());
             }
         }
@@ -71,5 +89,9 @@ public final class HudVisibilityCoordinator {
 
     public void applyHudDelta(PlayerTickContext tickContext, PlayerHudState state) {
         hudDeltaApplier.apply(tickContext, state);
+    }
+
+    private boolean hasActiveRules(HudComponent entry, DynamicHudConfig dynamicConfig) {
+        return dynamicConfig.hasRules(entry.key());
     }
 }

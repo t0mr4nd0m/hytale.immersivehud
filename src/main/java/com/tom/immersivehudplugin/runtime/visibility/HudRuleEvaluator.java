@@ -9,7 +9,6 @@ import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.hud.trigger.HudTriggerContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 
-import java.util.EnumSet;
 import java.util.List;
 
 public final class HudRuleEvaluator {
@@ -29,26 +28,26 @@ public final class HudRuleEvaluator {
                 continue;
             }
 
-            if (!shouldShowDynamic(entry.getDynamicRuleConfig(dynamicConfig), triggersContext)) {
+            DynamicHudRuleConfig ruleConfig = entry.getDynamicRuleConfig(dynamicConfig);
+            if (!hasActiveRules(ruleConfig)) {
+                continue;
+            }
+
+            if (!shouldShowDynamic(ruleConfig, triggersContext)) {
                 state.addDynamicHidden(entry.hudComponent());
             }
         }
+    }
+
+    private boolean hasActiveRules(DynamicHudRuleConfig ruleConfig) {
+        return ruleConfig != null && !ruleConfig.getRules().isEmpty();
     }
 
     private boolean shouldShowDynamic(
             DynamicHudRuleConfig ruleConfig,
             HudTriggerContext triggersContext
     ) {
-        if (ruleConfig == null) {
-            return false;
-        }
-
-        EnumSet<HudTrigger> rules = ruleConfig.getRules();
-        if (rules.isEmpty()) {
-            return false;
-        }
-
-        for (HudTrigger trigger : rules) {
+        for (HudTrigger trigger : ruleConfig.getRules()) {
             if (trigger.matches(ruleConfig, triggersContext)) {
                 return true;
             }
