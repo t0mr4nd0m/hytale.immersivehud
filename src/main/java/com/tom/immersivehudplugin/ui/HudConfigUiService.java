@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
+import com.tom.immersivehudplugin.runtime.HudRuntimeService;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,13 +19,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class HudConfigUiService {
 
     private final PlayerConfigService playerConfigService;
+    private final HudRuntimeService hudRuntimeService;
 
     private final Map<UUID, HudConfigUiSession> sessions = new ConcurrentHashMap<>();
 
     public HudConfigUiService(
-            @Nonnull PlayerConfigService playerConfigService
+            @Nonnull PlayerConfigService playerConfigService,
+            @Nonnull HudRuntimeService hudRuntimeService
     ) {
         this.playerConfigService = playerConfigService;
+        this.hudRuntimeService = hudRuntimeService;
     }
 
     public void open(
@@ -66,6 +70,7 @@ public final class HudConfigUiService {
             config.setHudComponents(session.getDraftHudComponents().copy());
             config.setDynamicHud(session.getDraftDynamicHud().copy());
         });
+        hudRuntimeService.onPlayerConfigChanged(playerRef);
 
         discard(playerRef);
         return true;
