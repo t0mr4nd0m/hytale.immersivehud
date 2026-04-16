@@ -6,13 +6,17 @@
 
 # Immersive HUD
 
-ImmersiveHud is a lightweight, fully configurable Hytale mod that dynamically hides and reveals HUD elements based on player actions and gameplay context.
+ImmersiveHud is a lightweight, fully configurable Hytale mod designed to reduce visual HUD noise without losing critical information.
 
-With a flexible trigger system and ready-to-use profiles, it shows only what matters, when it matters, delivering a cleaner, more immersive experience without losing critical information.
+Instead of disabling HUD elements, it makes them context-aware: they appear only when relevant and disappear when not needed.
+
+It uses a flexible trigger system and ready-to-use profiles, making it quick and easy to customize the player experience.
+
+It shows only what matters, when it matters, delivering a cleaner and more immersive experience.
 
 By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
-![link](https://img.shields.io/badge/platform-Hytale-purple)
+![Platform](https://img.shields.io/badge/platform-Hytale-purple)
 ![GitHub release](https://img.shields.io/github/v/release/T0mR4nD0m/hytale.immersivehud)
 ![GitHub last commit](https://img.shields.io/github/last-commit/T0mR4nD0m/hytale.immersivehud)
 ![GitHub repo size](https://img.shields.io/github/repo-size/T0mR4nD0m/hytale.immersivehud)
@@ -84,7 +88,7 @@ Example: Input bindings, Notifications, Player list, Chat,...
 
 ### ️🅱️ Dynamic visibility
 
-Dynamic HUD components are normally hidden and become visible when specific gameplay triggers occur.
+Dynamic HUD components are hidden by default and become visible when at least one rule matches the current gameplay context.
 
 * Dynamic HUD component behaviour is defined by the dynamic rules assigned to it.
 * Different rules can be applied to same component to react to different triggers.
@@ -109,18 +113,18 @@ Commands to set up and personalize ImmersiveHUD behaviour per player
 - are persisted automatically
 - override the global config
 
-| Command   | Parameters                         | Description                                                 | Example                                 |
-|-----------|------------------------------------|-------------------------------------------------------------|-----------------------------------------|
-| `config`  | none                               | Opens config UI                                             | /ihud config                            |
-| `status`  | none                               | Displays the current visibility state of all HUD components | /ihud status                            |
-| `toggle`  | `<component>`                      | Toggles visibility of a specific HUD component              | /ihud toggle health                     |
-| `toggle`  | `<component>` `<state>`            | Hides/Shows a component                                     | /ihud toggle health hide                |
-| `toggle`  | `<group>` `<state>`                | Hides/Shows all components in a group                       | /ihud toggle ui hide                    |
-| `rules`   | `<component>` list                 | List rules from a component                                 | /ihud rules health list                 |
-| `rules`   | `<component>` clear                | Clear rules from a component                                | /ihud rules health clear                |
-| `rules`   | `<component>` add/remove `<rule>`  | Add or remove rules to/from component                       | /ihud rules health add  HEALTH_NOT_FULL |
-| `rules`   | `<component>` threshold `<value>`  | Set the threshold from which the bar will be visible        | /ihud rules health threshold 75         |
-| `profile` | `<profile>`                        | Apply quick IHud configuration based on different profiles  | /ihud profile immersive                 |
+| Command   | Parameters                         | Description                                                                                | Example                                 |
+|-----------|------------------------------------|--------------------------------------------------------------------------------------------|-----------------------------------------|
+| `config`  | none                               | Opens the in-game configuration UI to manage visibility, rules and profiles interactively. | /ihud config                            |
+| `status`  | none                               | Displays the current visibility state of all HUD components                                | /ihud status                            |
+| `toggle`  | `<component>`                      | Toggles visibility of a specific HUD component                                             | /ihud toggle health                     |
+| `toggle`  | `<component>` `<state>`            | Hides/Shows a component                                                                    | /ihud toggle health hide                |
+| `toggle`  | `<group>` `<state>`                | Hides/Shows all components in a group                                                      | /ihud toggle ui hide                    |
+| `rules`   | `<component>` list                 | List rules from a component                                                                | /ihud rules health list                 |
+| `rules`   | `<component>` clear                | Clear rules from a component                                                               | /ihud rules health clear                |
+| `rules`   | `<component>` add/remove `<rule>`  | Add or remove rules to/from component                                                      | /ihud rules health add  HEALTH_NOT_FULL |
+| `rules`   | `<component>` threshold `<value>`  | Set the threshold from which the bar will be visible                                       | /ihud rules health threshold 75         |
+| `profile` | `<profile>`                        | Apply quick IHud configuration based on different profiles                                 | /ihud profile immersive                 |
 
 | Parameter     | Description           | Values                                 |
 |---------------|-----------------------|----------------------------------------|
@@ -148,7 +152,7 @@ HUD components supported by ImmersiveHUD
 | health                            | Bars    | Dynamic  | Hidden        | `HEALTH_NOT_FULL`                                                                               |
 | stamina                           | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL`                                                                              |
 | mana                              | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL`                                                                                 |
-| oxygen                            | Bars    | Dynamic  | Hidden        | —                                                                                               |
+| oxygen                            | Bars    | Dynamic  | Hidden        | `OXYGEN_NOT_FULL`                                                                               |
 | inputbindings                     | UI      | Static   | Hidden        | —                                                                                               |
 | notifications                     | UI      | Static   | Hidden        | —                                                                                               |
 | statusicons                       | UI      | Static   | Visible       | —                                                                                               |
@@ -166,6 +170,8 @@ HUD components supported by ImmersiveHUD
 | blockvariantselector              | Builder | Static   | Visible       | —                                                                                               |
 | buildertoolslegend                | Builder | Static   | Visible       | —                                                                                               |
 | buildertoolsmaterialslotselector  | Builder | Static   | Visible       | —                                                                                               |
+
+All bar components (Health, Stamina, Mana and Oxygen) support threshold-based visibility.
 
 ---
 
@@ -205,6 +211,11 @@ Rules to define the visibility behaviour of dynamic HUD components
 
 When activating any rule bar `_NOT_FULL`, use `Threshold` to specify the bar level at which the component becomes visible.
 
+Examples:
+- Threshold = 100 → visible whenever the bar is not full
+- Threshold = 50 → visible below half
+- Threshold = 25 → visible only in critical situations
+
 ---
 
 💡 Tip: multiple rules can be combined to alter component behaviour. Ex. Hotbar rules=`HOTBAR_INPUT`, `CHARGING_WEAPON` -> when changes hotbar slot and when aiming.
@@ -226,12 +237,30 @@ You can switch between them instantly using commands.
 
 ## ⚙️ Configuration
 
+To configure ImmersiveHud behaviour you can edit manually the player config file, use in-game commands 
+or even better, use in-game **Config UI**
+
+### Config UI
+
+Use command `/ihud config` to open in-game configuration UI to manage visibility, rules and profiles interactively.
+
+1. Select one of the available profiles to start customizing your experience
+<p style="text-align:center;"><img src="assets/006_config_0_profile.png" alt="Immersive HUD"/></p>
+
+2. Toggle off the components you want to hide from your HUD
+<p style="text-align:center;"><img src="assets/006_config_1_visibility.png" alt="Immersive HUD"/></p>
+
+3. Select the triggers to change HUD components visibility 
+<p style="text-align:center;"><img src="assets/006_config_2_dynamic_rules.png" alt="Immersive HUD"/></p>
+
+Finally, press **APPLY** to save and activate your configuration and start enjoying your new Immersive HUD experience.
+
+---
+
 ImmersiveHud uses two configuration layers:
 
 1. Server configuration (Global)
 2. Per-player configuration
-
-To configure ImmersiveHud behaviour you can edit manually the player config file or use in-game commands.
 
 ### Global Configuration file - `config.json`
 
