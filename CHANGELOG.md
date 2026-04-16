@@ -1,11 +1,19 @@
 # Changelog
 
+## v1.2.3 - Technical update + redefined StatusIcons as a dynamic component
+
+**Code Changes**
+* extensive refactor and code cleaning to avoid duplication, remove dead code, improve logic and readability, etc... 
+
+**New Feature**
+* added StatusIcons to dynamic component catalog, associated to trigger 'HOTBAR_INPUT'. However, doing so, I've found that the component cannot be hide using Hytale API (Am I doing something wrong? Maybe is it a bug from Hytale API?). Further testing and analysis will be required.
+
 ## v1.2.2 - Technical update + new trigger BLOCKING_ATTACK
 
 **Code Changes**
 * extensive refactor and code cleaning, simplified package structure, removed redundant logic and renamed classes, improved structure, profiles, commands, and more maintainable runtime system focused on performance and flexibility
 
-**Features**
+**New Features**
 * added new trigger `BLOCKING_ATTACK` associated to `reticle` component
 
 ## v1.2.1 - Technical update
