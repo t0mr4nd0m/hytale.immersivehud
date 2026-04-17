@@ -96,7 +96,6 @@ public record HudComponent(
         staticSetter.set(hudConfig, hidden);
     }
 
-    @Nullable
     public DynamicHudRuleConfig getDynamicRuleConfig(DynamicHudConfig dynamicConfig) {
         return dynamicGetter != null ? dynamicGetter.apply(dynamicConfig) : null;
     }

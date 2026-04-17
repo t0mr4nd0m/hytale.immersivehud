@@ -3,6 +3,7 @@ package com.tom.immersivehudplugin.hud.component;
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -147,7 +148,12 @@ public final class HudComponentRegistry {
 
         for (HudComponent entry : dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.getDynamicRuleConfig(cfg);
-            ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
+            if (ruleCfg == null) {
+                continue;
+            }
+
+            EnumSet<HudTrigger> defaultRules = entry.defaultRules();
+            ruleCfg.setRules(defaultRules != null ? defaultRules : EnumSet.noneOf(HudTrigger.class));
 
             if (entry.supportsThreshold()) {
                 ruleCfg.setThreshold(entry.defaultThreshold());
