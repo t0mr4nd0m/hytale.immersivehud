@@ -176,6 +176,6 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public String getDynamicComponentVisibilityLabel(@Nonnull HudComponent entry) {
-        return isDynamicComponentVisible(entry) ? "<VISIBLE>" : "<HIDDEN>";
+        return isDynamicComponentVisible(entry) ? "VISIBLE" : "HIDDEN";
     }
 }

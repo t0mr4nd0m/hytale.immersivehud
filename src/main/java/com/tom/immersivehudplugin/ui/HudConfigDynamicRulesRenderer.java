@@ -2,6 +2,7 @@ package com.tom.immersivehudplugin.ui;
 
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -45,18 +46,24 @@ public final class HudConfigDynamicRulesRenderer {
             renderIndex.putDynamicComponentRowIndex(entry.key(), componentIndex);
 
             String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
+            String iconSelector = componentRoot + " #DynamicComponentIcon";
             String titleSelector = componentRoot + " #DynamicComponentValueLabel";
             String visibilitySelector = componentRoot + " #DynamicComponentVisibilityLabel";
             String rulesListSelector = componentRoot + " #DynamicRulesList";
+            String visibilityWhenSelector = componentRoot + " #DynamicComponentVisibilityWhenLabel";
 
+            String componentStatus = session.getDynamicComponentVisibilityLabel(entry);
+
+            commands.set(iconSelector + ".Background", Value.ref(DYNAMIC_SECTION_UI, entry.key() + "Icon"));
             commands.set(titleSelector + ".TextSpans", Message.raw(entry.label().toUpperCase()));
-            commands.set(
-                    visibilitySelector + ".TextSpans",
-                    Message.raw(session.getDynamicComponentVisibilityLabel(entry))
-            );
+            commands.set(visibilitySelector + ".TextSpans", Message.raw(componentStatus));
 
-            renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
-            renderDynamicThresholdControls(commands, events, session, entry, componentRoot);
+            if (componentStatus.equalsIgnoreCase("VISIBLE")) {
+                commands.set( visibilityWhenSelector + ".TextSpans" , Message.raw(" - ALWAYS"));
+            } else {
+                renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
+                renderDynamicThresholdControls(commands, events, session, entry, componentRoot);
+            }
 
             componentIndex++;
         }
@@ -69,9 +76,7 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull HudTrigger trigger
     ) {
         Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) {
-            return;
-        }
+        if (componentIndex == null) return;
 
         boolean enabled = session.isRuleEnabled(entry, trigger);
 
@@ -99,9 +104,7 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull HudComponent entry
     ) {
         Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) {
-            return;
-        }
+        if (componentIndex == null) return;
 
         String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
         String thresholdHostSelector = componentRoot + " #DynamicThresholdHost";
@@ -112,9 +115,7 @@ public final class HudConfigDynamicRulesRenderer {
 
         commands.set(thresholdHostSelector + ".Visible", visible);
 
-        if (!visible) {
-            return;
-        }
+        if (!visible) return;
 
         int threshold = Math.round(session.getDynamicThreshold(entry));
         commands.set(sliderSelector + ".Value", threshold);
@@ -154,10 +155,7 @@ public final class HudConfigDynamicRulesRenderer {
         String labelSelector = rowRootSelector + " #DynamicRuleLabel";
         String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
 
-        commands.set(
-                labelSelector + ".TextSpans",
-                Message.raw(HudTrigger.displayNameUpper(trigger))
-        );
+        commands.set(labelSelector + ".TextSpans", Message.raw(HudTrigger.displayNameUpper(trigger)));
         commands.set(checkBoxSelector + ".Value", enabled);
 
         events.addEventBinding(
@@ -187,9 +185,7 @@ public final class HudConfigDynamicRulesRenderer {
 
         commands.set(thresholdHostSelector + ".Visible", visible);
 
-        if (!visible) {
-            return;
-        }
+        if (!visible) return;
 
         int threshold = Math.round(session.getDynamicThreshold(entry));
         commands.set(sliderSelector + ".Value", threshold);
