@@ -53,6 +53,7 @@ public final class HudConfigDynamicRulesRenderer {
             String visibilityWhenSelector = componentRoot + " #DynamicComponentVisibilityWhenLabel";
 
             String componentStatus = session.getDynamicComponentVisibilityLabel(entry);
+            boolean hasRules = !session.getDynamicRuleConfig(entry).getRules().isEmpty();
 
             commands.set(iconSelector + ".Background", Value.ref(DYNAMIC_SECTION_UI, entry.key() + "Icon"));
             commands.set(titleSelector + ".TextSpans", Message.raw(entry.label().toUpperCase()));
@@ -61,6 +62,10 @@ public final class HudConfigDynamicRulesRenderer {
             if (componentStatus.equalsIgnoreCase("VISIBLE")) {
                 commands.set( visibilityWhenSelector + ".TextSpans" , Message.raw(" - ALWAYS"));
             } else {
+                commands.set(
+                        visibilityWhenSelector + ".TextSpans",
+                        Message.raw(hasRules ? " - VISIBLE WHEN:" : " - ALWAYS")
+                );
                 renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
                 renderDynamicThresholdControls(commands, events, session, entry, componentRoot);
             }
@@ -199,5 +204,31 @@ public final class HudConfigDynamicRulesRenderer {
                         .append("@DynamicThreshold", sliderSelector + ".Value"),
                 false
         );
+    }
+
+    public void updateDynamicVisibilityWhenLabel(
+            @Nonnull UICommandBuilder commands,
+            @Nonnull HudConfigUiSession session,
+            @Nonnull HudComponent entry
+    ) {
+        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
+        if (componentIndex == null) return;
+
+        String visibilitySelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicComponentVisibilityLabel";
+        String visibilityWhenSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicComponentVisibilityWhenLabel";
+
+        String componentStatus = session.getDynamicComponentVisibilityLabel(entry);
+        boolean hasRules = !session.getDynamicRuleConfig(entry).getRules().isEmpty();
+
+        commands.set(visibilitySelector + ".TextSpans", Message.raw(componentStatus));
+
+        if (componentStatus.equalsIgnoreCase("VISIBLE")) {
+            commands.set(visibilityWhenSelector + ".TextSpans", Message.raw(" - ALWAYS"));
+        } else {
+            commands.set(
+                    visibilityWhenSelector + ".TextSpans",
+                    Message.raw(hasRules ? " - VISIBLE WHEN:" : " - ALWAYS")
+            );
+        }
     }
 }

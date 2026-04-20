@@ -136,6 +136,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
                     UICommandBuilder commands = new UICommandBuilder();
                     dynamicRulesRenderer.updateDynamicRuleRow(commands, session, entry, rule);
+                    dynamicRulesRenderer.updateDynamicVisibilityWhenLabel(commands, session, entry);
                     dynamicRulesRenderer.updateDynamicThresholdControls(commands, session, entry);
                     sendUpdate(commands, new UIEventBuilder(), false);
                 }
