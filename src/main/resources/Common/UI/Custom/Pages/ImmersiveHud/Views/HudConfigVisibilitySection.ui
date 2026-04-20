@@ -64,7 +64,7 @@ Group #VisibilitySectionRow {
     Group #VisibilitySectionSymbolClosed {
       Anchor: (Width: 24, Height: 14, Left: 16, Right: 8);
       LayoutMode: CenterMiddle;
-      Background: (TexturePath: "../AltDropdownCaretDown.png");
+      Background: (TexturePath: "../Assets/AltDropdownCaretDown.png");
     }
   }
 
@@ -92,7 +92,7 @@ Group #VisibilitySectionRow {
     Group #VisibilitySectionSymbolOpen {
       Anchor: (Width: 24, Height: 14, Left: 16, Right: 8);
       LayoutMode: CenterMiddle;
-      Background: (TexturePath: "../AltDropdownCaretUp.png");
+      Background: (TexturePath: "../Assets/AltDropdownCaretUp.png");
     }
   }
 }
