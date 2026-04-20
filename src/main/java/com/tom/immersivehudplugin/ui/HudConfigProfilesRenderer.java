@@ -56,14 +56,16 @@ public final class HudConfigProfilesRenderer {
             String descriptionSelector = rowRootSelector + " #ProfileDescription";
             String selectProfileButtonSelector = rowRootSelector + " #SelectProfileButton";
             String selectedProfileSelector = rowRootSelector + " #SelectedProfile";
+            String selectedProfileIconSelector = rowRootSelector + " #ProfileSelectedIcon";
 
-            commands.set(labelSelector + ".TextSpans", Message.raw(profile.label().toUpperCase() + " PROFILE"));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(profile.label().toUpperCase() + " PROFILE <APPLIED>"));
+            commands.set(labelSelector + ".TextSpans", Message.raw(profile.label().toUpperCase()));
+            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(profile.label().toUpperCase()));
             commands.set(labelSelector + ".Visible", !isSelected);
             commands.set(labelSelectedSelector + ".Visible", isSelected);
             commands.set(descriptionSelector + ".TextSpans", Message.raw(profile.description()));
             commands.set(selectProfileButtonSelector + ".Visible", !isSelected);
             commands.set(selectedProfileSelector + ".Visible", isSelected);
+            commands.set(selectedProfileIconSelector + ".Visible", isSelected);
 
             events.addEventBinding(
                     CustomUIEventBindingType.Activating,
@@ -83,14 +85,16 @@ public final class HudConfigProfilesRenderer {
             String labelSelectedSelector = rowRootSelector + " #ProfileSelectedLabel";
             String descriptionSelector = rowRootSelector + " #ProfileDescription";
             String selectedProfileSelector = rowRootSelector + " #SelectedProfile";
+            String selectedProfileIconSelector = rowRootSelector + " #ProfileSelectedIcon";
 
             commands.set(labelSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase()));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase() + " PROFILE <APPLIED>"));
+            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase()));
             commands.set(descriptionSelector + ".TextSpans", Message.raw(Profile.CUSTOM.description()));
 
             commands.set(labelSelector + ".Visible", false);
             commands.set(labelSelectedSelector + ".Visible", true);
             commands.set(selectedProfileSelector + ".Visible", true);
+            commands.set(selectedProfileIconSelector + ".Visible", true);
         }
     }
 }

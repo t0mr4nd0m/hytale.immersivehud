@@ -39,7 +39,7 @@ Group #ProfileRow {
 
   Group #ProfileButtonContent {
     LayoutMode: Top;
-    Anchor: (Full: 0);
+    Anchor: (Full: 0, Height: 86);
     Padding: (Vertical: 8, Horizontal: 16);
 
     Label #ProfileLabel {
@@ -58,6 +58,14 @@ Group #ProfileRow {
       Anchor: (Top: 8, Bottom: 4);
       Text: "Balanced default configuration";
       Style: @ProfileDescriptionStyle;
+    }
+
+    Group #ProfileSelectedIcon {
+      LayoutMode: Right;
+      Anchor: (Height: 48, Width: 48, Top: -52, Right: -28);
+      Padding: (Bottom: 8);
+      Background: (TexturePath: "../Assets/selected-arrow.png");
+      Visible: false;
     }
   }
 }
