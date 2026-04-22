@@ -51,6 +51,10 @@ public final class HudConfigRenderIndex {
         dynamicRuleRowIndexes.clear();
     }
 
+    public void clearDynamicRuleRowIndexes(@Nonnull String componentKey) {
+        dynamicRuleRowIndexes.keySet().removeIf(key -> key.componentKey().equals(componentKey));
+    }
+
     public void putDynamicRuleRowIndex(
             @Nonnull String componentKey,
             @Nonnull String host,

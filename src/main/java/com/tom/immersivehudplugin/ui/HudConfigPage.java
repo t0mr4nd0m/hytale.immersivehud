@@ -127,6 +127,22 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 }
             }
 
+            case "TOGGLE_DYNAMIC_COMPONENT_EXPANDED" -> {
+                HudComponent entry = HudComponentRegistry.find(data.getComponent());
+                if (entry == null) {
+                    return;
+                }
+
+                session.toggleDynamicComponentExpanded(entry);
+
+                UICommandBuilder commands = new UICommandBuilder();
+                UIEventBuilder events = new UIEventBuilder();
+
+                dynamicRulesRenderer.updateDynamicComponentEditButton(commands, session, entry);
+                dynamicRulesRenderer.rerenderDynamicComponentRules(commands, events, session, entry);
+                sendUpdate(commands, events, false);
+            }
+
             case "TOGGLE_RULE" -> {
                 HudTrigger rule = HudTrigger.fromString(data.getValue());
                 HudComponent entry = HudComponentRegistry.find(data.getComponent());
@@ -136,7 +152,7 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
 
                     UICommandBuilder commands = new UICommandBuilder();
                     dynamicRulesRenderer.updateDynamicRuleRow(commands, session, entry, rule);
-                    dynamicRulesRenderer.updateDynamicVisibilityWhenLabel(commands, session, entry);
+                    dynamicRulesRenderer.updateDynamicStatus(commands, session, entry);
                     dynamicRulesRenderer.updateDynamicThresholdControls(commands, session, entry);
                     sendUpdate(commands, new UIEventBuilder(), false);
                 }

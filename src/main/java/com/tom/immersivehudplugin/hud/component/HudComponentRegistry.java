@@ -79,7 +79,7 @@ public final class HudComponentRegistry {
     );
 
     static {
-        ALL_LIST = List.copyOf(HudComponentCatalog.createAll());
+        ALL_LIST = List.copyOf(sortByGroupOrder(HudComponentCatalog.createAll()));
         DYNAMIC_LIST = ALL_LIST.stream()
                 .filter(HudComponent::supportsDynamicRules)
                 .toList();
@@ -92,6 +92,21 @@ public final class HudComponentRegistry {
                         LinkedHashMap::new,
                         Collectors.toUnmodifiableList()
                 ));
+    }
+
+    private static List<HudComponent> sortByGroupOrder(List<HudComponent> entries) {
+        Map<Group, Integer> groupIndex = new LinkedHashMap<>();
+        for (int i = 0; i < GROUP_ORDER.size(); i++) {
+            groupIndex.put(GROUP_ORDER.get(i), i);
+        }
+
+        return entries.stream()
+                .sorted((a, b) -> {
+                    int ga = groupIndex.getOrDefault(a.group(), Integer.MAX_VALUE);
+                    int gb = groupIndex.getOrDefault(b.group(), Integer.MAX_VALUE);
+                    return Integer.compare(ga, gb);
+                })
+                .toList();
     }
 
     private static Map<String, HudComponent> buildRegistry(List<HudComponent> entries) {

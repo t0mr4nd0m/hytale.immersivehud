@@ -23,6 +23,9 @@ public final class HudConfigUiSession {
     @Nullable
     private HudComponentRegistry.Group expandedVisibilityGroup = HudComponentRegistry.Group.CORE;
 
+    @Nullable
+    private String expandedDynamicComponentKey;
+
     private HudComponentsConfig draftHudComponents;
     private DynamicHudConfig draftDynamicHud;
 
@@ -177,5 +180,30 @@ public final class HudConfigUiSession {
     @Nonnull
     public String getDynamicComponentVisibilityLabel(@Nonnull HudComponent entry) {
         return isDynamicComponentVisible(entry) ? "VISIBLE" : "HIDDEN";
+    }
+
+    public boolean isDynamicComponentExpanded(@Nonnull HudComponent entry) {
+        return entry.key().equalsIgnoreCase(expandedDynamicComponentKey);
+    }
+
+    public void toggleDynamicComponentExpanded(@Nonnull HudComponent entry) {
+        if (entry.key().equalsIgnoreCase(expandedDynamicComponentKey)) {
+            expandedDynamicComponentKey = null;
+        } else {
+            expandedDynamicComponentKey = entry.key();
+        }
+    }
+
+    @Nonnull
+    public List<HudTrigger> getVisibleRulesInDisplayOrder(@Nonnull HudComponent entry) {
+        List<HudTrigger> allRules = getBaseRulesInDisplayOrder(entry);
+
+        if (isDynamicComponentExpanded(entry)) {
+            return allRules;
+        }
+
+        return allRules.stream()
+                .filter(rule -> isRuleEnabled(entry, rule))
+                .toList();
     }
 }

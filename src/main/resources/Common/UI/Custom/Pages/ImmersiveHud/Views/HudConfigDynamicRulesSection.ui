@@ -1,18 +1,29 @@
 $C = "../../../Common.ui";
 
-@VisibilityLabelStyle  = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center, HorizontalAlignment: End );
-@SectionLabelStyle     = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
-@ComponentValueStyle   = LabelStyle( FontSize: 15, TextColor: $C.@ColorGoldHighlight, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
-@SliderInputFieldStyle = InputFieldStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true );
+@BaseLabelStyle       = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
 
-@healthIcon = PatchStyle(TexturePath: "../Assets/0health_active.png");
-@staminaIcon = PatchStyle(TexturePath: "../Assets/1stamina_active.png");
-@manaIcon = PatchStyle(TexturePath: "../Assets/2mana_active.png");
-@oxygenIcon = PatchStyle(TexturePath: "../Assets/4oxygen_active.png");
-@hotbarIcon = PatchStyle(TexturePath: "../Assets/5hotbar_active.png");
-@reticleIcon = PatchStyle(TexturePath: "../Assets/6reticle_active.png");
-@compassIcon = PatchStyle(TexturePath: "../Assets/7compass_active.png");
-@statusiconsIcon = PatchStyle(TexturePath: "../Assets/8statusicons_active.png");
+@HorizontalGap        = Group {Anchor: (Width: 8);};
+@HorizontalGapx2      = Group {Anchor: (Width: 16);};
+
+@IconVisibilityOff    = PatchStyle(TexturePath: "../Assets/VisibilityOff.png");
+@IconVisibilityOn     = PatchStyle(TexturePath: "../Assets/VisibilityOn.png");
+
+@IconStatic           = PatchStyle(TexturePath: "../Assets/StaticIcon.png");
+@IconDynamic          = PatchStyle(TexturePath: "../Assets/DynamicIcon.png");
+
+@IconEditTriggers     = PatchStyle(TexturePath: "../Assets/EditIcon.png");
+@IconSaveTriggers     = PatchStyle(TexturePath: "../Assets/SaveIcon.png");
+
+@IconClearAllTriggers = PatchStyle(TexturePath: "../Assets/DeleteIcon.png");
+
+@healthIcon       = PatchStyle(TexturePath: "../Assets/0health_active.png");
+@staminaIcon      = PatchStyle(TexturePath: "../Assets/1stamina_active.png");
+@manaIcon         = PatchStyle(TexturePath: "../Assets/2mana_active.png");
+@oxygenIcon       = PatchStyle(TexturePath: "../Assets/4oxygen_active.png");
+@hotbarIcon       = PatchStyle(TexturePath: "../Assets/5hotbar_active.png");
+@reticleIcon      = PatchStyle(TexturePath: "../Assets/6reticle_active.png");
+@compassIcon      = PatchStyle(TexturePath: "../Assets/7compass_active.png");
+@statusiconsIcon  = PatchStyle(TexturePath: "../Assets/8statusicons_active.png");
 
 Group #DynamicComponentSectionRoot {
   LayoutMode: Top;
@@ -21,66 +32,89 @@ Group #DynamicComponentSectionRoot {
   Group #DynamicComponentHeader {
     LayoutMode: Left;
     Anchor: (Height: 38);
-    Padding: (Vertical: 8);
+    Padding: (Vertical: 8, Horizontal: 16);
     Background: #1a2533(0.6);
     OutlineColor: #3a4a5a(0.35);
     OutlineSize: 1;
 
-    Group #DynamicComponentIcon {
-      Anchor: (Width: 32, Height: 32, Left: 8);
-      Background: (TexturePath: "../Assets/0health_inactive.png");
-    }
-
-    Label #DynamicComponentValueLabel {
+    Group #DynamicComponentTitle {
+      LayoutMode: Left;
       FlexWeight: 1;
       Anchor: (Height: 32);
-      Padding: (Horizontal: 8);
-      Text: "Component Name";
-      Style: @ComponentValueStyle;
+
+      Button #DynamicComponentIcon {
+        Anchor: (Width: 28, Height: 28);
+        TooltipText: "Dynamic HUD component";
+        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+        Background: (TexturePath: "../Assets/0health_inactive.png");
+      }
+
+      @HorizontalGapx2 {}
+
+      Label #DynamicComponentValueLabel {
+        Anchor: (Height: 32, Width: 140);
+        Text: "Component Name";
+        Style: (...@BaseLabelStyle, TextColor: $C.@ColorGoldHighlight, FontSize: 15);
+      }
+    }
+
+    Group #DynamicComponentEditButtonHost {
+      FlexWeight: 2;
+      LayoutMode: Right;
+      Anchor: (Height: 32);
+
+      Button #VisibilityToggleButton {
+        Anchor: (Width: 28, Height: 28);
+        TooltipText: "Component visibility";
+        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+        Background: @IconVisibilityOff;
+      }
+
+      @HorizontalGap {}
+
+      Button #StatusButton {
+        Anchor: (Width: 28, Height: 28);
+        TooltipText: "Component visibility";
+        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+        Background: @IconStatic;
+      }
+
+      @HorizontalGap {}
+
+      Button #DynamicComponentEditButton {
+        Anchor: (Width: 28, Height: 28);
+        TooltipText: "Edit rules";
+        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+        Background: @IconEditTriggers;
+      }
+
+      //@HorizontalGap {}
+
+      Button #VisibilityToggleButton {
+        Anchor: (Width: 28, Height: 28);
+        TooltipText: "Clear all rules";
+        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+        Background: @IconClearAllTriggers;
+        Visible: false;
+      }
     }
 
     Label #DynamicComponentVisibilityLabel {
       Anchor: (Width: 110, Height: 32);
       Text: "Visibility Status";
-      Style: @VisibilityLabelStyle;
+      Style: (...@BaseLabelStyle, HorizontalAlignment: End);
+      Visible: false;
     }
 
     Label #DynamicComponentVisibilityWhenLabel {
       Padding: (Right: 8);
-      Text: " - VISIBLE WHEN:";
-      Style: @SectionLabelStyle;
+      Text: " Visibility When";
+      Style: (...@BaseLabelStyle);
+      Visible: false;
     }
   }
 
   Group #DynamicRulesList {
     LayoutMode: Top;
-  }
-
-  Group #DynamicThresholdHost {
-    LayoutMode: Left;
-    Anchor: (Height: 38);
-    Padding: (Vertical: 4, Horizontal: 16);
-    Background: #1a2533(0.6);
-    OutlineColor: #3a4a5a(0.35);
-    OutlineSize: 1;
-    Visible: false;
-
-    Label #DynamicThresholdTitleLabel {
-      FlexWeight: 1;
-      Anchor: (Height: 32);
-      Padding: (Horizontal: 8);
-      Text: "VALUE BELOW";
-      Style: @SectionLabelStyle;
-    }
-
-    $C.@SliderNumberField #DynamicThresholdSlider {
-      @Anchor = (Width: 380);
-      Value: 100;
-      Min: 0;
-      Max: 100;
-      NumberFieldContainerAnchor: (Left: 16, Width: 60, Height: 24);
-      NumberFieldSuffix: "%";
-      NumberFieldStyle: @SliderInputFieldStyle;
-    }
   }
 }

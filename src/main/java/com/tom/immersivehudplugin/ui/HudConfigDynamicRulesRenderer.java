@@ -10,6 +10,7 @@ import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class HudConfigDynamicRulesRenderer {
 
@@ -48,62 +49,50 @@ public final class HudConfigDynamicRulesRenderer {
             String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
             String iconSelector = componentRoot + " #DynamicComponentIcon";
             String titleSelector = componentRoot + " #DynamicComponentValueLabel";
-            String visibilitySelector = componentRoot + " #DynamicComponentVisibilityLabel";
+
+            String visibilityToggleButtonSelector = componentRoot + " #VisibilityToggleButton";
+            String statusButtonSelector = componentRoot + " #StatusButton";
+
             String rulesListSelector = componentRoot + " #DynamicRulesList";
-            String visibilityWhenSelector = componentRoot + " #DynamicComponentVisibilityWhenLabel";
 
             String componentStatus = session.getDynamicComponentVisibilityLabel(entry);
             boolean hasRules = !session.getDynamicRuleConfig(entry).getRules().isEmpty();
+            boolean isVisible = componentStatus.equalsIgnoreCase("VISIBLE");
+
+            String iconVisibilityToggleButton = isVisible ? "IconVisibilityOn" : "IconVisibilityOff";
+            String iconStatusButton = !isVisible && hasRules ? "IconDynamic" : "IconStatic";
 
             commands.set(iconSelector + ".Background", Value.ref(DYNAMIC_SECTION_UI, entry.key() + "Icon"));
             commands.set(titleSelector + ".TextSpans", Message.raw(entry.label().toUpperCase()));
-            commands.set(visibilitySelector + ".TextSpans", Message.raw(componentStatus));
 
-            if (componentStatus.equalsIgnoreCase("VISIBLE")) {
-                commands.set( visibilityWhenSelector + ".TextSpans" , Message.raw(" - ALWAYS"));
-            } else {
-                commands.set(
-                        visibilityWhenSelector + ".TextSpans",
-                        Message.raw(hasRules ? " - VISIBLE WHEN:" : " - ALWAYS")
-                );
+            commands.set(visibilityToggleButtonSelector + ".Background",
+                    Value.ref(DYNAMIC_SECTION_UI, iconVisibilityToggleButton));
+            commands.set(visibilityToggleButtonSelector + ".TooltipText", isVisible ? "Visible" : "Hidden");
+
+            commands.set(statusButtonSelector + ".Background", Value.ref(DYNAMIC_SECTION_UI, iconStatusButton));
+            commands.set(statusButtonSelector + ".TooltipText", !isVisible && hasRules ? "Dynamic" : "Static");
+
+            if (!isVisible) {
                 renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
-                renderDynamicThresholdControls(commands, events, session, entry, componentRoot);
             }
+
+            String editButtonSelector = componentRoot + " #DynamicComponentEditButton";
+
+            updateDynamicComponentEditButton(commands, session, entry);
+
+            events.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    editButtonSelector,
+                    HudConfigPage.PageEventData.action("TOGGLE_DYNAMIC_COMPONENT_EXPANDED")
+                            .append("Component", entry.key()),
+                    false
+            );
 
             componentIndex++;
         }
     }
 
-    public void updateDynamicRuleRow(
-            @Nonnull UICommandBuilder commands,
-            @Nonnull HudConfigUiSession session,
-            @Nonnull HudComponent entry,
-            @Nonnull HudTrigger trigger
-    ) {
-        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) return;
-
-        boolean enabled = session.isRuleEnabled(entry, trigger);
-
-        Integer baseRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "base", trigger);
-        if (baseRowIndex != null) {
-            String rulesListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicRulesList";
-            String rowRootSelector = rulesListSelector + "[" + baseRowIndex + "]";
-            String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
-            commands.set(checkBoxSelector + ".Value", enabled);
-            return;
-        }
-
-        Integer extraRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "extra", trigger);
-        if (extraRowIndex != null) {
-            String extraListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicExtraTriggersList";
-            String rowRootSelector = extraListSelector + "[" + extraRowIndex + "]";
-            String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
-            commands.set(checkBoxSelector + ".Value", enabled);
-        }
-    }
-
-    public void updateDynamicThresholdControls(
+    public void updateDynamicComponentEditButton(
             @Nonnull UICommandBuilder commands,
             @Nonnull HudConfigUiSession session,
             @Nonnull HudComponent entry
@@ -112,19 +101,75 @@ public final class HudConfigDynamicRulesRenderer {
         if (componentIndex == null) return;
 
         String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
-        String thresholdHostSelector = componentRoot + " #DynamicThresholdHost";
-        String sliderSelector = componentRoot + " #DynamicThresholdSlider";
+        String editButtonSelector = componentRoot + " #DynamicComponentEditButton";
 
-        boolean visible = entry.supportsThreshold();
-        boolean enabled = session.isDynamicThresholdEnabled(entry);
+        boolean expanded = session.isDynamicComponentExpanded(entry);
 
-        commands.set(thresholdHostSelector + ".Visible", visible);
+        commands.set(
+                editButtonSelector + ".Background",
+                Value.ref(DYNAMIC_SECTION_UI, expanded ? "IconSaveTriggers" : "IconEditTriggers")
+        );
+        commands.set(editButtonSelector + ".TooltipText", expanded ? "Colapse rules" : "Edit rules");
+    }
 
-        if (!visible) return;
+    public void updateDynamicRuleRow(
+            @Nonnull UICommandBuilder commands,
+            @Nonnull HudConfigUiSession session,
+            @Nonnull HudComponent entry,
+            @Nonnull HudTrigger trigger
+    ) {
+        String rowRootSelector = findRuleRowRootSelector(entry, trigger);
+        if (rowRootSelector == null) {
+            return;
+        }
 
-        int threshold = Math.round(session.getDynamicThreshold(entry));
-        commands.set(sliderSelector + ".Value", threshold);
-        commands.set(thresholdHostSelector + ".Visible", enabled);
+        boolean enabled = session.isRuleEnabled(entry, trigger);
+        String checkBoxSelector = rowRootSelector + " #DynamicRuleCheckBox";
+
+        commands.set(checkBoxSelector + ".Value", enabled);
+
+        if (isThresholdRule(entry, trigger)) {
+            updateThresholdRow(commands, session, entry, rowRootSelector);
+        }
+    }
+
+    public void updateDynamicStatus(
+            @Nonnull UICommandBuilder commands,
+            @Nonnull HudConfigUiSession session,
+            @Nonnull HudComponent entry
+    ) {
+        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
+        if (componentIndex == null) return;
+
+        String componentRoot = "#DynamicComponentsList[" + componentIndex + "]";
+
+        String statusButtonSelector = componentRoot + " #StatusButton";
+
+        String componentStatus = session.getDynamicComponentVisibilityLabel(entry);
+        boolean isVisible = componentStatus.equalsIgnoreCase("VISIBLE");
+        boolean hasRules = !session.getDynamicRuleConfig(entry).getRules().isEmpty();
+        String iconStatusButton = !isVisible && hasRules ? "IconDynamic" : "IconStatic";
+
+        commands.set(statusButtonSelector + ".Background", Value.ref(DYNAMIC_SECTION_UI, iconStatusButton));
+        commands.set(statusButtonSelector + ".TooltipText", !isVisible && hasRules ? "Dynamic" : "Static");
+    }
+
+    public void updateDynamicThresholdControls(
+            @Nonnull UICommandBuilder commands,
+            @Nonnull HudConfigUiSession session,
+            @Nonnull HudComponent entry
+    ) {
+        HudTrigger thresholdRule = entry.thresholdRule();
+        if (thresholdRule == null) {
+            return;
+        }
+
+        String rowRootSelector = findRuleRowRootSelector(entry, thresholdRule);
+        if (rowRootSelector == null) {
+            return;
+        }
+
+        updateThresholdRow(commands, session, entry, rowRootSelector);
     }
 
     private void renderDynamicRulesList(
@@ -136,7 +181,7 @@ public final class HudConfigDynamicRulesRenderer {
     ) {
         int rowIndex = 0;
 
-        for (HudTrigger trigger : session.getBaseRulesInDisplayOrder(entry)) {
+        for (HudTrigger trigger : session.getVisibleRulesInDisplayOrder(entry)) {
             rowIndex = renderDynamicRuleRow(commands, events, session, entry, rulesListSelector, "base", rowIndex, trigger);
         }
     }
@@ -152,6 +197,7 @@ public final class HudConfigDynamicRulesRenderer {
             @Nonnull HudTrigger trigger
     ) {
         boolean enabled = session.isRuleEnabled(entry, trigger);
+        //boolean expanded = session.isDynamicComponentExpanded(entry);
 
         commands.append(hostSelector, DYNAMIC_RULE_ROW_UI);
         renderIndex.putDynamicRuleRowIndex(entry.key(), hostKey, trigger, rowIndex);
@@ -162,6 +208,7 @@ public final class HudConfigDynamicRulesRenderer {
 
         commands.set(labelSelector + ".TextSpans", Message.raw(HudTrigger.displayNameUpper(trigger)));
         commands.set(checkBoxSelector + ".Value", enabled);
+        //commands.set(checkBoxSelector + ".Disabled", !expanded);
 
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
@@ -172,63 +219,88 @@ public final class HudConfigDynamicRulesRenderer {
                 false
         );
 
+        if (isThresholdRule(entry, trigger)) {
+            String thresholdSliderSelector = rowRootSelector + " #DynamicRuleThresholdSlider";
+
+            updateThresholdRow(commands, session, entry, rowRootSelector);
+
+            events.addEventBinding(
+                    CustomUIEventBindingType.ValueChanged,
+                    thresholdSliderSelector,
+                    EventData.of("Action", "DYN_SET_THRESHOLD")
+                            .append("Component", entry.key())
+                            .append("@DynamicThreshold", thresholdSliderSelector + ".Value"),
+                    false
+            );
+        }
+
         return rowIndex + 1;
     }
 
-    private void renderDynamicThresholdControls(
+    private void updateThresholdRow(
             @Nonnull UICommandBuilder commands,
-            @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
             @Nonnull HudComponent entry,
-            @Nonnull String componentRoot
+            @Nonnull String rowRootSelector
     ) {
-        String thresholdHostSelector = componentRoot + " #DynamicThresholdHost";
-        String sliderSelector = componentRoot + " #DynamicThresholdSlider";
+        String thresholdHostSelector = rowRootSelector + " #DynamicRuleThresholdHost";
+        String thresholdSliderSelector = rowRootSelector + " #DynamicRuleThresholdSlider";
 
-        boolean visible = entry.supportsThreshold();
         boolean enabled = session.isDynamicThresholdEnabled(entry);
-
-        commands.set(thresholdHostSelector + ".Visible", visible);
-
-        if (!visible) return;
-
         int threshold = Math.round(session.getDynamicThreshold(entry));
-        commands.set(sliderSelector + ".Value", threshold);
-        commands.set(thresholdHostSelector + ".Visible", enabled);
 
-        events.addEventBinding(
-                CustomUIEventBindingType.ValueChanged,
-                sliderSelector,
-                EventData.of("Action", "DYN_SET_THRESHOLD")
-                        .append("Component", entry.key())
-                        .append("@DynamicThreshold", sliderSelector + ".Value"),
-                false
-        );
+        commands.set(thresholdHostSelector + ".Visible", enabled);
+        commands.set(thresholdSliderSelector + ".Value", threshold);
     }
 
-    public void updateDynamicVisibilityWhenLabel(
+    private boolean isThresholdRule(
+            @Nonnull HudComponent entry,
+            @Nonnull HudTrigger trigger
+    ) {
+        HudTrigger thresholdRule = entry.thresholdRule();
+        return thresholdRule == trigger;
+    }
+
+    @Nullable
+    private String findRuleRowRootSelector(
+            @Nonnull HudComponent entry,
+            @Nonnull HudTrigger trigger
+    ) {
+        Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
+        if (componentIndex == null) {
+            return null;
+        }
+
+        Integer baseRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "base", trigger);
+        if (baseRowIndex != null) {
+            return "#DynamicComponentsList[" + componentIndex + "] #DynamicRulesList[" + baseRowIndex + "]";
+        }
+
+        Integer extraRowIndex = renderIndex.getDynamicRuleRowIndex(entry.key(), "extra", trigger);
+        if (extraRowIndex != null) {
+            return "#DynamicComponentsList[" + componentIndex + "] #DynamicExtraTriggersList[" + extraRowIndex + "]";
+        }
+
+        return null;
+    }
+
+    public void rerenderDynamicComponentRules(
             @Nonnull UICommandBuilder commands,
+            @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session,
             @Nonnull HudComponent entry
     ) {
         Integer componentIndex = renderIndex.getDynamicComponentRowIndex(entry.key());
-        if (componentIndex == null) return;
-
-        String visibilitySelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicComponentVisibilityLabel";
-        String visibilityWhenSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicComponentVisibilityWhenLabel";
-
-        String componentStatus = session.getDynamicComponentVisibilityLabel(entry);
-        boolean hasRules = !session.getDynamicRuleConfig(entry).getRules().isEmpty();
-
-        commands.set(visibilitySelector + ".TextSpans", Message.raw(componentStatus));
-
-        if (componentStatus.equalsIgnoreCase("VISIBLE")) {
-            commands.set(visibilityWhenSelector + ".TextSpans", Message.raw(" - ALWAYS"));
-        } else {
-            commands.set(
-                    visibilityWhenSelector + ".TextSpans",
-                    Message.raw(hasRules ? " - VISIBLE WHEN:" : " - ALWAYS")
-            );
+        if (componentIndex == null) {
+            return;
         }
+
+        String rulesListSelector = "#DynamicComponentsList[" + componentIndex + "] #DynamicRulesList";
+
+        renderIndex.clearDynamicRuleRowIndexes(entry.key());
+        commands.clear(rulesListSelector);
+
+        renderDynamicRulesList(commands, events, session, entry, rulesListSelector);
+        updateDynamicStatus(commands, session, entry);
     }
 }

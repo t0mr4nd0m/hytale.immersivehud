@@ -42,66 +42,6 @@ final class HudComponentCatalog {
     static List<HudComponent> createAll() {
         return List.of(
                 dynamicComponent(
-                        "health",
-                        "Health",
-                        HudComponentRegistry.Group.BARS,
-                        Health,
-                        HudComponentsConfig::isHideHealthHud,
-                        HudComponentsConfig::setHideHealthHud,
-                        DynamicHudConfig::getHealth,
-                        EnumSet.of(
-                                HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.HEALTH_NOT_FULL
-                        ),
-                        EnumSet.of(HudTrigger.HEALTH_NOT_FULL),
-                        100f
-                ),
-                dynamicComponent(
-                        "stamina",
-                        "Stamina",
-                        HudComponentRegistry.Group.BARS,
-                        Stamina,
-                        HudComponentsConfig::isHideStaminaHud,
-                        HudComponentsConfig::setHideStaminaHud,
-                        DynamicHudConfig::getStamina,
-                        EnumSet.of(
-                                HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.STAMINA_NOT_FULL
-                        ),
-                        EnumSet.of(HudTrigger.STAMINA_NOT_FULL),
-                        100f
-                ),
-                dynamicComponent(
-                        "mana",
-                        "Mana",
-                        HudComponentRegistry.Group.BARS,
-                        Mana,
-                        HudComponentsConfig::isHideManaHud,
-                        HudComponentsConfig::setHideManaHud,
-                        DynamicHudConfig::getMana,
-                        EnumSet.of(
-                                HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.MANA_NOT_FULL
-                        ),
-                        EnumSet.of(HudTrigger.MANA_NOT_FULL),
-                        100f
-                ),
-                dynamicComponent(
-                        "oxygen",
-                        "Oxygen",
-                        HudComponentRegistry.Group.BARS,
-                        Oxygen,
-                        HudComponentsConfig::isHideOxygenHud,
-                        HudComponentsConfig::setHideOxygenHud,
-                        DynamicHudConfig::getOxygen,
-                        EnumSet.of(
-                                HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.OXYGEN_NOT_FULL
-                        ),
-                        EnumSet.of(HudTrigger.OXYGEN_NOT_FULL),
-                        100f
-                ),
-                dynamicComponent(
                         "compass",
                         "Compass",
                         HudComponentRegistry.Group.CORE,
@@ -176,6 +116,66 @@ final class HudComponentCatalog {
                                 HudTrigger.HOLDING_RANGED_WEAPON
                         ),
                         null
+                ),
+                dynamicComponent(
+                        "health",
+                        "Health",
+                        HudComponentRegistry.Group.BARS,
+                        Health,
+                        HudComponentsConfig::isHideHealthHud,
+                        HudComponentsConfig::setHideHealthHud,
+                        DynamicHudConfig::getHealth,
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.HEALTH_NOT_FULL
+                        ),
+                        EnumSet.of(HudTrigger.HEALTH_NOT_FULL),
+                        100f
+                ),
+                dynamicComponent(
+                        "stamina",
+                        "Stamina",
+                        HudComponentRegistry.Group.BARS,
+                        Stamina,
+                        HudComponentsConfig::isHideStaminaHud,
+                        HudComponentsConfig::setHideStaminaHud,
+                        DynamicHudConfig::getStamina,
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.STAMINA_NOT_FULL
+                        ),
+                        EnumSet.of(HudTrigger.STAMINA_NOT_FULL),
+                        100f
+                ),
+                dynamicComponent(
+                        "mana",
+                        "Mana",
+                        HudComponentRegistry.Group.BARS,
+                        Mana,
+                        HudComponentsConfig::isHideManaHud,
+                        HudComponentsConfig::setHideManaHud,
+                        DynamicHudConfig::getMana,
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.MANA_NOT_FULL
+                        ),
+                        EnumSet.of(HudTrigger.MANA_NOT_FULL),
+                        100f
+                ),
+                dynamicComponent(
+                        "oxygen",
+                        "Oxygen",
+                        HudComponentRegistry.Group.BARS,
+                        Oxygen,
+                        HudComponentsConfig::isHideOxygenHud,
+                        HudComponentsConfig::setHideOxygenHud,
+                        DynamicHudConfig::getOxygen,
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.OXYGEN_NOT_FULL
+                        ),
+                        EnumSet.of(HudTrigger.OXYGEN_NOT_FULL),
+                        100f
                 ),
                 dynamicComponent(
                         "statusicons",

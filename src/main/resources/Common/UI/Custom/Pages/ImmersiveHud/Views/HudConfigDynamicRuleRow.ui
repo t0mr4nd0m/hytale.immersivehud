@@ -1,28 +1,58 @@
 $C = "../../../Common.ui";
 
-@RuleLabelStyle = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@RuleLabelStyle        = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center);
+@SliderInputFieldStyle = InputFieldStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true );
 
 Group #DynamicRuleRow {
   LayoutMode: Left;
-  Padding: (Vertical: 4, Horizontal: 16);
+  Padding: (Vertical: 4, Left: 56, Right: 16);
   Background: #1a2533(0.6);
   OutlineColor: #3a4a5a(0.35);
   OutlineSize: 1;
 
-  Label #DynamicRuleLabel {
+  Group {
+    LayoutMode: Left;
     FlexWeight: 1;
-    Anchor: (Height: 32);
-    Text: "RULE";
-    Style: @RuleLabelStyle;
+
+    Group #DynamicRuleCheckHost {
+      Anchor: (Width: 32, Height: 32);
+      Padding: (Right: 16);
+      $C.@CheckBox #DynamicRuleCheckBox {
+        TooltipText: "Check to apply trigger";
+        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+      }
+    }
+
+    Label #DynamicRuleLabel {
+      Anchor: (Height: 32);
+      Padding: (Right: 16);
+      Text: "RULE";
+      Style: @RuleLabelStyle;
+    }
   }
 
-  Group #DynamicRuleCheckHost {
-    Anchor: (Width: 32, Height: 32);
-    LayoutMode: Center;
+  Group #DynamicRuleThresholdHost {
+    LayoutMode: Right;
+    FlexWeight: 1;
+    Anchor: (Height: 32);
+    Padding: (Left: 16);
+    Visible: false;
 
-    $C.@CheckBox #DynamicRuleCheckBox {
-      TooltipText: "Check to apply trigger";
-      TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+    Label #DynamicRuleThresholdLabel {
+      Anchor: (Height: 32);
+      Padding: (Right: 16);
+      Text: "BELOW";
+      Style: @RuleLabelStyle;
+    }
+
+    $C.@SliderNumberField #DynamicRuleThresholdSlider {
+      @Anchor = (Width: 300);
+      Value: 100;
+      Min: 0;
+      Max: 100;
+      NumberFieldContainerAnchor: (Left: 16, Width: 60, Height: 24);
+      NumberFieldSuffix: "%";
+      NumberFieldStyle: @SliderInputFieldStyle;
     }
   }
 }
