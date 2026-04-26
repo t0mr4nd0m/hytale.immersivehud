@@ -34,7 +34,7 @@ $C.@PageOverlay {
             Group #NavBar {
                 LayoutMode: Left;
                 Anchor: (Height: 40);
-                Padding: (Vertical: 8);
+                Padding: (Top: 8, Bottom: 16);
 
                 @NavButtonGroup {
 
@@ -67,7 +67,7 @@ $C.@PageOverlay {
 
                     @NavButtonContainer #ViewVisibilityBtnContainer {
                         Anchor: (Full: 0);
-                        Visible: false;
+                        Visible: true;
 
                         $C.@TextButton #ViewVisibilityBtn {
                             FlexWeight: 1;
@@ -77,38 +77,11 @@ $C.@PageOverlay {
                     }
                     @NavButtonSelectedContainer #ViewVisibilityBtnSelectedContainer {
                         Anchor: (Full: 0);
-                        Visible: true;
+                        Visible: false;
 
                         $C.@TextButton #ViewVisibilityBtnSelected {
                             FlexWeight: 1;
                             Text: "VISIBILITY";
-                            Disabled: true;
-                            Style: @CustomStyle;
-                        }
-                    }
-                }
-
-                @HorizontalSpacer {}
-
-                @NavButtonGroup {
-
-                    @NavButtonContainer #ViewDynamicRulesBtnContainer {
-                        Anchor: (Full: 0);
-                        Visible: true;
-
-                        $C.@TextButton #ViewDynamicRulesBtn {
-                            FlexWeight: 1;
-                            Text: "DYNAMIC RULES";
-                            Style: @CustomStyle;
-                        }
-                    }
-                    @NavButtonSelectedContainer #ViewDynamicRulesBtnSelectedContainer {
-                        Anchor: (Full: 0);
-                        Visible: false;
-
-                        $C.@TextButton #ViewDynamicRulesBtnSelected {
-                            FlexWeight: 1;
-                            Text: "DYNAMIC RULES";
                             Disabled: true;
                             Style: @CustomStyle;
                         }

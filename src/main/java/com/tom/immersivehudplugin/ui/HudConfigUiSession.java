@@ -13,6 +13,7 @@ import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 public final class HudConfigUiSession {
@@ -20,11 +21,6 @@ public final class HudConfigUiSession {
     private boolean dirty;
     private HudConfigView currentView = HudConfigView.PROFILES;
 
-    @Nullable
-    private HudComponentRegistry.Group expandedVisibilityGroup = HudComponentRegistry.Group.CORE;
-
-    @Nullable
-    private String expandedDynamicComponentKey;
 
     private HudComponentsConfig draftHudComponents;
     private DynamicHudConfig draftDynamicHud;
@@ -45,14 +41,6 @@ public final class HudConfigUiSession {
 
     public void showProfilesView() {
         currentView = HudConfigView.PROFILES;
-    }
-
-    public void showVisibilityView() {
-        currentView = HudConfigView.VISIBILITY;
-    }
-
-    public void showDynamicRulesView() {
-        currentView = HudConfigView.DYNAMIC_RULES;
     }
 
     public void selectProfile(@Nonnull Profile profile) {
@@ -88,24 +76,6 @@ public final class HudConfigUiSession {
         boolean hidden = entry.isHidden(draftHudComponents);
         entry.setHidden(draftHudComponents, !hidden);
         dirty = true;
-    }
-
-    @Nullable
-    public HudComponentRegistry.Group getExpandedVisibilityGroup() {
-        return expandedVisibilityGroup;
-    }
-
-    public void toggleVisibilityGroup(@Nonnull HudComponentRegistry.Group group) {
-        if (expandedVisibilityGroup == group) {
-            expandedVisibilityGroup = null;
-        } else {
-            expandedVisibilityGroup = group;
-        }
-    }
-
-    @Nonnull
-    public List<HudComponent> getDynamicEntries() {
-        return HudComponentRegistry.dynamicList();
     }
 
     @Nonnull
@@ -173,37 +143,74 @@ public final class HudConfigUiSession {
                 .toList();
     }
 
-    public boolean isDynamicComponentVisible(@Nonnull HudComponent entry) {
-        return !entry.isHidden(draftHudComponents);
+    @Nullable
+    private String selectedVisibilityTargetKey;
+
+    public void showVisibilityView() {
+        currentView = HudConfigView.VISIBILITY;
     }
 
     @Nonnull
-    public String getDynamicComponentVisibilityLabel(@Nonnull HudComponent entry) {
-        return isDynamicComponentVisible(entry) ? "VISIBLE" : "HIDDEN";
-    }
-
-    public boolean isDynamicComponentExpanded(@Nonnull HudComponent entry) {
-        return entry.key().equalsIgnoreCase(expandedDynamicComponentKey);
-    }
-
-    public void toggleDynamicComponentExpanded(@Nonnull HudComponent entry) {
-        if (entry.key().equalsIgnoreCase(expandedDynamicComponentKey)) {
-            expandedDynamicComponentKey = null;
-        } else {
-            expandedDynamicComponentKey = entry.key();
+    public String getSelectedVisibilityTargetKey() {
+        if (selectedVisibilityTargetKey != null && !selectedVisibilityTargetKey.isBlank()) {
+            return selectedVisibilityTargetKey;
         }
+
+        return HudComponentRegistry.dynamicList().isEmpty()
+                ? "static"
+                : HudComponentRegistry.dynamicList().getFirst().key();
+    }
+
+    public void selectVisibilityTarget(@Nullable String key) {
+        if (key == null || key.isBlank()) {
+            return;
+        }
+        this.selectedVisibilityTargetKey = key;
+    }
+
+    public boolean isVisibilityStaticSelection() {
+        return "static".equalsIgnoreCase(getSelectedVisibilityTargetKey());
+    }
+
+    @Nullable
+    public HudComponent getSelectedVisibilityComponent() {
+        if (isVisibilityStaticSelection()) {
+            return null;
+        }
+        return HudComponentRegistry.find(getSelectedVisibilityTargetKey());
+    }
+
+    private boolean showOnlyCheckedTriggers;
+
+    public boolean isShowOnlyCheckedTriggers() {
+        return showOnlyCheckedTriggers;
+    }
+
+    public void toggleShowOnlyCheckedTriggers() {
+        showOnlyCheckedTriggers = !showOnlyCheckedTriggers;
     }
 
     @Nonnull
     public List<HudTrigger> getVisibleRulesInDisplayOrder(@Nonnull HudComponent entry) {
-        List<HudTrigger> allRules = getBaseRulesInDisplayOrder(entry);
+        var rules = getDynamicRuleConfig(entry).getRules();
 
-        if (isDynamicComponentExpanded(entry)) {
-            return allRules;
+        return getBaseRulesInDisplayOrder(entry).stream()
+                .filter(trigger -> !showOnlyCheckedTriggers || rules.contains(trigger))
+                .toList();
+    }
+
+    public boolean shouldRebuildTriggerListAfterRuleToggle() {
+        return showOnlyCheckedTriggers;
+    }
+
+    public void clearRules(@Nonnull HudComponent entry) {
+        DynamicHudRuleConfig cfg = getDynamicRuleConfig(entry);
+
+        if (!cfg.hasRules()) {
+            return;
         }
 
-        return allRules.stream()
-                .filter(rule -> isRuleEnabled(entry, rule))
-                .toList();
+        cfg.setRules(EnumSet.noneOf(HudTrigger.class));
+        dirty = true;
     }
 }

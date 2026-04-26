@@ -1,0 +1,15 @@
+$C = "../../../Common.ui";
+
+@BaseLabelStyle = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+
+Group #VisibilitySectionHeaderRow {
+  LayoutMode: Left;
+  Anchor: (Height: 36);
+  Padding: (Vertical: 8);
+
+  Label #SectionTitle {
+    FlexWeight: 1;
+    Text: "SECTION";
+    Style: @BaseLabelStyle;
+  }
+}

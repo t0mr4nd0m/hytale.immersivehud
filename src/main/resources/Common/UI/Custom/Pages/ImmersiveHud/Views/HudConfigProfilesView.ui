@@ -9,6 +9,7 @@ Group #ProfilesRoot {
 
   $C.@SimpleContainer  #ViewHelpRow {
     Anchor: (Vertical: 8);
+    Visible: false;
 
     Label #ViewHelpText {
       FlexWeight: 1;

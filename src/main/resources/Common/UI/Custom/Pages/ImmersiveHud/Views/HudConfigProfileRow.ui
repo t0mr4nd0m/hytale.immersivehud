@@ -6,6 +6,11 @@ $C = "../../../Common.ui";
 
 @DefaultProfileSelectedBackground = PatchStyle(TexturePath: "../../../Common/HeaderTabSelectedBackground.png", Border: 12);
 
+@BalancedProfileIcon   = PatchStyle(TexturePath: "../Assets/profile_balanced.png");
+@ImmersiveProfileIcon  = PatchStyle(TexturePath: "../Assets/profile_immersive.png");
+@VanillaProfileIcon    = PatchStyle(TexturePath: "../Assets/profile_vanilla.png");
+@CustomProfileIcon     = PatchStyle(TexturePath: "../Assets/profile_custom.png");
+
 @ProfileButtonStyle = ButtonStyle(
   Hovered : (Background: @DefaultProfileSelectedBackground),
   Pressed : (Background: @DefaultProfileSelectedBackground),
@@ -38,31 +43,42 @@ Group #ProfileRow {
   }
 
   Group #ProfileButtonContent {
-    LayoutMode: Top;
+    LayoutMode: Left;
     Anchor: (Full: 0, Height: 86);
     Padding: (Vertical: 8, Horizontal: 16);
 
-    Label #ProfileLabel {
-      Text: "#ProfileLabel ";
-      Style: @ProfileLabelStyle;
-      Visible: true;
+    Group #ProfileIcon {
+      Anchor: (Height: 64, Width: 64);
+      Background: @CustomProfileIcon;
     }
 
-    Label #ProfileSelectedLabel {
-      Text: "#ProfileSelectedLabel";
-      Style: @ProfileSelectedLabelStyle;
-      Visible: false;
-    }
+    Group {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Padding: (Left: 16);
 
-    Label #ProfileDescription {
-      Anchor: (Top: 8, Bottom: 4);
-      Text: "Balanced default configuration";
-      Style: @ProfileDescriptionStyle;
+      Label #ProfileLabel {
+        Text: "#ProfileLabel ";
+        Style: @ProfileLabelStyle;
+        Visible: true;
+      }
+
+      Label #ProfileSelectedLabel {
+        Text: "#ProfileSelectedLabel";
+        Style: @ProfileSelectedLabelStyle;
+        Visible: false;
+      }
+
+      Label #ProfileDescription {
+        Anchor: (Top: 8, Bottom: 4);
+        Text: "Balanced default configuration";
+        Style: @ProfileDescriptionStyle;
+      }
     }
 
     Group #ProfileSelectedIcon {
       LayoutMode: Right;
-      Anchor: (Height: 48, Width: 48, Top: -52, Right: -28);
+      Anchor: (Height: 48, Width: 48, Right: -28);
       Padding: (Bottom: 8);
       Background: (TexturePath: "../Assets/selected-arrow.png");
       Visible: false;

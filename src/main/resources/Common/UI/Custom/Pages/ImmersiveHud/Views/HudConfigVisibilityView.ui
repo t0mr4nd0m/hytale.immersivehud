@@ -1,23 +1,192 @@
 $C = "../../../Common.ui";
 
-@BaseHelpStyle = LabelStyle( FontSize: 14 );
+@BaseHelpStyle        = LabelStyle( FontSize: 14 );
+@BaseLabelStyle       = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@HeaderLabelStyle     = LabelStyle( FontSize: 15, TextColor: $C.@ColorGoldHighlight, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@StateLabelStyle      = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center );
+
+
+@arrowLeftIcon        = PatchStyle(TexturePath: "../Assets/arrow_left.png");
+@arrowRightIcon       = PatchStyle(TexturePath: "../Assets/arrow_right.png");
+@applyFilterIcon      = PatchStyle(TexturePath: "../Assets/apply_filter.png");
+@removeFilterIcon     = PatchStyle(TexturePath: "../Assets/remove_filter.png");
+@deleteIcon           = PatchStyle(TexturePath: "../Assets/deleteIcon.png");
 
 Group #VisibilityRoot {
+  LayoutMode: Top;
+  Padding: (Right: 2);
+
+  $C.@SimpleContainer #ViewHelpRow {
+    Anchor: (Vertical: 8);
+    Visible: false;
+
+    Label #ViewHelpText {
+      FlexWeight: 1;
+      Text: "Visibility";
+      Style: @BaseHelpStyle;
+    }
+  }
+
+  Group #VisibilityScrollHost {
+    Anchor: (Vertical: 4);
     LayoutMode: Top;
 
-    $C.@SimpleContainer #ViewHelpRow {
-        Anchor: (Vertical: 8);
+    Group #VisibilityContent {
+      LayoutMode: Top;
 
-        Label #ViewHelpText {
-            FlexWeight: 1;
-            Text: "Visibility view copy";
-            Style: @BaseHelpStyle;
+      Group #VisibilityTargetsPanel {
+        LayoutMode: Top;
+
+        Label {
+          Text: "Components";
+          Style: @BaseLabelStyle;
         }
-    }
 
-    Group #VisibilityList {
-        Anchor: (Height: 344);
-        LayoutMode: TopScrolling;
-        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        Group #VisibilityTargetsList {
+          LayoutMode: Left;
+          Padding: (Top: 8);
+        }
+      }
+
+      Group #DynamicDetailHost {
+        LayoutMode: Top;
+        Anchor: (Bottom: 8);
+        Padding: (Top: 8);
+        Visible: true;
+
+        Group #VisibilityHeader {
+          LayoutMode: Left;
+          Anchor: (Height: 38);
+          Padding: (Vertical: 8, Horizontal: 16);
+          Background: #1a2533(0.6);
+          OutlineColor: #3a4a5a(0.35);
+          OutlineSize: 1;
+
+          Group #VisibilityTitleHost {
+            LayoutMode: Left;
+            FlexWeight: 1;
+            Anchor: (Height: 32);
+
+            Label #VisibilityComponentTitle {
+              Anchor: (Height: 32);
+              Text: "Health";
+              Style: @HeaderLabelStyle;
+            }
+          }
+
+          Button #VisibilityComponentStateButton {
+            Anchor: (Width: 256, Height: 32);
+            TooltipText: "Toggle visibility";
+            TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+
+            Group {
+              LayoutMode: Left;
+
+              Group {
+                Anchor: (Width: 24, Height: 24);
+                Background: @arrowLeftIcon;
+              }
+
+              Label #VisibilityComponentStateLabel {
+                FlexWeight: 1;
+                Text: "HIDDEN";
+                Style: @StateLabelStyle;
+              }
+
+              Group {
+                Anchor: (Width: 24, Height: 24);
+                Background: @arrowRightIcon;
+              }
+            }
+
+          }
+        }
+
+        Group #VisibilityTriggersSection {
+          LayoutMode: Top;
+          Padding: (Top: 4, Bottom: 8);
+
+          Group #VisibilityTriggersHeader {
+            LayoutMode: Left;
+            Anchor: (Height: 32);
+            Padding: (Right: 16);
+
+            Label {
+              FlexWeight: 1;
+              Text: "Triggers";
+              Style: @BaseLabelStyle;
+            }
+
+            Button #TriggerClearButton {
+              Anchor: (Width: 20, Height: 20);
+              TooltipText: "Uncheck all triggers";
+              TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+
+              Group #TriggerClearButtonIcon {
+                Background: @deleteIcon;
+              }
+            }
+
+            Group {
+              Anchor: (Width: 4);
+            }
+
+            Button #TriggerFilterButton {
+              Anchor: (Width: 20, Height: 20);
+              TooltipText: "Filter triggers";
+              TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+
+              Group #TriggerFilterButtonIcon {
+                Background: @applyFilterIcon;
+              }
+            }
+          }
+
+          Group #VisibilityTriggersList {
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
+            Anchor: (Height: 284);
+            Visible: true;
+          }
+
+          Group #VisibilityTriggersMessage {
+            LayoutMode: Left;
+            Anchor: (Full: 0);
+            Padding: (Top: 8, Horizontal: 16);
+            Visible: false;
+
+            Label {
+              Text: "Triggers disabled while component is set to VISIBLE";
+              Style: LabelStyle(...@BaseLabelStyle, Wrap: true, RenderBold: false, RenderUppercase: false);
+            }
+          }
+
+          Group #VisibilityNoActiveTriggersMessage  {
+            LayoutMode: Left;
+            Anchor: (Full: 0);
+            Padding: (Top: 8, Horizontal: 16);
+            Visible: false;
+
+            Label {
+              Text: "No active triggers";
+              Style: LabelStyle(...@BaseLabelStyle, Wrap: true, RenderBold: false, RenderUppercase: false);
+            }
+          }
+
+        }
+      }
+
+      Group #StaticDetailHost {
+        LayoutMode: Top;
+        Anchor: (Bottom: 8);
+        Visible: false;
+
+        Group #VisibilityStaticList {
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Anchor: (Height: 364);
+        }
+      }
     }
+  }
 }

@@ -2,6 +2,7 @@ package com.tom.immersivehudplugin.ui;
 
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.tom.immersivehudplugin.profiles.Profile;
@@ -51,6 +52,7 @@ public final class HudConfigProfilesRenderer {
             commands.append("#ProfilesList", PROFILE_ROW_UI);
 
             String rowRootSelector = "#ProfilesList[" + rowIndex + "]";
+            String profileIconSelector = rowRootSelector + " #ProfileIcon";
             String labelSelector = rowRootSelector + " #ProfileLabel";
             String labelSelectedSelector = rowRootSelector + " #ProfileSelectedLabel";
             String descriptionSelector = rowRootSelector + " #ProfileDescription";
@@ -58,8 +60,9 @@ public final class HudConfigProfilesRenderer {
             String selectedProfileSelector = rowRootSelector + " #SelectedProfile";
             String selectedProfileIconSelector = rowRootSelector + " #ProfileSelectedIcon";
 
-            commands.set(labelSelector + ".TextSpans", Message.raw(profile.label().toUpperCase()));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(profile.label().toUpperCase()));
+            commands.set(profileIconSelector + ".Background", Value.ref(PROFILE_ROW_UI, profile.label() + "ProfileIcon"));
+            commands.set(labelSelector + ".TextSpans", Message.raw(profile.label()));
+            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(profile.label()));
             commands.set(labelSelector + ".Visible", !isSelected);
             commands.set(labelSelectedSelector + ".Visible", isSelected);
             commands.set(descriptionSelector + ".TextSpans", Message.raw(profile.description()));
@@ -87,9 +90,10 @@ public final class HudConfigProfilesRenderer {
             String selectedProfileSelector = rowRootSelector + " #SelectedProfile";
             String selectedProfileIconSelector = rowRootSelector + " #ProfileSelectedIcon";
 
-            commands.set(labelSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase()));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label().toUpperCase()));
+            commands.set(labelSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label()));
+            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label()));
             commands.set(descriptionSelector + ".TextSpans", Message.raw(Profile.CUSTOM.description()));
+
 
             commands.set(labelSelector + ".Visible", false);
             commands.set(labelSelectedSelector + ".Visible", true);

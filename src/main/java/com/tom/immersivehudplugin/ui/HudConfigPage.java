@@ -13,13 +13,12 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.tom.immersivehudplugin.profiles.Profile;
-import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.component.HudComponent;
+import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
+import com.tom.immersivehudplugin.profiles.Profile;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.PageEventData> {
 
@@ -28,11 +27,9 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
     private final HudConfigPresenter presenter = new HudConfigPresenter();
-    private final HudConfigRenderIndex renderIndex = new HudConfigRenderIndex();
 
-    private final HudConfigVisibilityRenderer visibilityRenderer;
-    private final HudConfigDynamicRulesRenderer dynamicRulesRenderer;
     private final HudConfigProfilesRenderer profilesRenderer;
+    private final HudConfigVisibilityRenderer visibilityRenderer;
 
     public HudConfigPage(
             @Nonnull HudConfigUiService uiService,
@@ -41,9 +38,8 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, PageEventData.CODEC);
         this.uiService = uiService;
         this.playerRef = playerRef;
-        this.visibilityRenderer = new HudConfigVisibilityRenderer(presenter, renderIndex);
-        this.dynamicRulesRenderer = new HudConfigDynamicRulesRenderer(renderIndex);
         this.profilesRenderer = new HudConfigProfilesRenderer(presenter);
+        this.visibilityRenderer = new HudConfigVisibilityRenderer();
     }
 
     @Override
@@ -98,69 +94,41 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 rebuildPageContent();
             }
 
-            case "VIEW_DYNAMIC_RULES" -> {
-                session.showDynamicRulesView();
+            case "VIS_SELECT_TARGET" -> {
+                session.selectVisibilityTarget(data.getValue());
                 rebuildPageContent();
             }
 
-            case "TOGGLE_VISIBILITY" -> {
-                if (data.getValue() != null && !data.getValue().isBlank()) {
-                    HudComponent entry = HudComponentRegistry.find(data.getValue());
-                    if (entry == null) {
-                        return;
-                    }
-
-                    session.toggleVisibility(data.getValue());
-
-                    UICommandBuilder commands = new UICommandBuilder();
-                    visibilityRenderer.updateVisibilityRow(commands, session, data.getValue());
-                    visibilityRenderer.updateVisibilitySection(commands, session, entry.group());
-                    sendUpdate(commands, new UIEventBuilder(), false);
-                }
-            }
-
-            case "VIS_TOGGLE_GROUP" -> {
-                HudComponentRegistry.Group group = parseVisibilityGroup(data.getValue());
-                if (group != null) {
-                    session.toggleVisibilityGroup(group);
-                    rebuildPageContent();
-                }
-            }
-
-            case "TOGGLE_DYNAMIC_COMPONENT_EXPANDED" -> {
+            case "VIS_TOGGLE_RULE" -> {
+                HudTrigger rule = HudTrigger.fromString(data.getValue());
                 HudComponent entry = HudComponentRegistry.find(data.getComponent());
-                if (entry == null) {
+
+                if (rule == null || entry == null) {
                     return;
                 }
 
-                session.toggleDynamicComponentExpanded(entry);
+                session.toggleRule(entry, rule);
 
                 UICommandBuilder commands = new UICommandBuilder();
                 UIEventBuilder events = new UIEventBuilder();
 
-                dynamicRulesRenderer.updateDynamicComponentEditButton(commands, session, entry);
-                dynamicRulesRenderer.rerenderDynamicComponentRules(commands, events, session, entry);
+                if (session.shouldRebuildTriggerListAfterRuleToggle()) {
+                    visibilityRenderer.updateDynamicDetail(commands, events, session, entry);
+                } else {
+                    visibilityRenderer.updateDynamicRuleRow(commands, session, entry, rule);
+                    visibilityRenderer.updateDynamicThresholdControls(commands, session, entry);
+                    visibilityRenderer.updateDynamicHeader(commands, session, entry);
+                }
+
                 sendUpdate(commands, events, false);
             }
 
-            case "TOGGLE_RULE" -> {
-                HudTrigger rule = HudTrigger.fromString(data.getValue());
+            case "VIS_SET_THRESHOLD" -> {
                 HudComponent entry = HudComponentRegistry.find(data.getComponent());
-
-                if (rule != null && entry != null) {
-                    session.toggleRule(entry, rule);
-
-                    UICommandBuilder commands = new UICommandBuilder();
-                    dynamicRulesRenderer.updateDynamicRuleRow(commands, session, entry, rule);
-                    dynamicRulesRenderer.updateDynamicStatus(commands, session, entry);
-                    dynamicRulesRenderer.updateDynamicThresholdControls(commands, session, entry);
-                    sendUpdate(commands, new UIEventBuilder(), false);
-                }
-            }
-
-            case "DYN_SET_THRESHOLD" -> {
-                HudComponent entry = HudComponentRegistry.find(data.getComponent());
-                if (entry == null || !entry.supportsThreshold() || !session.isDynamicThresholdEnabled(entry)) {
+                if (entry == null
+                        || !entry.supportsThreshold()
+                        || !session.isDynamicThresholdEnabled(entry)
+                        || !session.isHidden(entry)) {
                     return;
                 }
 
@@ -168,8 +136,64 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 session.setDynamicThreshold(entry, threshold);
 
                 UICommandBuilder commands = new UICommandBuilder();
-                dynamicRulesRenderer.updateDynamicThresholdControls(commands, session, entry);
+                visibilityRenderer.updateDynamicThresholdControls(commands, session, entry);
                 sendUpdate(commands, new UIEventBuilder(), false);
+            }
+
+            case "VIS_TOGGLE_VISIBILITY" -> {
+
+                HudComponent entry = HudComponentRegistry.find(data.getComponent());
+                if (entry == null) return;
+
+                session.toggleVisibility(entry.key());
+
+                UICommandBuilder commands = new UICommandBuilder();
+                UIEventBuilder events = new UIEventBuilder();
+
+                visibilityRenderer.updateDynamicDetail(commands, events, session, entry);
+                sendUpdate(commands, events, false);
+            }
+
+            case "VIS_TOGGLE_STATIC_VISIBILITY" -> {
+                HudComponent entry = HudComponentRegistry.find(data.getComponent());
+                if (entry == null) {
+                    return;
+                }
+
+                session.toggleVisibility(entry.key());
+
+                UICommandBuilder commands = new UICommandBuilder();
+                visibilityRenderer.updateStaticRow(commands, session, entry);
+                sendUpdate(commands, new UIEventBuilder(), false);
+            }
+
+            case "VIS_TOGGLE_TRIGGER_FILTER" -> {
+                HudComponent entry = session.getSelectedVisibilityComponent();
+                if (entry == null) return;
+
+                session.toggleShowOnlyCheckedTriggers();
+
+                UICommandBuilder commands = new UICommandBuilder();
+                UIEventBuilder events = new UIEventBuilder();
+
+                visibilityRenderer.updateDynamicDetail(commands, events, session, entry);
+                sendUpdate(commands, events, false);
+            }
+
+            case "VIS_CLEAR_TRIGGERS" -> {
+                HudComponent entry = HudComponentRegistry.find(data.getComponent());
+                if (entry == null || !entry.supportsDynamicRules()) {
+                    return;
+                }
+
+                session.clearRules(entry);
+
+                UICommandBuilder commands = new UICommandBuilder();
+                UIEventBuilder events = new UIEventBuilder();
+
+                visibilityRenderer.updateDynamicDetail(commands, events, session, entry);
+
+                sendUpdate(commands, events, false);
             }
 
             case "APPLY" -> {
@@ -191,8 +215,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             return;
         }
 
-        renderIndex.clearAll();
-
         UICommandBuilder commands = new UICommandBuilder();
         UIEventBuilder events = new UIEventBuilder();
 
@@ -208,7 +230,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
             @Nonnull UIEventBuilder events
     ) {
         HudConfigUiSession session = uiService.getSession(playerRef);
-
         if (session == null) {
             return;
         }
@@ -218,7 +239,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         switch (session.getCurrentView()) {
             case PROFILES -> profilesRenderer.renderProfilesView(commands, events, session);
             case VISIBILITY -> visibilityRenderer.renderVisibilityView(commands, events, session);
-            case DYNAMIC_RULES -> dynamicRulesRenderer.renderDynamicRulesView(commands, events, session);
         }
     }
 
@@ -229,33 +249,16 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
         HudConfigView currentView = session.getCurrentView();
 
         boolean profilesSelected = currentView == HudConfigView.PROFILES;
-        boolean visibilityActive = currentView == HudConfigView.VISIBILITY;
-        boolean dynamicActive = currentView == HudConfigView.DYNAMIC_RULES;
+        boolean visibilitySelected = currentView == HudConfigView.VISIBILITY;
 
         commands.set("#ViewProfilesBtnContainer.Visible", !profilesSelected);
         commands.set("#ViewProfilesBtnSelectedContainer.Visible", profilesSelected);
 
-        commands.set("#ViewVisibilityBtnContainer.Visible", !visibilityActive);
-        commands.set("#ViewVisibilityBtnSelectedContainer.Visible", visibilityActive);
-
-        commands.set("#ViewDynamicRulesBtnContainer.Visible", !dynamicActive);
-        commands.set("#ViewDynamicRulesBtnSelectedContainer.Visible", dynamicActive);
+        commands.set("#ViewVisibilityBtnContainer.Visible", !visibilitySelected);
+        commands.set("#ViewVisibilityBtnSelectedContainer.Visible", visibilitySelected);
 
         commands.set("#ApplyButton.Text", "APPLY");
         commands.set("#CancelButton.Text", "CANCEL");
-    }
-
-    @Nullable
-    private HudComponentRegistry.Group parseVisibilityGroup(@Nullable String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-
-        try {
-            return HudComponentRegistry.Group.valueOf(value.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
     }
 
     private void bindChromeEvents(@Nonnull UIEventBuilder events) {
@@ -281,18 +284,6 @@ public final class HudConfigPage extends InteractiveCustomUIPage<HudConfigPage.P
                 CustomUIEventBindingType.Activating,
                 "#ViewVisibilityBtnSelected",
                 PageEventData.action("VIEW_VISIBILITY"),
-                false
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#ViewDynamicRulesBtn",
-                PageEventData.action("VIEW_DYNAMIC_RULES"),
-                false
-        );
-        events.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#ViewDynamicRulesBtnSelected",
-                PageEventData.action("VIEW_DYNAMIC_RULES"),
                 false
         );
         events.addEventBinding(

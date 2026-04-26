@@ -1,18 +1,18 @@
 package com.tom.immersivehudplugin.profiles;
 
 public enum Profile {
-    DEFAULT("Default", """
-            Balanced experience.
-            Shows HUD elements only when they are relevant during gameplay."""),
+    BALANCED("Balanced", """
+            Balanced experience. [RECOMENDED]
+            HUD elements appear only when relevant during gameplay."""),
     IMMERSIVE("Immersive", """
-            Minimal HUD, maximum immersion.
-            Most elements stay hidden and only appear in key gameplay moments."""),
-    DISABLED("Disabled", """
-            Full HUD visibility.
-            All HUD elements are always visible (vanilla-like experience)."""),
+            Minimal HUD, maximum immersion. [ADVANCED]
+            Most elements stay hidden and only some of them appear only during key gameplay moments."""),
+    VANILLA("Vanilla", """
+            Original Hytale HUD experience.
+            All HUD elements remain visible at all times."""),
     CUSTOM("Custom", """
             Your personalized HUD configuration.
-            You’ve customized components or triggers outside the predefined profiles.""");
+            You’ve customized HUD visibility beyond predefined profiles.""");
 
     private final String label;
     private final String description;

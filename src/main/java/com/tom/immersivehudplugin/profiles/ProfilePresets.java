@@ -24,8 +24,8 @@ public final class ProfilePresets {
 
         switch (profile) {
             case IMMERSIVE -> applyImmersive(cfg);
-            case DISABLED -> applyDisabled(cfg);
-            case DEFAULT -> { /* DO NOTHING */ }
+            case VANILLA -> applyVanilla(cfg);
+            case BALANCED -> { /* DO NOTHING */ }
         }
 
         cfg.sanitize();
@@ -63,7 +63,7 @@ public final class ProfilePresets {
         dyn.getHotbar().setRules(EnumSet.noneOf(HudTrigger.class));
     }
 
-    private static void applyDisabled(PlayerConfig cfg) {
+    private static void applyVanilla(PlayerConfig cfg) {
         HudComponentsConfig hud = cfg.getHudComponents();
         DynamicHudConfig dyn = cfg.getDynamicHud();
 

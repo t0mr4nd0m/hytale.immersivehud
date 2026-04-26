@@ -32,26 +32,6 @@ public final class HudConfigPresenter {
         return Profile.CUSTOM;
     }
 
-    public String getVisibilityGroupCounterLabel(
-            HudComponentRegistry.Group group,
-            HudComponentsConfig hud
-    ) {
-        int total = 0;
-        int hidden = 0;
-
-        for (var entry : HudComponentRegistry.allList()) {
-            if (entry.group() != group) continue;
-
-            total++;
-            if (entry.isHidden(hud)) {
-                hidden++;
-            }
-        }
-
-        int shown = total - hidden;
-        return "visible [" + shown + "/" + total + "] total";
-    }
-
     // ---------------- internal helpers ----------------
 
     private boolean hudComponentsEqual(
