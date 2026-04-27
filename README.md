@@ -30,7 +30,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
 - Dynamic HUD visibility based on gameplay
 - Configurable triggers per component
-- Built-in config profiles (default, immersive, disabled)
+- Built-in config profiles (balanced, immersive, vanilla)
 - Per-player configuration
 - Lightweight and performance-friendly
 - Custom config UI
@@ -229,9 +229,9 @@ You can switch between them instantly using commands.
 
 | Profile     | Description                                       |
 |-------------|---------------------------------------------------|
-| `default`   | Balanced. Shows HUD components only when relevant |
+| `balanced`  | Balanced. Shows HUD components only when relevant |
 | `immersive` | Minimal HUD, maximum immersion                    |
-| `disabled`  | HUD always visible (vanilla-like)                 |
+| `vanilla`   | HUD always visible (vanilla-like)                 |
 
 ---
 
@@ -245,13 +245,10 @@ or even better, use in-game **Config UI**
 Use command `/ihud config` to open in-game configuration UI to manage visibility, rules and profiles interactively.
 
 1. Select one of the available profiles to start customizing your experience
-<p style="text-align:center;"><img src="assets/006_config_0_profile.png" alt="Immersive HUD"/></p>
+<p style="text-align:center;"><img src="assets/006_config_0_profile.png" alt="Immersive HUD Config Profile"/></p>
 
-2. Toggle off the components you want to hide from your HUD
-<p style="text-align:center;"><img src="assets/006_config_1_visibility.png" alt="Immersive HUD"/></p>
-
-3. Select the triggers to change HUD components visibility 
-<p style="text-align:center;"><img src="assets/006_config_2_dynamic_rules.png" alt="Immersive HUD"/></p>
+2. Configure the visibility and rules to hide or show the different HUD elements
+<p style="text-align:center;"><img src="assets/006_config_1_visibility.png" alt="Immersive HUD Config Visibility"/></p>
 
 Finally, press **APPLY** to save and activate your configuration and start enjoying your new Immersive HUD experience.
 
@@ -535,6 +532,7 @@ runtime/
    HudTimers.java
    PlayerHeldItemState.java
    PlayerHudState.java
+   PlayerLifecycleService.java
    context/
       HudStateUpdater.java
       HudTriggerContextFactory.java
@@ -552,16 +550,21 @@ runtime/
       HudVisibilityCoordinator.java
       
 ui/
-   HudConfigDynamicRulesRenderer.java
    HudConfigPage.java
    HudConfigPresenter.java
    HudConfigProfilesRenderer.java
-   HudConfigRenderIndex.java
    HudConfigUiService.java
    HudConfigUiSession.java
    HudConfigView.java
    HudConfigVisibilityRenderer.java
 ```
+
+---
+
+## 🐞 Known Issues
+
+- **Input Bindings**: Due to limitations in the Hytale API, visibility for this HUD component cannot be reliably controlled by the plugin. To fully hide it, use the in-game settings.
+- **Status Icons**: Due to limitations in the Hytale API, this HUD component's visibility cannot currently be controlled by the plugin, and there is no available way to hide it.
 
 ---
 
