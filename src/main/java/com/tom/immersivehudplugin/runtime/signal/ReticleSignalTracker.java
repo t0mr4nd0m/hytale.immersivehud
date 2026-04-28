@@ -1,7 +1,6 @@
 package com.tom.immersivehudplugin.runtime.signal;
 
 import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -76,7 +75,7 @@ public final class ReticleSignalTracker {
         boolean hasEntityTarget = target != null && !target.equals(tickContext.ref());
 
         boolean lookingAtInteractable = false;
-        Vector3i blockPos = TargetUtil.getTargetBlock(
+        var blockPos = TargetUtil.getTargetBlock(
                 tickContext.ref(),
                 targetRange,
                 tickContext.store()

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.4 - Hytale Update 5
+
+* Updated to Hytale Update 5 - 2026.04.23-3f4475f43
+
 ## v1.2.3 - Technical update + added StatusIcons to dynamic components + Config UI redesign
 
 **Code Changes**
