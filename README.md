@@ -565,6 +565,7 @@ ui/
 
 - **Input Bindings**: Due to limitations in the Hytale API, visibility for this HUD component cannot be reliably controlled by the plugin. To fully hide it, use the in-game settings.
 - **Status Icons**: Due to limitations in the Hytale API, this HUD component's visibility cannot currently be controlled by the plugin, and there is no available way to hide it.
+- **Network Quality**: Due to limitations in the Hytale API, visibility for this HUD component cannot currently be controlled by the plugin. To fully hide it, use the in-game settings.
 
 ---
 
@@ -577,7 +578,8 @@ Possible future improvements:
   - ~~PLAYER_GLIDING~~
   - IN_COMBAT
 - Import / export custom config profiles
-- Support for future Hud components
+- Support for future Hytale Hud components
+- Support for Hud components from other mods (API)
 
 ---
 
