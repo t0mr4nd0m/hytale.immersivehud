@@ -4,6 +4,7 @@ import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
@@ -82,26 +83,17 @@ public final class HeldItemSignalTracker {
 
     @Nullable
     private Item getHeldItemFromInventory(
-            PlayerHudState state,
             PlayerTickContext tickContext
     ) {
         try {
-            var inventory = tickContext.player().getInventory();
-            if (inventory == null) { return null; }
+            var entityStoreHolder = tickContext.player().toHolder();
+            if (entityStoreHolder == null) { return null; }
 
-            var heldStack = inventory.getActiveHotbarItem();
+            var heldStack = InventoryComponent.getItemInHand(entityStoreHolder);
             if (heldStack == null) { return null; }
 
             String itemId = heldStack.getItemId();
             if (itemId.isBlank()) { return null; }
-
-            if (state.heldItem.lastActiveHotbarSlot == -1) {
-
-                int slot = inventory.getActiveHotbarSlot();
-                if (slot >= 0 && slot <= 8) {
-                    state.heldItem.lastActiveHotbarSlot = slot;
-                }
-            }
 
             return resolveItem(itemId);
 
@@ -118,7 +110,7 @@ public final class HeldItemSignalTracker {
             return;
         }
 
-        Item heldItem = getHeldItemFromInventory(state, tickContext);
+        Item heldItem = getHeldItemFromInventory(tickContext);
 
         state.applyHeldItemState(
                 HeldItemState.isRangedWeapon(heldItem),

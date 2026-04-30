@@ -7,7 +7,6 @@ public final class PlayerHeldItemState {
     public volatile boolean consumableInHand;
     public volatile boolean initialized;
     public volatile boolean refreshRequested = true;
-    public volatile int lastActiveHotbarSlot = -1;
 
     public void apply(
             boolean rangedWeapon,
@@ -27,7 +26,6 @@ public final class PlayerHeldItemState {
         consumableInHand = false;
         initialized = false;
         refreshRequested = true;
-        lastActiveHotbarSlot = -1;
     }
 
     public boolean needsRepair() {
