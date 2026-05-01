@@ -7,8 +7,8 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
+import com.hypixel.hytale.server.npc.role.support.MarkedEntitySupport;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class CombatSignalScanner {
@@ -24,7 +24,9 @@ public final class CombatSignalScanner {
             return false;
         }
 
-        TransformComponent playerTransform = store.getComponent(playerRef, TransformComponent.getComponentType());
+        TransformComponent playerTransform =
+                store.getComponent(playerRef, TransformComponent.getComponentType());
+
         if (playerTransform == null) {
             return false;
         }
@@ -32,7 +34,10 @@ public final class CombatSignalScanner {
         AtomicBoolean found = new AtomicBoolean(false);
 
         store.forEachChunk(
-                Query.and(NPCEntity.getComponentType(), TransformComponent.getComponentType()),
+                Query.and(
+                        NPCEntity.getComponentType(),
+                        TransformComponent.getComponentType()
+                ),
                 (chunk, commandBuffer) -> {
                     if (found.get()) {
                         return;
@@ -51,7 +56,9 @@ public final class CombatSignalScanner {
                             continue;
                         }
 
-                        NPCEntity npc = chunk.getComponent(i, NPCEntity.getComponentType());
+                        NPCEntity npc =
+                                chunk.getComponent(i, NPCEntity.getComponentType());
+
                         if (isNpcTargetingPlayer(npc, playerRef)) {
                             found.set(true);
                             return;
@@ -63,45 +70,24 @@ public final class CombatSignalScanner {
         return found.get();
     }
 
-    private Object firstNonNull(Object... values) {
-        for (Object value : values) {
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    private boolean isNpcTargetingPlayer(NPCEntity npc, Ref<EntityStore> playerRef) {
-        Role role = getRole(npc);
+    private boolean isNpcTargetingPlayer(
+            NPCEntity npc,
+            Ref<EntityStore> playerRef
+    ) {
+        Role role = npc.getRole();
         if (role == null) {
             return false;
         }
 
-        Object markedEntitySupport = invokeNoArg(role, "getMarkedEntitySupport");
+        MarkedEntitySupport markedEntitySupport = role.getMarkedEntitySupport();
         if (markedEntitySupport == null) {
             return false;
         }
 
-        Ref<EntityStore> lockedTarget = getMarkedTarget(markedEntitySupport, LOCKED_TARGET_SLOT);
+        Ref<EntityStore> lockedTarget =
+                markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
+
         return playerRef.equals(lockedTarget);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Ref<EntityStore> getMarkedTarget(Object markedEntitySupport, String slot) {
-        Object value = firstNonNull(
-                invoke(markedEntitySupport, "getMarkedEntityRef", new Class<?>[]{String.class}, slot),
-                invoke(markedEntitySupport, "getMarkedEntityRef", new Class<?>[]{int.class}, 0)
-        );
-
-        return value instanceof Ref<?> ref
-                ? (Ref<EntityStore>) ref
-                : null;
-    }
-
-    private Role getRole(NPCEntity npc) {
-        Object value = invokeNoArg(npc, "getRole");
-        return value instanceof Role role ? role : null;
     }
 
     private boolean isWithinRange(
@@ -123,23 +109,5 @@ public final class CombatSignalScanner {
         double rangeSq = (double) range * range;
 
         return (dx * dx + dy * dy + dz * dz) <= rangeSq;
-    }
-
-    private Object invokeNoArg(Object target, String methodName) {
-        return invoke(target, methodName, new Class<?>[0]);
-    }
-
-    private Object invoke(Object target, String methodName, Class<?>[] parameterTypes, Object... args) {
-        if (target == null) {
-            return null;
-        }
-
-        try {
-            Method method = target.getClass().getMethod(methodName, parameterTypes);
-            method.setAccessible(true);
-            return method.invoke(target, args);
-        } catch (ReflectiveOperationException ignored) {
-            return null;
-        }
     }
 }
