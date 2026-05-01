@@ -2,7 +2,7 @@ package com.tom.immersivehudplugin.profiles;
 
 public enum Profile {
     BALANCED("Balanced", """
-            Balanced experience. [RECOMENDED]
+            Balanced experience. [RECOMMENDED]
             HUD elements appear only when relevant during gameplay."""),
     IMMERSIVE("Immersive", """
             Minimal HUD, maximum immersion. [ADVANCED]
