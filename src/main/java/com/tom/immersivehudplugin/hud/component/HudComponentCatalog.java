@@ -68,7 +68,8 @@ final class HudComponentCatalog {
                                 HudTrigger.PLAYER_SITTING,
                                 HudTrigger.PLAYER_SLEEPING,
                                 HudTrigger.PLAYER_IN_FLUID,
-                                HudTrigger.PLAYER_ON_GROUND
+                                HudTrigger.PLAYER_ON_GROUND,
+                                HudTrigger.IN_COMBAT
                         ),
                         EnumSet.of(HudTrigger.PLAYER_MOVING),
                         null
@@ -85,7 +86,8 @@ final class HudComponentCatalog {
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.CONSUMABLE_USE,
                                 HudTrigger.HOLDING_MELEE_WEAPON,
-                                HudTrigger.HOLDING_RANGED_WEAPON
+                                HudTrigger.HOLDING_RANGED_WEAPON,
+                                HudTrigger.IN_COMBAT
                         ),
                         EnumSet.of(HudTrigger.HOTBAR_INPUT),
                         null
@@ -106,7 +108,8 @@ final class HudComponentCatalog {
                                 HudTrigger.INTERACTABLE_BLOCK,
                                 HudTrigger.HOLDING_RANGED_WEAPON,
                                 HudTrigger.HOLDING_MELEE_WEAPON,
-                                HudTrigger.BLOCKING_ATTACK
+                                HudTrigger.BLOCKING_ATTACK,
+                                HudTrigger.IN_COMBAT
                         ),
                         EnumSet.of(
                                 HudTrigger.CHARGING_WEAPON,
@@ -127,7 +130,8 @@ final class HudComponentCatalog {
                         DynamicHudConfig::getHealth,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.HEALTH_NOT_FULL
+                                HudTrigger.HEALTH_NOT_FULL,
+                                HudTrigger.IN_COMBAT
                         ),
                         EnumSet.of(HudTrigger.HEALTH_NOT_FULL),
                         100f
@@ -142,7 +146,8 @@ final class HudComponentCatalog {
                         DynamicHudConfig::getStamina,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.STAMINA_NOT_FULL
+                                HudTrigger.STAMINA_NOT_FULL,
+                                HudTrigger.IN_COMBAT
                         ),
                         EnumSet.of(HudTrigger.STAMINA_NOT_FULL),
                         100f
@@ -157,7 +162,8 @@ final class HudComponentCatalog {
                         DynamicHudConfig::getMana,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
-                                HudTrigger.MANA_NOT_FULL
+                                HudTrigger.MANA_NOT_FULL,
+                                HudTrigger.IN_COMBAT
                         ),
                         EnumSet.of(HudTrigger.MANA_NOT_FULL),
                         100f
@@ -185,7 +191,10 @@ final class HudComponentCatalog {
                         HudComponentsConfig::isHideStatusIconsHud,
                         HudComponentsConfig::setHideStatusIconsHud,
                         DynamicHudConfig::getStatusIcons,
-                        EnumSet.of(HudTrigger.HOTBAR_INPUT),
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.IN_COMBAT
+                        ),
                         EnumSet.of(HudTrigger.HOTBAR_INPUT),
                         null
                 ),

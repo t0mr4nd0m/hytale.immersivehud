@@ -17,6 +17,7 @@ public final class ConfigJsonMapper {
     private static final String INTERVAL_MS = "IntervalMs";
     private static final String HIDE_DELAY_MS = "HideDelayMs";
     private static final String RETICLE_TARGET_RANGE = "ReticleTargetRange";
+    private static final String COMBAT_SCAN_RANGE = "CombatScanRange";
     private static final String DEFAULT_HUD_COMPONENTS = "DefaultHudComponents";
     private static final String DEFAULT_DYNAMIC_HUD = "DefaultDynamicHud";
     private static final String HUD_COMPONENTS = "HudComponents";
@@ -32,6 +33,7 @@ public final class ConfigJsonMapper {
         root.addProperty(INTERVAL_MS, cfg.getIntervalMs());
         root.addProperty(HIDE_DELAY_MS, cfg.getHideDelayMs());
         root.addProperty(RETICLE_TARGET_RANGE, cfg.getReticleTargetRange());
+        root.addProperty(COMBAT_SCAN_RANGE, cfg.getCombatScanRange());
         root.add(DEFAULT_HUD_COMPONENTS, toJson(cfg.getDefaultHudComponents()));
         root.add(DEFAULT_DYNAMIC_HUD, toJson(cfg.getDefaultDynamicHud()));
 
@@ -56,6 +58,9 @@ public final class ConfigJsonMapper {
         }
         if (isNumber(root, RETICLE_TARGET_RANGE)) {
             cfg.setReticleTargetRange(root.get(RETICLE_TARGET_RANGE).getAsFloat());
+        }
+        if (isNumber(root, COMBAT_SCAN_RANGE)) {
+            cfg.setCombatScanRange(root.get(COMBAT_SCAN_RANGE).getAsFloat());
         }
 
         JsonObject hudObj = getObject(root, DEFAULT_HUD_COMPONENTS);

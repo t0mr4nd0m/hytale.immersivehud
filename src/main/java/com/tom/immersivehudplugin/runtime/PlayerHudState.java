@@ -28,6 +28,7 @@ public final class PlayerHudState {
     public boolean staticHudInitialized;
     public boolean staticDirty = true;
 
+    public volatile long lastCombatScanMs;
     public volatile long lastReticleScanMs;
     public volatile int hideDelayMs = GlobalConfig.HIDE_DELAY_MS;
 
@@ -135,6 +136,7 @@ public final class PlayerHudState {
     private void resetTimersAndScans() {
         t.clearAll();
         lastReticleScanMs = 0L;
+        lastCombatScanMs = 0L;
     }
 
     public record HudDelta(

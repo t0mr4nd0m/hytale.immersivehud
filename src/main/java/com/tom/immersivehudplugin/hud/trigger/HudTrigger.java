@@ -37,6 +37,7 @@ public enum HudTrigger {
     HOLDING_RANGED_WEAPON   (Category.COMBAT, Source.SIGNAL, false),
     HOLDING_MELEE_WEAPON    (Category.COMBAT, Source.SIGNAL, false),
     BLOCKING_ATTACK         (Category.COMBAT, Source.SIGNAL, false),
+    IN_COMBAT               (Category.COMBAT, Source.SIGNAL, false),
 
     HEALTH_NOT_FULL         (Category.HUD_BAR , Source.HUD_BAR, true),
     STAMINA_NOT_FULL        (Category.HUD_BAR , Source.HUD_BAR, true),

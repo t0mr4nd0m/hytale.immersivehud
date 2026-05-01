@@ -14,10 +14,7 @@ import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
 import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
-import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
-import com.tom.immersivehudplugin.runtime.signal.HudSignalPipeline;
-import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
-import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.*;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 
 import javax.annotation.Nullable;
@@ -39,6 +36,7 @@ public final class HudRuntimeService {
     private final HeldItemSignalTracker heldItemSignalTracker;
     private final MovementSignalTracker movementSignalTracker;
     private final ReticleSignalTracker reticleSignalTracker;
+    private final CombatSignalTracker combatSignalTracker;
     private final HudSignalPipeline hudSignalPipeline;
     private final HudBarStateUpdater barUpdater;
     private final PlayerTickContextFactory tickContextFactory;
@@ -70,10 +68,12 @@ public final class HudRuntimeService {
         this.tickContextFactory = new PlayerTickContextFactory();
         this.movementSignalTracker = new MovementSignalTracker();
         this.reticleSignalTracker = new ReticleSignalTracker();
+        this.combatSignalTracker = new CombatSignalTracker();
         this.hudSignalPipeline = new HudSignalPipeline(
                 heldItemSignalTracker,
                 movementSignalTracker,
-                reticleSignalTracker
+                reticleSignalTracker,
+                combatSignalTracker
         );
         this.barUpdater = new HudBarStateUpdater(
                 healthState,

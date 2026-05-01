@@ -10,15 +10,18 @@ public final class HudSignalPipeline {
     private final HeldItemSignalTracker heldItemSignalTracker;
     private final MovementSignalTracker movementSignalTracker;
     private final ReticleSignalTracker reticleSignalTracker;
+    private final CombatSignalTracker combatSignalTracker;
 
     public HudSignalPipeline(
             HeldItemSignalTracker heldItemSignalTracker,
             MovementSignalTracker movementSignalTracker,
-            ReticleSignalTracker reticleSignalTracker
+            ReticleSignalTracker reticleSignalTracker,
+            CombatSignalTracker combatSignalTracker
     ) {
         this.heldItemSignalTracker = heldItemSignalTracker;
         this.movementSignalTracker = movementSignalTracker;
         this.reticleSignalTracker = reticleSignalTracker;
+        this.combatSignalTracker = combatSignalTracker;
     }
 
     public void update(
@@ -37,5 +40,6 @@ public final class HudSignalPipeline {
         movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
         reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
         heldItemSignalTracker.cleanupWeaponSignals(state);
+        combatSignalTracker.updateCombatSignalIfNeeded(state, tickContext, global, now, hideDelay);
     }
 }

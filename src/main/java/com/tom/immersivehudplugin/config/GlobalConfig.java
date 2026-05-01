@@ -7,11 +7,13 @@ public final class GlobalConfig {
     public static final int INTERVAL_MS = 250;
     public static final int HIDE_DELAY_MS = 2000;
     public static final float RETICLE_TARGET_RANGE = 8.0f;
+    public static final float COMBAT_SCAN_RANGE = 24f;
 
     private String configVersion = "";
     private int intervalMs = INTERVAL_MS;
     private int hideDelayMs = HIDE_DELAY_MS;
     private float reticleTargetRange = RETICLE_TARGET_RANGE;
+    private float combatScanRange = COMBAT_SCAN_RANGE;
 
     private HudComponentsConfig defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
     private DynamicHudConfig defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
@@ -46,6 +48,14 @@ public final class GlobalConfig {
 
     public void setReticleTargetRange(float reticleTargetRange) {
         this.reticleTargetRange = reticleTargetRange;
+    }
+
+    public float getCombatScanRange() {
+        return combatScanRange;
+    }
+
+    public void setCombatScanRange(float range) {
+        this.combatScanRange = range;
     }
 
     public HudComponentsConfig getDefaultHudComponents() {
@@ -84,6 +94,11 @@ public final class GlobalConfig {
 
         if (hideDelayMs < 0) {
             hideDelayMs = HIDE_DELAY_MS;
+            changed = true;
+        }
+
+        if (combatScanRange <= 0f) {
+            combatScanRange = COMBAT_SCAN_RANGE;
             changed = true;
         }
 
