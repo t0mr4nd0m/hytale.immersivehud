@@ -2,7 +2,11 @@
 
 ## v1.2.4 - Hytale Update 5
 
-* Updated to Hytale Update 5 - 2026.04.23-3f4475f43
+* Updated to Hytale Update 5 - 2026.04.30-b4f6a911e
+* Removed deprecated method: getActiveHotbarItem > IntentoryComponent.getItemInHand
+* Removed obsolete commands: status, profile, toggle and rules
+* Extensive refactor related to UI files: code cleaning, improved logic and readability
+* Added: world paused while config UI is open
 
 ## v1.2.3 - Technical update + added StatusIcons to dynamic components + Config UI redesign
 
@@ -10,9 +14,9 @@
 * extensive refactor and code cleaning to avoid duplication, remove dead code, improve logic and readability, etc...
 
 **New Feature**
-* added StatusIcons to dynamic component catalog, associated to trigger 'HOTBAR_INPUT'. However, doing so, I've found that the component cannot be hide using Hytale API (Am I doing something wrong? Maybe is it a bug from Hytale API?). Further testing and analysis will be required.
+* added StatusIcons to dynamic component catalogue, associated to trigger 'HOTBAR_INPUT'. However, doing so, I've found that the component cannot be hide using Hytale API (Am I doing something wrong? Maybe is it a bug from Hytale API?). Further testing and analysis will be required.
 * minor tweaks to **'Immersive'** profile to reduce even more hud visibility.
-* redesigned config UI. Final version? Maybe, problably, I don't know but I like it more this way. :)
+* redesigned config UI. Final version? Maybe, probably, I don't know, but I like it more this way. :)
 
 ## v1.2.2 - Technical update + new trigger BLOCKING_ATTACK
 
