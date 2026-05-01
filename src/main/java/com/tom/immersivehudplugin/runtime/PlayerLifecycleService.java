@@ -1,10 +1,17 @@
 package com.tom.immersivehudplugin.runtime;
 
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
+
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public final class PlayerLifecycleService {
 
@@ -35,10 +42,19 @@ public final class PlayerLifecycleService {
     }
 
     private void onPlayerReady(PlayerReadyEvent event) {
-        PlayerRef playerRef = event.getPlayer().getPlayerRef();
+        PlayerRef playerRef = resolvePlayerRef(event.getPlayer());
 
-        playerConfigService.getOrLoadPlayerConfig(playerRef.getUuid());
+        playerConfigService.getOrLoadPlayerConfig(Objects.requireNonNull(playerRef).getUuid());
         hudRuntimeService.onPlayerReady(playerRef);
+    }
+
+    private PlayerRef resolvePlayerRef(@Nonnull Player player) {
+        Ref<EntityStore> ref = player.getReference();
+
+        if (ref == null || !ref.isValid()) { return null; }
+        Store<EntityStore> store = ref.getStore();
+
+        return store.getComponent(ref, PlayerRef.getComponentType());
     }
 
     private void onPlayerDisconnect(PlayerDisconnectEvent event) {
