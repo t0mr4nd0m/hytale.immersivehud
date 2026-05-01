@@ -13,8 +13,10 @@ import java.util.List;
 
 public final class HudConfigProfilesRenderer {
 
-    private static final String PROFILES_UI = "Pages/ImmersiveHud/Views/HudConfigProfilesView.ui";
-    private static final String PROFILE_ROW_UI = "Pages/ImmersiveHud/Views/HudConfigProfileRow.ui";
+    private static final String PROFILES_UI = "Views/ProfilesView.ui";
+    private static final String PROFILE_ROW_UI = "Views/ProfileRow.ui";
+
+    private static final String CONTENT_SELECTOR = "#ProfilesContent";
 
     private final HudConfigPresenter presenter;
 
@@ -28,77 +30,103 @@ public final class HudConfigProfilesRenderer {
             @Nonnull HudConfigUiSession session
     ) {
         commands.append("#ContentHost", PROFILES_UI);
-        commands.clear("#ProfilesList");
-
-        commands.set(
-                "#ViewHelpText.TextSpans",
-                Message.raw(session.getCurrentView().helpText())
-        );
-
-        List<Profile> profiles = Arrays.stream(Profile.values())
-                .filter(profile -> profile != Profile.CUSTOM)
-                .toList();
+        commands.clear(CONTENT_SELECTOR);
 
         Profile currentProfile = presenter.resolveCurrentProfile(
                 session.getDraftHudComponents(),
                 session.getDraftDynamicHud()
         );
 
-        int rowIndex = 0;
+        List<Profile> profiles = profilesToRender(currentProfile);
 
-        for (Profile profile : profiles) {
-            boolean isSelected = currentProfile == profile;
+        for (int i = 0; i < profiles.size(); i++) {
+            renderProfileRow(commands, events, profiles.get(i), currentProfile, i);
+        }
+    }
 
-            commands.append("#ProfilesList", PROFILE_ROW_UI);
+    private List<Profile> profilesToRender(@Nonnull Profile currentProfile) {
+        List<Profile> baseProfiles = Arrays.stream(Profile.values())
+                .filter(profile -> profile != Profile.CUSTOM)
+                .toList();
 
-            String rowRootSelector = "#ProfilesList[" + rowIndex + "]";
-            String profileIconSelector = rowRootSelector + " #ProfileIcon";
-            String labelSelector = rowRootSelector + " #ProfileLabel";
-            String labelSelectedSelector = rowRootSelector + " #ProfileSelectedLabel";
-            String descriptionSelector = rowRootSelector + " #ProfileDescription";
-            String selectProfileButtonSelector = rowRootSelector + " #SelectProfileButton";
-            String selectedProfileSelector = rowRootSelector + " #SelectedProfile";
-            String selectedProfileIconSelector = rowRootSelector + " #ProfileSelectedIcon";
-
-            commands.set(profileIconSelector + ".Background", Value.ref(PROFILE_ROW_UI, profile.label() + "ProfileIcon"));
-            commands.set(labelSelector + ".TextSpans", Message.raw(profile.label()));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(profile.label()));
-            commands.set(labelSelector + ".Visible", !isSelected);
-            commands.set(labelSelectedSelector + ".Visible", isSelected);
-            commands.set(descriptionSelector + ".TextSpans", Message.raw(profile.description()));
-            commands.set(selectProfileButtonSelector + ".Visible", !isSelected);
-            commands.set(selectedProfileSelector + ".Visible", isSelected);
-            commands.set(selectedProfileIconSelector + ".Visible", isSelected);
-
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    selectProfileButtonSelector,
-                    HudConfigPage.PageEventData.action("SELECT_PROFILE").append("Value", profile.name()),
-                    false
-            );
-
-            rowIndex++;
+        if (currentProfile != Profile.CUSTOM) {
+            return baseProfiles;
         }
 
-        if (currentProfile == Profile.CUSTOM) {
-            commands.append("#ProfilesList", PROFILE_ROW_UI);
+        return Arrays.stream(Profile.values()).toList();
+    }
 
-            String rowRootSelector = "#ProfilesList[" + rowIndex + "]";
-            String labelSelector = rowRootSelector + " #ProfileLabel";
-            String labelSelectedSelector = rowRootSelector + " #ProfileSelectedLabel";
-            String descriptionSelector = rowRootSelector + " #ProfileDescription";
-            String selectedProfileSelector = rowRootSelector + " #SelectedProfile";
-            String selectedProfileIconSelector = rowRootSelector + " #ProfileSelectedIcon";
+    private void renderProfileRow(
+            @Nonnull UICommandBuilder commands,
+            @Nonnull UIEventBuilder events,
+            @Nonnull Profile profile,
+            @Nonnull Profile currentProfile,
+            int rowIndex
+    ) {
+        boolean selected = profile == currentProfile;
 
-            commands.set(labelSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label()));
-            commands.set(labelSelectedSelector + ".TextSpans", Message.raw(Profile.CUSTOM.label()));
-            commands.set(descriptionSelector + ".TextSpans", Message.raw(Profile.CUSTOM.description()));
+        commands.append(CONTENT_SELECTOR, PROFILE_ROW_UI);
 
+        ProfileRowSelectors selectors = ProfileRowSelectors.from(rowIndex);
 
-            commands.set(labelSelector + ".Visible", false);
-            commands.set(labelSelectedSelector + ".Visible", true);
-            commands.set(selectedProfileSelector + ".Visible", true);
-            commands.set(selectedProfileIconSelector + ".Visible", true);
+        commands.set(selectors.icon() + ".Background", Value.ref(PROFILE_ROW_UI, profileIconRef(profile)));
+        commands.set(selectors.label() + ".TextSpans", Message.raw(profile.label()));
+        commands.set(selectors.label() + ".Style", Value.ref(PROFILE_ROW_UI, labelStyleRef(selected)));
+        commands.set(selectors.description() + ".TextSpans", Message.raw(profile.description()));
+        commands.set(selectors.button() + ".Style", Value.ref(PROFILE_ROW_UI, buttonStyleRef(selected)));
+        commands.set(selectors.selectedIcon() + ".Visible", selected);
+
+        if (!selected) {
+            bindSelectProfileEvent(events, selectors.button(), profile);
+        }
+    }
+
+    private void bindSelectProfileEvent(
+            @Nonnull UIEventBuilder events,
+            @Nonnull String selector,
+            @Nonnull Profile profile
+    ) {
+        events.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                selector,
+                IHudConfigPage.PageEventData.action("SELECT_PROFILE")
+                        .append("Value", profile.name()),
+                false
+        );
+    }
+
+    private String profileIconRef(@Nonnull Profile profile) {
+        return profile.label() + "ProfileIcon";
+    }
+
+    private String labelStyleRef(boolean selected) {
+        return selected ? "ProfileSelectedLabelStyle" : "ProfileLabelStyle";
+    }
+
+    private String buttonStyleRef(boolean selected) {
+        return selected ? "SelectedProfileButtonStyle" : "ProfileButtonStyle";
+    }
+
+    private record ProfileRowSelectors(
+            String row,
+            String button,
+            String icon,
+            String label,
+            String description,
+            String selectedIcon
+    ) {
+
+        private static ProfileRowSelectors from(int rowIndex) {
+            String row = CONTENT_SELECTOR + "[" + rowIndex + "]";
+
+            return new ProfileRowSelectors(
+                    row,
+                    row + " #ProfileButton",
+                    row + " #ProfileIcon",
+                    row + " #ProfileLabel",
+                    row + " #ProfileDescription",
+                    row + " #ProfileSelectedIcon"
+            );
         }
     }
 }

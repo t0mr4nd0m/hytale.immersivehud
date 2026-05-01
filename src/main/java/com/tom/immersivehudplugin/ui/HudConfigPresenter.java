@@ -8,11 +8,8 @@ import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 
-import javax.annotation.Nullable;
-
 public final class HudConfigPresenter {
 
-    @Nullable
     public Profile resolveCurrentProfile(
             HudComponentsConfig hud,
             DynamicHudConfig dynamic

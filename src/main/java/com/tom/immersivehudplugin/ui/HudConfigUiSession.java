@@ -144,16 +144,16 @@ public final class HudConfigUiSession {
     }
 
     @Nullable
-    private String selectedVisibilityTargetKey;
+    private String selectedVisibilityComponentKey;
 
     public void showVisibilityView() {
         currentView = HudConfigView.VISIBILITY;
     }
 
     @Nonnull
-    public String getSelectedVisibilityTargetKey() {
-        if (selectedVisibilityTargetKey != null && !selectedVisibilityTargetKey.isBlank()) {
-            return selectedVisibilityTargetKey;
+    public String getSelectedVisibilityComponentKey() {
+        if (selectedVisibilityComponentKey != null && !selectedVisibilityComponentKey.isBlank()) {
+            return selectedVisibilityComponentKey;
         }
 
         return HudComponentRegistry.dynamicList().isEmpty()
@@ -161,15 +161,15 @@ public final class HudConfigUiSession {
                 : HudComponentRegistry.dynamicList().getFirst().key();
     }
 
-    public void selectVisibilityTarget(@Nullable String key) {
+    public void selectVisibilityComponent(@Nullable String key) {
         if (key == null || key.isBlank()) {
             return;
         }
-        this.selectedVisibilityTargetKey = key;
+        this.selectedVisibilityComponentKey = key;
     }
 
     public boolean isVisibilityStaticSelection() {
-        return "static".equalsIgnoreCase(getSelectedVisibilityTargetKey());
+        return "static".equalsIgnoreCase(getSelectedVisibilityComponentKey());
     }
 
     @Nullable
@@ -177,7 +177,7 @@ public final class HudConfigUiSession {
         if (isVisibilityStaticSelection()) {
             return null;
         }
-        return HudComponentRegistry.find(getSelectedVisibilityTargetKey());
+        return HudComponentRegistry.find(getSelectedVisibilityComponentKey());
     }
 
     private boolean showOnlyCheckedTriggers;

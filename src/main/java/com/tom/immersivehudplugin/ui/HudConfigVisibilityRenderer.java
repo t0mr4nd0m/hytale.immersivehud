@@ -15,107 +15,83 @@ import java.util.Locale;
 
 public final class HudConfigVisibilityRenderer {
 
-    private static final String ROOT_UI =
-            "Pages/ImmersiveHud/Views/HudConfigVisibilityView.ui";
-    private static final String TARGET_BUTTON_UI =
-            "Pages/ImmersiveHud/Views/HudConfigVisibilityTargetButton.ui";
+    private static final String VISIBILITY_UI =
+            "Views/VisibilityView.ui";
+    private static final String COMPONENT_BUTTON_UI =
+            "Views/VisibilityComponentButton.ui";
     private static final String TRIGGER_ROW_UI =
-            "Pages/ImmersiveHud/Views/HudConfigVisibilityTriggerRow.ui";
+            "Views/VisibilityTriggerRow.ui";
+    private static final String HEADER_UI =
+            "Views/VisibilityStaticHeader.ui";
     private static final String STATIC_ROW_UI =
-            "Pages/ImmersiveHud/Views/HudConfigVisibilityStaticRow.ui";
-    private static final String SECTION_HEADER_UI =
-            "Pages/ImmersiveHud/Views/HudConfigVisibilitySectionHeader.ui";
+            "Views/VisibilityStaticRow.ui";
 
     public void renderVisibilityView(
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session
     ) {
-        commands.append("#ContentHost", ROOT_UI);
+        commands.append("#ContentHost", VISIBILITY_UI);
 
-        commands.set(
-                "#ViewHelpText.TextSpans",
-                Message.raw(session.getCurrentView().helpText())
-        );
-
-        renderTargetSelector(commands, events, session);
+        renderComponentSelector(commands, events, session);
         renderDetail(commands, events, session);
     }
 
-    private void renderTargetSelector(
+    private void renderComponentSelector(
             @Nonnull UICommandBuilder commands,
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session
     ) {
-        commands.clear("#VisibilityTargetsList");
+        commands.clear("#ComponentsButtons");
 
-        String selectedKey = session.getSelectedVisibilityTargetKey();
+        String selectedKey = session.getSelectedVisibilityComponentKey();
         int rowIndex = 0;
 
         for (HudComponent entry : HudComponentRegistry.dynamicList()) {
             String key = entry.key();
             boolean selected = key.equalsIgnoreCase(selectedKey);
 
-            commands.append("#VisibilityTargetsList", TARGET_BUTTON_UI);
+            commands.append("#ComponentsButtons", COMPONENT_BUTTON_UI);
 
-            String rowRoot = "#VisibilityTargetsList[" + rowIndex + "]";
-            String buttonContainerSelector = rowRoot + " #TargetButtonContainer";
-            String buttonSelectedContainerSelector = rowRoot + " #TargetButtonSelectedContainer";
-            String buttonSelector = rowRoot + " #TargetButton";
-            String buttonSelectedSelector = rowRoot + " #TargetButtonSelected";
-            String iconSelector = rowRoot + " #TargetIcon";
-            String iconSelectedSelector = rowRoot + " #TargetIconSelected";
+            String buttonSelector = "#ComponentsButtons[" + rowIndex + "]";
+            String buttonIconSelector = buttonSelector + " #ComponentButtonIcon";
 
             String iconRef = selectorIconRef(key);
-
-            commands.set(buttonContainerSelector + ".Visible", !selected);
-            commands.set(buttonSelectedContainerSelector + ".Visible", selected);
-
-            commands.set(iconSelector + ".Background", Value.ref(TARGET_BUTTON_UI, iconRef));
-            commands.set(iconSelectedSelector + ".Background", Value.ref(TARGET_BUTTON_UI, iconRef));
-
+            commands.set(buttonIconSelector + ".Background", Value.ref(COMPONENT_BUTTON_UI, iconRef));
             commands.set(buttonSelector + ".TooltipText", entry.label());
-            commands.set(buttonSelectedSelector + ".TooltipText", entry.label());
 
-            events.addEventBinding(
-                    CustomUIEventBindingType.Activating,
-                    buttonSelector,
-                    HudConfigPage.PageEventData.action("VIS_SELECT_TARGET")
-                            .append("Value", key),
-                    false
-            );
+            if (!selected) {
+                events.addEventBinding(
+                        CustomUIEventBindingType.Activating,
+                        buttonSelector,
+                        IHudConfigPage.PageEventData.action("VIS_SELECT_COMPONENT")
+                                .append("Value", key),
+                        false
+                );
+            }
 
             rowIndex++;
         }
 
         boolean staticSelected = "static".equalsIgnoreCase(selectedKey);
 
-        commands.append("#VisibilityTargetsList", TARGET_BUTTON_UI);
+        commands.append("#ComponentsButtons", COMPONENT_BUTTON_UI);
 
-        String rowRoot = "#VisibilityTargetsList[" + rowIndex + "]";
-        String buttonContainerSelector = rowRoot + " #TargetButtonContainer";
-        String buttonSelectedContainerSelector = rowRoot + " #TargetButtonSelectedContainer";
-        String buttonSelector = rowRoot + " #TargetButton";
-        String buttonSelectedSelector = rowRoot + " #TargetButtonSelected";
-        String iconSelector = rowRoot + " #TargetIcon";
-        String iconSelectedSelector = rowRoot + " #TargetIconSelected";
+        String buttonSelector = "#ComponentsButtons[" + rowIndex + "]";
+        String buttonIconSelector = buttonSelector + " #ComponentButtonIcon";
 
-        commands.set(buttonContainerSelector + ".Visible", !staticSelected);
-        commands.set(buttonSelectedContainerSelector + ".Visible", staticSelected);
-
-        commands.set(iconSelector + ".Background", Value.ref(TARGET_BUTTON_UI, "staticIcon"));
-        commands.set(iconSelectedSelector + ".Background", Value.ref(TARGET_BUTTON_UI, "staticIcon"));
-
+        commands.set(buttonIconSelector + ".Background", Value.ref(COMPONENT_BUTTON_UI, "staticIcon"));
         commands.set(buttonSelector + ".TooltipText", "Static Components");
-        commands.set(buttonSelectedSelector + ".TooltipText", "Static Components");
 
-        events.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                buttonSelector,
-                HudConfigPage.PageEventData.action("VIS_SELECT_TARGET")
-                        .append("Value", "static"),
-                false
-        );
+        if  (!staticSelected) {
+            events.addEventBinding(
+                    CustomUIEventBindingType.Activating,
+                    buttonSelector,
+                    IHudConfigPage.PageEventData.action("VIS_SELECT_COMPONENT")
+                            .append("Value", "static"),
+                    false
+            );
+        }
     }
 
     private void renderDetail(
@@ -136,14 +112,15 @@ public final class HudConfigVisibilityRenderer {
             @Nonnull HudConfigUiSession session
     ) {
         HudComponent entry = session.getSelectedVisibilityComponent();
+
         if (entry == null) {
-            commands.set("#DynamicDetailHost.Visible", false);
-            commands.set("#StaticDetailHost.Visible", false);
+            commands.set("#DynamicComponentHost.Visible", false);
+            commands.set("#StaticComponentsHost.Visible", false);
             return;
         }
 
-        commands.set("#DynamicDetailHost.Visible", true);
-        commands.set("#StaticDetailHost.Visible", false);
+        commands.set("#DynamicComponentHost.Visible", true);
+        commands.set("#StaticComponentsHost.Visible", false);
 
         updateDynamicHeader(commands, session, entry);
         bindDynamicDetailEvents(events, entry);
@@ -195,6 +172,26 @@ public final class HudConfigVisibilityRenderer {
         updateNoActiveTriggersMessage(commands, session, entry, rowIndex);
     }
 
+    private void updateTriggersCounter(
+            @Nonnull UICommandBuilder commands,
+            @Nonnull HudConfigUiSession session,
+            @Nonnull HudComponent entry
+    ) {
+        int total = entry.allowedRules().size();
+
+        int active = 0;
+        for (HudTrigger trigger : entry.allowedRules()) {
+            if (session.isRuleEnabled(entry, trigger)) {
+                active++;
+            }
+        }
+
+        commands.set(
+                "#TriggersHeaderLabel.Text",
+                "TRIGGERS (" + active + "/" + total + ")"
+        );
+    }
+
     private void updateNoActiveTriggersMessage(
             @Nonnull UICommandBuilder commands,
             @Nonnull HudConfigUiSession session,
@@ -236,7 +233,7 @@ public final class HudConfigVisibilityRenderer {
             events.addEventBinding(
                     CustomUIEventBindingType.ValueChanged,
                     thresholdSliderSelector,
-                    HudConfigPage.PageEventData.action("VIS_SET_THRESHOLD")
+                    IHudConfigPage.PageEventData.action("VIS_SET_THRESHOLD")
                             .append("Component", entry.key())
                             .append("@DynamicThreshold", thresholdSliderSelector + ".Value"),
                     false
@@ -248,7 +245,7 @@ public final class HudConfigVisibilityRenderer {
         events.addEventBinding(
                 CustomUIEventBindingType.ValueChanged,
                 checkBoxSelector,
-                HudConfigPage.PageEventData.action("VIS_TOGGLE_RULE")
+                IHudConfigPage.PageEventData.action("VIS_TOGGLE_RULE")
                         .append("Component", entry.key())
                         .append("Value", trigger.name()),
                 false
@@ -263,12 +260,12 @@ public final class HudConfigVisibilityRenderer {
         boolean componentHidden = session.isHidden(entry);
 
         commands.set(
-                "#VisibilityComponentTitle.TextSpans",
+                "#DynamicComponentTitle.TextSpans",
                 Message.raw(entry.label())
         );
 
         commands.set(
-                "#VisibilityComponentStateLabel.Text",
+                "#DynamicComponentVisiblityStateLabel.Text",
                 componentHidden ? "HIDDEN" : "VISIBLE"
         );
 
@@ -276,6 +273,7 @@ public final class HudConfigVisibilityRenderer {
         commands.set("#VisibilityNoActiveTriggersMessage.Visible", false);
         commands.set("#VisibilityTriggersMessage.Visible", !componentHidden);
 
+        updateTriggersCounter(commands, session, entry);
         updateTriggerFilterButton(commands, session);
     }
 
@@ -285,8 +283,8 @@ public final class HudConfigVisibilityRenderer {
     ) {
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
-                "#VisibilityComponentStateButton",
-                HudConfigPage.PageEventData.action("VIS_TOGGLE_VISIBILITY")
+                "#DynamicComponentVisibilityStateButton",
+                IHudConfigPage.PageEventData.action("VIS_TOGGLE_VISIBILITY")
                         .append("Component", entry.key()),
                 false
         );
@@ -294,7 +292,7 @@ public final class HudConfigVisibilityRenderer {
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#TriggerClearButton",
-                HudConfigPage.PageEventData.action("VIS_CLEAR_TRIGGERS")
+                IHudConfigPage.PageEventData.action("VIS_CLEAR_TRIGGERS")
                         .append("Component", entry.key()),
                 false
         );
@@ -302,7 +300,7 @@ public final class HudConfigVisibilityRenderer {
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#TriggerFilterButton",
-                HudConfigPage.PageEventData.action("VIS_TOGGLE_TRIGGER_FILTER"),
+                IHudConfigPage.PageEventData.action("VIS_TOGGLE_TRIGGER_FILTER"),
                 false
         );
     }
@@ -316,7 +314,7 @@ public final class HudConfigVisibilityRenderer {
                 ? "removeFilterIcon"
                 : "applyFilterIcon";
 
-        commands.set("#TriggerFilterButtonIcon.Background", Value.ref(ROOT_UI, iconRef));
+        commands.set("#TriggerFilterButtonIcon.Background", Value.ref(VISIBILITY_UI, iconRef));
     }
 
     public void updateDynamicRuleRow(
@@ -400,10 +398,10 @@ public final class HudConfigVisibilityRenderer {
             @Nonnull UIEventBuilder events,
             @Nonnull HudConfigUiSession session
     ) {
-        commands.set("#DynamicDetailHost.Visible", false);
-        commands.set("#StaticDetailHost.Visible", true);
+        commands.set("#DynamicComponentHost.Visible", false);
+        commands.set("#StaticComponentsHost.Visible", true);
 
-        commands.clear("#VisibilityStaticList");
+        commands.clear("#StaticComponentsList");
 
         int rowIndex = 0;
 
@@ -416,9 +414,9 @@ public final class HudConfigVisibilityRenderer {
                 }
 
                 if (!groupHeaderAdded) {
-                    commands.append("#VisibilityStaticList", SECTION_HEADER_UI);
+                    commands.append("#StaticComponentsList", HEADER_UI);
 
-                    String headerRoot = "#VisibilityStaticList[" + rowIndex + "]";
+                    String headerRoot = "#StaticComponentsList[" + rowIndex + "]";
                     commands.set(
                             headerRoot + " #SectionTitle.TextSpans",
                             Message.raw(group.label())
@@ -428,9 +426,9 @@ public final class HudConfigVisibilityRenderer {
                     rowIndex++;
                 }
 
-                commands.append("#VisibilityStaticList", STATIC_ROW_UI);
+                commands.append("#StaticComponentsList", STATIC_ROW_UI);
 
-                String rowRoot = "#VisibilityStaticList[" + rowIndex + "]";
+                String rowRoot = "#StaticComponentsList[" + rowIndex + "]";
                 String labelSelector = rowRoot + " #StaticVisibilityLabel";
                 String stateButtonSelector = rowRoot + " #StaticVisibilityStateButton";
                 String stateLabelSelector = rowRoot + " #StaticVisibilityStateLabel";
@@ -447,7 +445,7 @@ public final class HudConfigVisibilityRenderer {
                 events.addEventBinding(
                         CustomUIEventBindingType.Activating,
                         stateButtonSelector,
-                        HudConfigPage.PageEventData.action("VIS_TOGGLE_STATIC_VISIBILITY")
+                        IHudConfigPage.PageEventData.action("VIS_TOGGLE_STATIC_VISIBILITY")
                                 .append("Component", entry.key()),
                         false
                 );
@@ -478,7 +476,7 @@ public final class HudConfigVisibilityRenderer {
     }
 
     @Nullable
-    private String findStaticRowRootSelector(@Nonnull HudComponent target) {
+    private String findStaticRowRootSelector(@Nonnull HudComponent component) {
         int rowIndex = 0;
 
         for (HudComponentRegistry.Group group : HudComponentRegistry.GROUP_ORDER) {
@@ -494,8 +492,8 @@ public final class HudConfigVisibilityRenderer {
                     groupHeaderAdded = true;
                 }
 
-                if (entry == target) {
-                    return "#VisibilityStaticList[" + rowIndex + "]";
+                if (entry == component) {
+                    return "#StaticComponentsList[" + rowIndex + "]";
                 }
 
                 rowIndex++;

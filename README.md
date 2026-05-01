@@ -82,10 +82,6 @@ Example: Input bindings, Notifications, Player list, Chat,...
 
 ---
 
-💡 Tip: Use command `/ihud toggle` <component> to define HUD components visibility
-
----
-
 ### ️🅱️ Dynamic visibility
 
 Dynamic HUD components are hidden by default and become visible when at least one rule matches the current gameplay context.
@@ -98,45 +94,6 @@ Examples:
 - showing the hotbar when changing the slot selected
 - showing health bar when damage is taken
 - showing the reticle when looking at a workbench or aiming with a bow
-
----
-
-💡 Tip: Use command `/ihud rules` <component> <add|remove> <rule> to define dynamic components visibility behaviour
-
----
-
-## ▶️ Commands
-
-Commands to set up and personalize ImmersiveHUD behaviour per player
-
-- affect only the current player
-- are persisted automatically
-- override the global config
-
-| Command   | Parameters                         | Description                                                                                | Example                                 |
-|-----------|------------------------------------|--------------------------------------------------------------------------------------------|-----------------------------------------|
-| `config`  | none                               | Opens the in-game configuration UI to manage visibility, rules and profiles interactively. | /ihud config                            |
-| `status`  | none                               | Displays the current visibility state of all HUD components                                | /ihud status                            |
-| `toggle`  | `<component>`                      | Toggles visibility of a specific HUD component                                             | /ihud toggle health                     |
-| `toggle`  | `<component>` `<state>`            | Hides/Shows a component                                                                    | /ihud toggle health hide                |
-| `toggle`  | `<group>` `<state>`                | Hides/Shows all components in a group                                                      | /ihud toggle ui hide                    |
-| `rules`   | `<component>` list                 | List rules from a component                                                                | /ihud rules health list                 |
-| `rules`   | `<component>` clear                | Clear rules from a component                                                               | /ihud rules health clear                |
-| `rules`   | `<component>` add/remove `<rule>`  | Add or remove rules to/from component                                                      | /ihud rules health add  HEALTH_NOT_FULL |
-| `rules`   | `<component>` threshold `<value>`  | Set the threshold from which the bar will be visible                                       | /ihud rules health threshold 75         |
-| `profile` | `<profile>`                        | Apply quick IHud configuration based on different profiles                                 | /ihud profile immersive                 |
-
-| Parameter     | Description           | Values                                 |
-|---------------|-----------------------|----------------------------------------|
-| `<component>` | Hud component         | [Hud Components](#-hud-components)     |
-| `<state>`     | Visibility state      | `[Hide/Show]`                          |
-| `<group>`     | Hud group             | `[Core/Bars/UI/Social/Panels/Builder]` |
-| `<rule>`      | Trigger Rules         | [Rules](#-rules)                       |
-| `<profile>`   | Configuration Profile | [Profiles](#-profiles)                 |
-
----
-
-💡 Tip: Use command `/ihud profile` to quickly apply a base configuration profile and then toggle components visibility and/or add or remove rules to customize your personal experience
 
 ---
 
@@ -490,13 +447,6 @@ ImmersiveHudPlugin.java
 commands/
    IHudCommands.java
    ConfigCmd.java
-   ProfileCmd.java
-   RulesCmd.java
-   StatusCmd.java
-   ToggleCmd.java
-   validation/
-      CommandValidators.java
-      PredicateValidator.java   
 config/
    ConfigJsonMapper.java
    ConfigSchemaValidator.java
@@ -517,7 +467,6 @@ hud/
       HudComponentRegistry.java
    trigger/
       HudBarState.java
-      HudRuleSupport.java
       HudTrigger.java
       HudTriggerContext.java
       
@@ -550,13 +499,13 @@ runtime/
       HudVisibilityCoordinator.java
       
 ui/
-   HudConfigPage.java
    HudConfigPresenter.java
    HudConfigProfilesRenderer.java
    HudConfigUiService.java
    HudConfigUiSession.java
    HudConfigView.java
    HudConfigVisibilityRenderer.java
+   HudConfigPage.java
 ```
 
 ---
