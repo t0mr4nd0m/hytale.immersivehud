@@ -5,6 +5,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
@@ -44,11 +45,11 @@ public final class HudConfigUiService {
         sessions.put(playerRef.getUuid(), new HudConfigUiSession(playerCfg));
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        if (player == null) {
-            return;
-        }
 
-        player.getPageManager().openCustomPage(ref, store, new HudConfigPage(this, playerRef));
+        if (player != null) {
+            player.getPageManager().openCustomPage(ref, store, new IHudConfigPage(this, playerRef));
+            pauseWorld(player, true);
+        }
     }
 
     @Nullable
@@ -83,6 +84,15 @@ public final class HudConfigUiService {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player != null) {
             player.getPageManager().setPage(ref, store, Page.None);
+            pauseWorld(player, false);
+        }
+    }
+
+    private void pauseWorld(Player player, boolean paused) {
+
+        World world = player.getWorld();
+        if (world != null) {
+            world.setPaused(paused);
         }
     }
 }
