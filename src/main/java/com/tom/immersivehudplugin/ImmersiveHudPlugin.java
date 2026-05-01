@@ -37,7 +37,6 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     @Override
     public void start() {
         startRuntimeServices();
-        registerCommands();
     }
 
     @Override
@@ -71,6 +70,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
         hudRuntimeService.start();
         playerLifecycleService.start();
+        registerCommands();
     }
 
     private PlayerConfigService createPlayerConfigService() {
@@ -109,9 +109,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     private void registerCommands() {
         this.getCommandRegistry().registerCommand(new IHudCommands(
                 hudConfigUiService,
-                this::getGlobalConfig,
-                playerConfigService,
-                hudRuntimeService
+                playerConfigService
         ));
     }
 }
