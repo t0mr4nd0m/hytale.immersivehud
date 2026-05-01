@@ -137,12 +137,6 @@ public enum HudTrigger {
         );
     }
 
-    public static String availableRulesText() {
-        return Arrays.stream(values())
-                .map(HudTrigger::key)
-                .collect(Collectors.joining(", "));
-    }
-
     public String key() {
         return name().toLowerCase(Locale.ROOT);
     }
