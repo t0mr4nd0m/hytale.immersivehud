@@ -1,0 +1,9 @@
+$C = "../Common.ui";
+$P = "../IHudConfigPage.ui";
+
+$P.@GroupView #ProfilesRoot {
+
+  $P.@GroupContent #ProfilesContent {
+
+  }
+}

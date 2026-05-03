@@ -1,0 +1,23 @@
+$C = "../Common.ui";
+
+@healthIcon       = PatchStyle(TexturePath: "../Assets/0health_active.png");
+@staminaIcon      = PatchStyle(TexturePath: "../Assets/1stamina_active.png");
+@manaIcon         = PatchStyle(TexturePath: "../Assets/2mana_active.png");
+@oxygenIcon       = PatchStyle(TexturePath: "../Assets/4oxygen_active.png");
+@hotbarIcon       = PatchStyle(TexturePath: "../Assets/5hotbar_active.png");
+@reticleIcon      = PatchStyle(TexturePath: "../Assets/6reticle_active.png");
+@compassIcon      = PatchStyle(TexturePath: "../Assets/7compass_active.png");
+@statusiconsIcon  = PatchStyle(TexturePath: "../Assets/8statusicons_active.png");
+@staticIcon       = PatchStyle(TexturePath: "../Assets/9staticicon_active.png");
+
+$C.@SecondaryButton #ComponentButton {
+  Anchor: (Left: 4, Right: 4);
+  TooltipText: "Component";
+  TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+
+  Group #ComponentButtonIcon {
+    Padding: (Full: 8);
+    Anchor: (Width: 40, Height: 40, Full: 8);
+    Background: @healthIcon;
+  }
+}

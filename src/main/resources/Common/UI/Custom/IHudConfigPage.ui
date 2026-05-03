@@ -1,0 +1,85 @@
+$C = "Common.ui";
+
+@GroupView = Group { LayoutMode: Top; Padding: (Right: 2); };
+@GroupContent = Group { LayoutMode: Top; Anchor: (Vertical: 4); };
+@HorizontalSpacer = Group { Anchor: (Width:  4); };
+@CustomLabelStyle = LabelStyle (FontSize: 18, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+@HoverLabelStyle = LabelStyle (...@CustomLabelStyle, TextColor: $C.@ColorButtonText);
+@GoldLabelStyle = LabelStyle (...@CustomLabelStyle, TextColor: $C.@ColorGoldHighlight);
+@CustomStyle = TextButtonStyle(
+    Default:  (LabelStyle: @CustomLabelStyle),
+    Hovered:  (LabelStyle: @HoverLabelStyle),
+    Pressed:  (LabelStyle: @HoverLabelStyle),
+    Disabled: (LabelStyle: @GoldLabelStyle),
+    Sounds:   $C.@ButtonSounds
+);
+
+$C.@PageOverlay {
+
+    $C.@Container {
+        Anchor: (Width: 760, Height: 600);
+
+        #Title {
+            $C.@Title {
+                @Text = "IMMERSIVE HUD CONFIG";
+            }
+        }
+
+        #Content {
+            LayoutMode: Top;
+            Padding: (Full: 8);
+
+            Group #NavBar {
+                LayoutMode: Center;
+                Anchor: (Height: 40);
+                Padding: (Vertical: 16);
+
+                $C.@TextButton #ViewProfilesBtn {
+                    Text: "PROFILE";
+                    Style: @CustomStyle;
+                    Disabled: false;
+                }
+
+                @HorizontalSpacer {}
+
+                $C.@TextButton #ViewVisibilityBtn {
+                    Text: "VISIBILITY";
+                    Style: @CustomStyle;
+                    Disabled: false;
+                }
+            }
+
+            $C.@PanelSeparatorFancy {}
+
+            Group #ContentHost {
+                LayoutMode: Top;
+                FlexWeight: 1;
+                Padding: (Full: 8);
+
+                Group #ViewHost {
+                    LayoutMode: Top;
+                }
+            }
+
+            $C.@PanelSeparatorFancy {}
+
+            $C.@ActionButtonContainer #Footer {
+                LayoutMode: Center;
+                Anchor: (Height: 44);
+                Padding: (Vertical: 8);
+
+                $C.@TextButton #ApplyButton {
+                    Anchor: (Width: 130);
+                    Text: "APPLY";
+                }
+
+                $C.@ActionButtonSeparator {}
+
+                $C.@CancelTextButton #CancelButton {
+                    Anchor: (Width: 130);
+                    Text: "CANCEL";
+                }
+            }
+        }
+    }
+}
