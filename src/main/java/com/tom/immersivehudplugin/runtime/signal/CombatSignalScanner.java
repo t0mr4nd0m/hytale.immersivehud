@@ -7,7 +7,6 @@ import com.hypixel.hytale.server.core.modules.entity.component.TransformComponen
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
-import com.hypixel.hytale.server.npc.role.support.MarkedEntitySupport;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -38,14 +37,14 @@ public final class CombatSignalScanner {
                         NPCEntity.getComponentType(),
                         TransformComponent.getComponentType()
                 ),
-                (chunk, commandBuffer) -> {
+                (chunk, _) -> {
                     if (found.get()) {
                         return;
                     }
 
                     for (int i = 0; i < chunk.size(); i++) {
                         Ref<EntityStore> npcRef = chunk.getReferenceTo(i);
-                        if (npcRef == null || !npcRef.isValid()) {
+                        if (!npcRef.isValid()) {
                             continue;
                         }
 
@@ -56,8 +55,15 @@ public final class CombatSignalScanner {
                             continue;
                         }
 
-                        NPCEntity npc =
-                                chunk.getComponent(i, NPCEntity.getComponentType());
+                        var entityComponentType = NPCEntity.getComponentType();
+                        if (entityComponentType == null) {
+                            continue;
+                        }
+
+                        NPCEntity npc = chunk.getComponent(i, entityComponentType);
+                        if (npc == null) {
+                            continue;
+                        }
 
                         if (isNpcTargetingPlayer(npc, playerRef)) {
                             found.set(true);
@@ -70,6 +76,22 @@ public final class CombatSignalScanner {
         return found.get();
     }
 
+    private boolean isNpcEngagedWithPlayer(Role role, Ref<EntityStore> playerRef) {
+
+        var combatSupport = role.getCombatSupport();
+        if (combatSupport.isExecutingAttack()) {
+            return true;
+        }
+
+        var bodyMotion = role.getLastBodySteeringMotion();
+        if (bodyMotion == null) {
+            return false;
+        }
+
+        Ref<EntityStore> desiredTarget = bodyMotion.getDesiredTargetEntity();
+        return playerRef.equals(desiredTarget);
+    }
+
     private boolean isNpcTargetingPlayer(
             NPCEntity npc,
             Ref<EntityStore> playerRef
@@ -79,15 +101,16 @@ public final class CombatSignalScanner {
             return false;
         }
 
-        MarkedEntitySupport markedEntitySupport = role.getMarkedEntitySupport();
-        if (markedEntitySupport == null) {
-            return false;
-        }
+        var markedEntitySupport = role.getMarkedEntitySupport();
 
         Ref<EntityStore> lockedTarget =
                 markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
 
-        return playerRef.equals(lockedTarget);
+        if (!playerRef.equals(lockedTarget)) {
+            return false;
+        }
+
+        return isNpcEngagedWithPlayer(role, playerRef);
     }
 
     private boolean isWithinRange(
