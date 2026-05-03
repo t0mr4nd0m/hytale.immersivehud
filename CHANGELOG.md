@@ -7,6 +7,7 @@
 * Removed obsolete commands: status, profile, toggle and rules
 * Extensive refactor related to UI files: code cleaning, improved logic and readability
 * Added: world paused while config UI is open
+* Added: new dynamic trigger IN_COMBAT
 
 ## v1.2.3 - Technical update + added StatusIcons to dynamic components + Config UI redesign
 
