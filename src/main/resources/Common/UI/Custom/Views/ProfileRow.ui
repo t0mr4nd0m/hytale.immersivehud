@@ -6,10 +6,12 @@ $C = "../Common.ui";
 
 @DefaultProfileSelectedBackground = PatchStyle(TexturePath: "../Common/HeaderTabSelectedBackground.png", Border: 12);
 
-@BalancedProfileIcon   = PatchStyle(TexturePath: "../Assets/profile_balanced.png");
-@ImmersiveProfileIcon  = PatchStyle(TexturePath: "../Assets/profile_immersive.png");
-@VanillaProfileIcon    = PatchStyle(TexturePath: "../Assets/profile_vanilla.png");
-@CustomProfileIcon     = PatchStyle(TexturePath: "../Assets/profile_custom.png");
+@balancedProfileIcon   = PatchStyle(TexturePath: "../Assets/profile_balanced.png");
+@immersiveProfileIcon  = PatchStyle(TexturePath: "../Assets/profile_immersive.png");
+@vanillaProfileIcon    = PatchStyle(TexturePath: "../Assets/profile_vanilla.png");
+@customProfileIcon     = PatchStyle(TexturePath: "../Assets/profile_custom.png");
+
+@selectedProfileIcon = PatchStyle(TexturePath: "../Assets/selected-arrow.png");
 
 @ProfileButtonStyle = ButtonStyle(
   Hovered : (Background: @DefaultProfileSelectedBackground),
@@ -39,7 +41,7 @@ Group #ProfileRow {
 
     Group #ProfileIcon {
       Anchor: (Height: 64, Width: 64);
-      Background: @CustomProfileIcon;
+      Background: @customProfileIcon;
     }
 
     Group #ProfileTexts {
@@ -48,14 +50,14 @@ Group #ProfileRow {
       Padding: (Left: 16);
 
       Label #ProfileLabel {
-        Text: "#ProfileLabel ";
+        Text: "Profile Label";
         Style: @ProfileLabelStyle;
         Visible: true;
       }
 
       Label #ProfileDescription {
         Anchor: (Top: 8, Bottom: 4);
-        Text: "Balanced default configuration";
+        Text: "Profile Description";
         Style: @ProfileDescriptionStyle;
       }
     }
@@ -64,7 +66,7 @@ Group #ProfileRow {
       LayoutMode: Right;
       Anchor: (Height: 48, Width: 48, Right: -28);
       Padding: (Bottom: 8);
-      Background: (TexturePath: "../Assets/selected-arrow.png");
+      Background: @selectedProfileIcon;
       Visible: false;
     }
   }

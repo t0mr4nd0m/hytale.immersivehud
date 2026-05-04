@@ -15,16 +15,18 @@ import java.util.Locale;
 
 public final class HudConfigVisibilityRenderer {
 
-    private static final String VISIBILITY_UI =
-            "Views/VisibilityView.ui";
-    private static final String COMPONENT_BUTTON_UI =
-            "Views/VisibilityComponentButton.ui";
-    private static final String TRIGGER_ROW_UI =
-            "Views/VisibilityTriggerRow.ui";
-    private static final String HEADER_UI =
-            "Views/VisibilityStaticHeader.ui";
-    private static final String STATIC_ROW_UI =
-            "Views/VisibilityStaticRow.ui";
+    private static final String VISIBILITY_UI = "Views/VisibilityView.ui";
+    private static final String COMPONENT_BUTTON_UI = "Views/VisibilityComponentButton.ui";
+    private static final String TRIGGER_ROW_UI = "Views/VisibilityTriggerRow.ui";
+    private static final String HEADER_UI = "Views/VisibilityStaticHeader.ui";
+    private static final String STATIC_ROW_UI = "Views/VisibilityStaticRow.ui";
+
+    private static final String HIDDEN_LABEL = "immersivehud.gui.component.state.hidden";
+    private static final String VISIBLE_LABEL = "immersivehud.gui.component.state.visible";
+    private static final String TRIGGERS_LABEL = "immersivehud.gui.triggers";
+
+    private static final Value<String> STATIC_BUTTON_ICON = Value.ref(COMPONENT_BUTTON_UI, "staticIcon");
+    private static final String STATIC_BUTTON_TOOLTIP = "immersivehud.gui.visibility.static.components.button.tooltip";
 
     public void renderVisibilityView(
             @Nonnull UICommandBuilder commands,
@@ -56,8 +58,8 @@ public final class HudConfigVisibilityRenderer {
             String buttonSelector = "#ComponentsButtons[" + rowIndex + "]";
             String buttonIconSelector = buttonSelector + " #ComponentButtonIcon";
 
-            String iconRef = selectorIconRef(key);
-            commands.set(buttonIconSelector + ".Background", Value.ref(COMPONENT_BUTTON_UI, iconRef));
+            Value<String> componentIcon = Value.ref(COMPONENT_BUTTON_UI, key+"Icon");
+            commands.set(buttonIconSelector + ".Background", componentIcon);
             commands.set(buttonSelector + ".TooltipText", entry.label());
 
             if (!selected) {
@@ -80,8 +82,8 @@ public final class HudConfigVisibilityRenderer {
         String buttonSelector = "#ComponentsButtons[" + rowIndex + "]";
         String buttonIconSelector = buttonSelector + " #ComponentButtonIcon";
 
-        commands.set(buttonIconSelector + ".Background", Value.ref(COMPONENT_BUTTON_UI, "staticIcon"));
-        commands.set(buttonSelector + ".TooltipText", "Static Components");
+        commands.set(buttonIconSelector + ".Background", STATIC_BUTTON_ICON);
+        commands.set(buttonSelector + ".TooltipText", Message.translation(STATIC_BUTTON_TOOLTIP));
 
         if  (!staticSelected) {
             events.addEventBinding(
@@ -188,7 +190,7 @@ public final class HudConfigVisibilityRenderer {
 
         commands.set(
                 "#TriggersHeaderLabel.Text",
-                "TRIGGERS (" + active + "/" + total + ")"
+                Message.translation(TRIGGERS_LABEL).param("active", active).param("total", total)
         );
     }
 
@@ -266,7 +268,7 @@ public final class HudConfigVisibilityRenderer {
 
         commands.set(
                 "#DynamicComponentVisiblityStateLabel.Text",
-                componentHidden ? "HIDDEN" : "VISIBLE"
+                Message.translation(componentHidden ? HIDDEN_LABEL : VISIBLE_LABEL)
         );
 
         commands.set("#VisibilityTriggersList.Visible", componentHidden);
@@ -429,9 +431,9 @@ public final class HudConfigVisibilityRenderer {
                 commands.append("#StaticComponentsList", STATIC_ROW_UI);
 
                 String rowRoot = "#StaticComponentsList[" + rowIndex + "]";
-                String labelSelector = rowRoot + " #StaticVisibilityLabel";
-                String stateButtonSelector = rowRoot + " #StaticVisibilityStateButton";
-                String stateLabelSelector = rowRoot + " #StaticVisibilityStateLabel";
+                String labelSelector = rowRoot + " #StaticComponentLabel";
+                String stateButtonSelector = rowRoot + " #StaticComponentVisibilityButton";
+                String stateLabelSelector = rowRoot + " #StaticComponentVisibilityStateLabel";
 
                 commands.set(
                         labelSelector + ".TextSpans",
@@ -439,7 +441,7 @@ public final class HudConfigVisibilityRenderer {
                 );
                 commands.set(
                         stateLabelSelector + ".Text",
-                        session.isHidden(entry) ? "HIDDEN" : "VISIBLE"
+                        Message.translation(session.isHidden(entry) ? HIDDEN_LABEL : VISIBLE_LABEL)
                 );
 
                 events.addEventBinding(
@@ -469,9 +471,10 @@ public final class HudConfigVisibilityRenderer {
                 rowRoot + " #StaticVisibilityLabel.TextSpans",
                 Message.raw(entry.label())
         );
+
         commands.set(
                 rowRoot + " #StaticVisibilityStateLabel.Text",
-                session.isHidden(entry) ? "HIDDEN" : "VISIBLE"
+                Message.translation(session.isHidden(entry) ? HIDDEN_LABEL : VISIBLE_LABEL)
         );
     }
 
@@ -508,20 +511,5 @@ public final class HudConfigVisibilityRenderer {
             @Nonnull HudTrigger trigger
     ) {
         return entry.thresholdRule() == trigger;
-    }
-
-    @Nonnull
-    private String selectorIconRef(@Nonnull String key) {
-        return switch (key.toLowerCase(Locale.ROOT)) {
-            case "health" -> "healthIcon";
-            case "stamina" -> "staminaIcon";
-            case "mana" -> "manaIcon";
-            case "oxygen" -> "oxygenIcon";
-            case "hotbar" -> "hotbarIcon";
-            case "reticle" -> "reticleIcon";
-            case "compass" -> "compassIcon";
-            case "statusicons" -> "statusiconsIcon";
-            default -> "staticIcon";
-        };
     }
 }

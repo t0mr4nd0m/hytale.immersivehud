@@ -1,6 +1,6 @@
 $C = "../Common.ui";
 
-@RuleLabelStyle        = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
+@RuleLabelStyle = LabelStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, VerticalAlignment: Center );
 @SliderInputFieldStyle = InputFieldStyle( FontSize: 14, TextColor: $C.@ColorDefaultLabel, RenderBold: true );
 
 Group #VisibilityTriggerRow {
@@ -19,7 +19,7 @@ Group #VisibilityTriggerRow {
       Padding: (Right: 16);
 
       $C.@CheckBox #TriggerCheckBox {
-        TooltipText: "Check to apply trigger";
+        TooltipText: %immersivehud.gui.triggers.checkbox.tooltip;
         TextTooltipStyle: $C.@DefaultTextTooltipStyle;
       }
     }
@@ -27,7 +27,7 @@ Group #VisibilityTriggerRow {
     Label #TriggerLabel {
       Anchor: (Height: 32);
       Padding: (Right: 16);
-      Text: "RULE";
+      Text: "Trigger Label";
       Style: @RuleLabelStyle;
     }
   }
@@ -42,7 +42,7 @@ Group #VisibilityTriggerRow {
     Label #ThresholdModeLabel {
       Anchor: (Height: 32);
       Padding: (Right: 16);
-      Text: "BELOW";
+      Text: %immersivehud.gui.threshold;
       Style: @RuleLabelStyle;
     }
 

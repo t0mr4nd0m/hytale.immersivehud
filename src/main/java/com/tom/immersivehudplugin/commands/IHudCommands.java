@@ -6,13 +6,15 @@ import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
 public final class IHudCommands extends AbstractCommandCollection {
 
+    private static final String COMMAND_NAME = "immersivehud";
+    private static final String [] COMMAND_ALIASES = {"ihud"};
+
     public IHudCommands(
-            HudConfigUiService hudConfigUiService,
-            PlayerConfigService playerConfigService
+            HudConfigUiService hudConfigUiService
     ) {
-        super("immersivehud", "ImmersiveHud plugin commands");
-        addAliases("ihud");
-        addSubCommand(new ConfigCmd(playerConfigService, hudConfigUiService));
+        super(COMMAND_NAME, "immersivehud.cmd.ihud");
+        addAliases(COMMAND_ALIASES);
+        addSubCommand(new ConfigCmd(hudConfigUiService));
     }
 
     @Override

@@ -6,7 +6,7 @@ $C = "Common.ui";
 @CustomLabelStyle = LabelStyle (FontSize: 18, TextColor: $C.@ColorDefaultLabel, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center);
 @HoverLabelStyle = LabelStyle (...@CustomLabelStyle, TextColor: $C.@ColorButtonText);
 @GoldLabelStyle = LabelStyle (...@CustomLabelStyle, TextColor: $C.@ColorGoldHighlight);
-@CustomStyle = TextButtonStyle(
+@NavButtonStyle = TextButtonStyle(
     Default:  (LabelStyle: @CustomLabelStyle),
     Hovered:  (LabelStyle: @HoverLabelStyle),
     Pressed:  (LabelStyle: @HoverLabelStyle),
@@ -21,7 +21,7 @@ $C.@PageOverlay {
 
         #Title {
             $C.@Title {
-                @Text = "IMMERSIVE HUD CONFIG";
+                @Text = %immersivehud.gui.title;
             }
         }
 
@@ -35,21 +35,25 @@ $C.@PageOverlay {
                 Padding: (Vertical: 16);
 
                 $C.@TextButton #ViewProfilesBtn {
-                    Text: "PROFILE";
-                    Style: @CustomStyle;
+                    Text: %immersivehud.gui.profile.button;
+                    Style: @NavButtonStyle;
+                    //TooltipText: %immersivehud.gui.profile.button.tooltip;
+                    //TextTooltipStyle: $C.@DefaultTextTooltipStyle;
                     Disabled: false;
                 }
 
                 @HorizontalSpacer {}
 
                 $C.@TextButton #ViewVisibilityBtn {
-                    Text: "VISIBILITY";
-                    Style: @CustomStyle;
+                    Text: %immersivehud.gui.visibility.button;
+                    Style: @NavButtonStyle;
+                    //TooltipText: %immersivehud.gui.visibility.button.tooltip;
+                    //TextTooltipStyle: $C.@DefaultTextTooltipStyle;
                     Disabled: false;
                 }
             }
 
-            $C.@PanelSeparatorFancy {}
+            $C.@ContentSeparator {}
 
             Group #ContentHost {
                 LayoutMode: Top;
@@ -61,7 +65,7 @@ $C.@PageOverlay {
                 }
             }
 
-            $C.@PanelSeparatorFancy {}
+            $C.@ContentSeparator {}
 
             $C.@ActionButtonContainer #Footer {
                 LayoutMode: Center;
@@ -70,14 +74,14 @@ $C.@PageOverlay {
 
                 $C.@TextButton #ApplyButton {
                     Anchor: (Width: 130);
-                    Text: "APPLY";
+                    Text: %immersivehud.gui.apply.button;
                 }
 
                 $C.@ActionButtonSeparator {}
 
                 $C.@CancelTextButton #CancelButton {
                     Anchor: (Width: 130);
-                    Text: "CANCEL";
+                    Text: %immersivehud.gui.cancel.button;
                 }
             }
         }

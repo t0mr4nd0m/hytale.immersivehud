@@ -70,9 +70,9 @@ public final class HudConfigProfilesRenderer {
         ProfileRowSelectors selectors = ProfileRowSelectors.from(rowIndex);
 
         commands.set(selectors.icon() + ".Background", Value.ref(PROFILE_ROW_UI, profileIconRef(profile)));
-        commands.set(selectors.label() + ".TextSpans", Message.raw(profile.label()));
+        commands.set(selectors.label() + ".TextSpans", Message.translation(profile.label()));
         commands.set(selectors.label() + ".Style", Value.ref(PROFILE_ROW_UI, labelStyleRef(selected)));
-        commands.set(selectors.description() + ".TextSpans", Message.raw(profile.description()));
+        commands.set(selectors.description() + ".TextSpans", Message.translation(profile.description()));
         commands.set(selectors.button() + ".Style", Value.ref(PROFILE_ROW_UI, buttonStyleRef(selected)));
         commands.set(selectors.selectedIcon() + ".Visible", selected);
 
@@ -96,7 +96,7 @@ public final class HudConfigProfilesRenderer {
     }
 
     private String profileIconRef(@Nonnull Profile profile) {
-        return profile.label() + "ProfileIcon";
+        return profile.toString().toLowerCase() + "ProfileIcon";
     }
 
     private String labelStyleRef(boolean selected) {

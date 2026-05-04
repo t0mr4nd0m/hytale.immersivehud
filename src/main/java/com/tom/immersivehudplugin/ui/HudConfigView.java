@@ -1,11 +1,8 @@
 package com.tom.immersivehudplugin.ui;
 
 public enum HudConfigView {
-    PROFILES ("Profiles", """
-            Choose a profile to instantly apply a preset HUD experience.
-            Profiles provide predefined configurations tailored for different playstyles."""),
-    VISIBILITY("Visibility", """
-            Lorem Ipsum""");
+    PROFILES ("Profiles", "Profiles help"),
+    VISIBILITY("Visibility", "Visibility help");
 
     private final String label;
     private final String helpText;

@@ -20,7 +20,7 @@ public final class ConfigCmd extends AbstractPlayerCommand {
     public ConfigCmd(
             HudConfigUiService hudConfigUiService
     ){
-        super(COMMAND_NAME, "immersivehud.command.config.description");
+        super(COMMAND_NAME, "immersivehud.cmd.config");
         this.hudConfigUiService = hudConfigUiService;
     }
 

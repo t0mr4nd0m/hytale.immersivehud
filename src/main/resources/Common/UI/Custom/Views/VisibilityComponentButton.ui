@@ -12,7 +12,7 @@ $C = "../Common.ui";
 
 $C.@SecondaryButton #ComponentButton {
   Anchor: (Left: 4, Right: 4);
-  TooltipText: "Component";
+  TooltipText: "Component label";
   TextTooltipStyle: $C.@DefaultTextTooltipStyle;
 
   Group #ComponentButtonIcon {

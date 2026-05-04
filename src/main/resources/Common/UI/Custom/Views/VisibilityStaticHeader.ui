@@ -9,7 +9,7 @@ Group #VisibilitySectionHeaderRow {
 
   Label #SectionTitle {
     FlexWeight: 1;
-    Text: "SECTION";
+    Text: "Section title label";
     Style: @BaseLabelStyle;
   }
 }

@@ -23,8 +23,6 @@ $P.@GroupView #VisibilityRoot {
         LayoutMode: Center;
         Padding: (Bottom: 8);
 
-        Label { Text: "Components:"; Padding: (Right: 16); Style: @BaseLabelStyle; Visible: false;}
-
         Group #ComponentsButtons {
           LayoutMode: Left;
           Anchor: (Full: 0);
@@ -63,7 +61,7 @@ $P.@GroupView #VisibilityRoot {
 
             Button #DynamicComponentVisibilityStateButton {
               Anchor: (Width: 256, Height: 32);
-              TooltipText: "Toggle visibility";
+              TooltipText: %immersivehud.gui.toggle.visibility.button.tooltip;
               TextTooltipStyle: $C.@DefaultTextTooltipStyle;
 
               Group {
@@ -73,7 +71,7 @@ $P.@GroupView #VisibilityRoot {
 
                 Label #DynamicComponentVisiblityStateLabel {
                   FlexWeight: 1;
-                  Text: "HIDDEN";
+                  Text: %immersivehud.gui.component.state.hidden;
                   Style: @StateLabelStyle;
                 }
 
@@ -92,12 +90,16 @@ $P.@GroupView #VisibilityRoot {
               Anchor: (Height: 32);
               Padding: (Right: 16);
 
-              Label #TriggersHeaderLabel { FlexWeight: 1; Text: "Triggers"; Style: @BaseLabelStyle; }
+              Label #TriggersHeaderLabel {
+                FlexWeight: 1;
+                Text: %immersivehud.gui.triggers;
+                Style: @BaseLabelStyle;
+              }
 
               $P.@HorizontalSpacer {}
 
               @ToolButton #TriggerClearButton {
-                TooltipText: "Uncheck all triggers";
+                TooltipText: %immersivehud.gui.uncheck.all.button.tooltip;
 
                 Group #TriggerClearButtonIcon {
                   Background: @deleteIcon;
@@ -107,7 +109,7 @@ $P.@GroupView #VisibilityRoot {
               $P.@HorizontalSpacer {}
 
               @ToolButton #TriggerFilterButton {
-                TooltipText: "Filter triggers";
+                TooltipText: %immersivehud.gui.filter.button.tooltip;
 
                 Group #TriggerFilterButtonIcon {
                   Background: @applyFilterIcon;
@@ -116,7 +118,7 @@ $P.@GroupView #VisibilityRoot {
             }
 
             @ScrollingGroup #VisibilityTriggersList {
-              Anchor: (Height: 284);
+              Anchor: (Height: 282);
               Visible: true;
             }
 
@@ -127,7 +129,7 @@ $P.@GroupView #VisibilityRoot {
               Visible: false;
 
               Label {
-                Text: "Triggers disabled while component is set to VISIBLE";
+                Text: %immersivehud.msg.visibility.disabled.triggers;
                 Style: LabelStyle(...@BaseLabelStyle, RenderBold: false, RenderUppercase: false);
               }
             }
@@ -139,7 +141,7 @@ $P.@GroupView #VisibilityRoot {
               Visible: false;
 
               Label {
-                Text: "No active triggers";
+                Text: %immersivehud.msg.visibility.no.triggers;
                 Style: LabelStyle(...@BaseLabelStyle, RenderBold: false, RenderUppercase: false);
               }
             }
@@ -152,7 +154,7 @@ $P.@GroupView #VisibilityRoot {
           Visible: false;
 
           @ScrollingGroup #StaticComponentsList {
-            Anchor: (Height: 350);
+            Anchor: (Height: 347);
           }
         }
       }

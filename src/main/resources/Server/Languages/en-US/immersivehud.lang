@@ -1,0 +1,45 @@
+# Commands #
+cmd.ihud="ImmersiveHud plugin commands."
+cmd.config="Open the ImmersiveHud configuration UI."
+
+# Config UI #
+gui.title="Immersive Hud Config"
+
+gui.profile.button="Profile"
+gui.profile.button.tooltip="Choose a profile to instantly apply a preset HUD experience.\nProfiles provide predefined configurations tailored for different playstyles."
+
+gui.visibility.button="Visibility"
+gui.visibility.button.tooltip="Lorem Ipsum"
+
+gui.apply.button="Apply"
+gui.cancel.button="Cancel"
+
+# Profile UI #
+gui.profile.balanced="Balanced"
+gui.profile.balanced.description="Balanced experience. [RECOMMENDED]\nHUD elements appear only when relevant during gameplay."
+
+gui.profile.immersive="Immersive"
+gui.profile.immersive.description="Minimal HUD, maximum immersion. [ADVANCED]\nMost elements stay hidden and only some of them appear only during key gameplay moments."
+
+gui.profile.vanilla="Vanilla"
+gui.profile.vanilla.description="Original Hytale HUD experience.\nAll HUD elements remain visible at all times."
+
+gui.profile.custom="Custom"
+gui.profile.custom.description="Your personalized HUD configuration.\nYou’ve customized HUD visibility beyond predefined profiles."
+
+# Visibility UI #
+gui.visibility.static.components.button.tooltip="Static Components"
+
+gui.toggle.visibility.button.tooltip="Toggle visibility"
+
+gui.triggers="TRIGGERS ({active}/{total})"
+gui.uncheck.all.button.tooltip="Uncheck all triggers"
+gui.filter.button.tooltip="Filter active triggers"
+gui.triggers.checkbox.tooltip="Check to apply trigger"
+gui.threshold.label="BELOW"
+
+msg.visibility.disabled.triggers="Triggers disabled while component is set to VISIBLE"
+msg.visibility.no.triggers="No active triggers"
+
+gui.component.state.hidden="hidden"
+gui.component.state.visible="visible"
