@@ -1,7 +1,6 @@
 package com.tom.immersivehudplugin.commands;
 
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
-import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
 public final class IHudCommands extends AbstractCommandCollection {

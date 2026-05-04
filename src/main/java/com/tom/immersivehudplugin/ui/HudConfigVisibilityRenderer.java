@@ -11,7 +11,6 @@ import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Locale;
 
 public final class HudConfigVisibilityRenderer {
 
