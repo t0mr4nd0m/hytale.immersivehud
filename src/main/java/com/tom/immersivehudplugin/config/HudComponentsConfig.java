@@ -143,7 +143,7 @@ public final class HudComponentsConfig {
     private void ensureAllEntries() {
         for (HudComponent entry : HudComponentRegistry.allList()) {
             String key = normalizeKey(entry.key());
-            hiddenByKey.computeIfAbsent(key, _ -> entry.defaultHidden());
+            hiddenByKey.computeIfAbsent(key, ignored -> entry.defaultHidden());
         }
     }
 
