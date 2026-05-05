@@ -144,7 +144,7 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
                     return;
                 }
 
-                session.toggleVisibility(entry.key());
+                session.toggleVisibility(entry);
 
                 UICommandBuilder commands = new UICommandBuilder();
                 UIEventBuilder events = new UIEventBuilder();
@@ -159,7 +159,7 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
                     return;
                 }
 
-                session.toggleVisibility(entry.key());
+                session.toggleVisibility(entry);
 
                 UICommandBuilder commands = new UICommandBuilder();
                 visibilityRenderer.updateStaticRow(commands, session, entry);

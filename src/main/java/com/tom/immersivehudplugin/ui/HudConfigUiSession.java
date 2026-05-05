@@ -18,9 +18,10 @@ import java.util.List;
 
 public final class HudConfigUiSession {
 
+    private static final String STATIC = "static";
+
     private boolean dirty;
     private HudConfigView currentView = HudConfigView.PROFILES;
-
 
     private HudComponentsConfig draftHudComponents;
     private DynamicHudConfig draftDynamicHud;
@@ -67,12 +68,7 @@ public final class HudConfigUiSession {
         return entry.isHidden(draftHudComponents);
     }
 
-    public void toggleVisibility(@Nonnull String componentKey) {
-        HudComponent entry = HudComponentRegistry.find(componentKey);
-        if (entry == null) {
-            return;
-        }
-
+    public void toggleVisibility(@Nonnull HudComponent entry) {
         boolean hidden = entry.isHidden(draftHudComponents);
         entry.setHidden(draftHudComponents, !hidden);
         dirty = true;
@@ -157,7 +153,7 @@ public final class HudConfigUiSession {
         }
 
         return HudComponentRegistry.dynamicList().isEmpty()
-                ? "static"
+                ? STATIC
                 : HudComponentRegistry.dynamicList().getFirst().key();
     }
 
@@ -165,11 +161,14 @@ public final class HudConfigUiSession {
         if (key == null || key.isBlank()) {
             return;
         }
-        this.selectedVisibilityComponentKey = key;
+
+        if (STATIC.equalsIgnoreCase(key) || HudComponentRegistry.find(key) != null) {
+            this.selectedVisibilityComponentKey = key;
+        }
     }
 
     public boolean isVisibilityStaticSelection() {
-        return "static".equalsIgnoreCase(getSelectedVisibilityComponentKey());
+        return STATIC.equalsIgnoreCase(getSelectedVisibilityComponentKey());
     }
 
     @Nullable
