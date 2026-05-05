@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.tom.immersivehudplugin.commands.IHudCommands;
 import com.tom.immersivehudplugin.config.ConfigSupport;
+import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.config.GlobalConfigStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.config.PlayerConfigStore;
@@ -58,7 +59,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         return this.getManifest().getVersion().toString();
     }
 
-    public com.tom.immersivehudplugin.config.GlobalConfig getGlobalConfig() {
+    public GlobalConfig getGlobalConfig() {
         return globalConfigStore.get();
     }
 
