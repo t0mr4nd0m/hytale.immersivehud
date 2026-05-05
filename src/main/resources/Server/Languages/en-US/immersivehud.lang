@@ -36,7 +36,7 @@ gui.triggers="TRIGGERS ({active}/{total})"
 gui.uncheck.all.button.tooltip="Uncheck all triggers"
 gui.filter.button.tooltip="Filter active triggers"
 gui.triggers.checkbox.tooltip="Check to apply trigger"
-gui.threshold.label="BELOW"
+gui.threshold="BELOW"
 
 msg.visibility.disabled.triggers="Triggers disabled while component is set to VISIBLE"
 msg.visibility.no.triggers="No active triggers"

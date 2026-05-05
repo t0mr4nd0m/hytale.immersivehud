@@ -116,7 +116,6 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
                     visibilityRenderer.updateDynamicDetail(commands, events, session, entry);
                 } else {
                     visibilityRenderer.updateDynamicRuleRow(commands, session, entry, rule);
-                    visibilityRenderer.updateDynamicThresholdControls(commands, session, entry);
                     visibilityRenderer.updateDynamicHeader(commands, session, entry);
                 }
 
@@ -135,15 +134,15 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
                 float threshold = Math.max(0f, Math.min(100f, data.getDynamicThreshold()));
                 session.setDynamicThreshold(entry, threshold);
 
-                UICommandBuilder commands = new UICommandBuilder();
-                visibilityRenderer.updateDynamicThresholdControls(commands, session, entry);
-                sendUpdate(commands, new UIEventBuilder(), false);
+                sendUpdate(new UICommandBuilder(), new UIEventBuilder(), false);
             }
 
             case "VIS_TOGGLE_VISIBILITY" -> {
 
-                HudComponent entry = HudComponentRegistry.find(data.getComponent());
-                if (entry == null) return;
+                HudComponent entry = session.getSelectedVisibilityComponent();
+                if (entry == null) {
+                    return;
+                }
 
                 session.toggleVisibility(entry.key());
 
@@ -181,8 +180,8 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
             }
 
             case "VIS_CLEAR_TRIGGERS" -> {
-                HudComponent entry = HudComponentRegistry.find(data.getComponent());
-                if (entry == null || !entry.supportsDynamicRules()) {
+                HudComponent entry = session.getSelectedVisibilityComponent();
+                if (entry == null) {
                     return;
                 }
 
@@ -219,7 +218,6 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
         UIEventBuilder events = new UIEventBuilder();
 
         commands.clear("#ContentHost");
-        bindChromeEvents(events);
         render(commands, events);
 
         sendUpdate(commands, events, false);

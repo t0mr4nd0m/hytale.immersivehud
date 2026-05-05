@@ -117,7 +117,7 @@ $P.@GroupView #VisibilityRoot {
               }
             }
 
-            @ScrollingGroup #VisibilityTriggersList {
+            @ScrollingGroup #VisibilityTriggers {
               Anchor: (Height: 282);
               Visible: true;
             }
@@ -153,7 +153,7 @@ $P.@GroupView #VisibilityRoot {
           LayoutMode: Top;
           Visible: false;
 
-          @ScrollingGroup #StaticComponentsList {
+          @ScrollingGroup #StaticComponents {
             Anchor: (Height: 347);
           }
         }
