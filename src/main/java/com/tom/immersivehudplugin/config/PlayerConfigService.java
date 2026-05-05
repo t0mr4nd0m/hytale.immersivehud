@@ -67,10 +67,6 @@ public final class PlayerConfigService {
         playerConfigStore.saveAsync(uuid);
     }
 
-    public void updateDynamicHud(PlayerRef playerRef, Consumer<DynamicHudConfig> mutator) {
-        updatePlayerConfig(playerRef, config -> mutator.accept(config.getDynamicHud()));
-    }
-
     private GlobalConfig getGlobalConfig() {
         return globalConfigSupplier.get();
     }
