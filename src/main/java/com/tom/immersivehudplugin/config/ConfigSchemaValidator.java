@@ -18,6 +18,7 @@ public final class ConfigSchemaValidator {
         if (hasAndNotNumber(obj, "IntervalMs")) return false;
         if (hasAndNotNumber(obj, "HideDelayMs")) return false;
         if (hasAndNotNumber(obj, "ReticleTargetRange")) return false;
+        if (hasAndNotNumber(obj, "CombatScanRange")) return false;
         if (hasAndNotObject(obj, "DefaultHudComponents")) return false;
         if (hasAndNotObject(obj, "DefaultDynamicHud")) return false;
 
