@@ -52,8 +52,12 @@ public final class PlayerConfig {
             DynamicHudConfig defaultDynamic
     ) {
         PlayerConfig cfg = new PlayerConfig();
-        cfg.setHudComponents(defaultHud != null ? defaultHud.copy() : HudComponentRegistry.buildDefaultHudComponents());
-        cfg.setDynamicHud(defaultDynamic != null ? defaultDynamic.copy() : HudComponentRegistry.buildDefaultDynamicHud());
+        cfg.setHudComponents(defaultHud != null
+                ? defaultHud.copy()
+                : HudComponentRegistry.buildDefaultHudComponents());
+        cfg.setDynamicHud(defaultDynamic != null
+                ? defaultDynamic.copy()
+                : HudComponentRegistry.buildDefaultDynamicHud());
         return cfg;
     }
 }
