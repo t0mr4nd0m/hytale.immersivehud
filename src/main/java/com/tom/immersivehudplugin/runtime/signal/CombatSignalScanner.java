@@ -8,6 +8,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class CombatSignalScanner {
@@ -23,8 +24,7 @@ public final class CombatSignalScanner {
             return false;
         }
 
-        TransformComponent playerTransform =
-                store.getComponent(playerRef, TransformComponent.getComponentType());
+        TransformComponent playerTransform = store.getComponent(playerRef, TransformComponent.getComponentType());
 
         if (playerTransform == null) {
             return false;
@@ -48,8 +48,7 @@ public final class CombatSignalScanner {
                             continue;
                         }
 
-                        TransformComponent npcTransform =
-                                chunk.getComponent(i, TransformComponent.getComponentType());
+                        TransformComponent npcTransform = chunk.getComponent(i, TransformComponent.getComponentType());
 
                         if (!isWithinRange(playerTransform, npcTransform, range)) {
                             continue;
@@ -93,9 +92,13 @@ public final class CombatSignalScanner {
     }
 
     private boolean isNpcTargetingPlayer(
-            NPCEntity npc,
+            @Nonnull NPCEntity npc,
             Ref<EntityStore> playerRef
     ) {
+        if (playerRef == null || !playerRef.isValid()) {
+            return false;
+        }
+
         Role role = npc.getRole();
         if (role == null) {
             return false;
@@ -103,8 +106,11 @@ public final class CombatSignalScanner {
 
         var markedEntitySupport = role.getMarkedEntitySupport();
 
-        Ref<EntityStore> lockedTarget =
-                markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
+        Ref<EntityStore> lockedTarget = markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
+
+        if (lockedTarget == null || !lockedTarget.isValid()) {
+            return false;
+        }
 
         if (!playerRef.equals(lockedTarget)) {
             return false;
@@ -118,7 +124,7 @@ public final class CombatSignalScanner {
             TransformComponent npcTransform,
             float range
     ) {
-        if (npcTransform == null || range <= 0f) {
+        if (playerTransform == null || npcTransform == null || range <= 0f) {
             return false;
         }
 
