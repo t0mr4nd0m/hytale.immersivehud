@@ -7,6 +7,8 @@ import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 public final class CombatSignalTracker {
 
+    private final CombatSignalScanner combatSignalScanner = new CombatSignalScanner();
+
     private int combatScanIntervalMs(GlobalConfig global) {
         return Math.max(100, intervalMs(global));
     }
@@ -44,8 +46,6 @@ public final class CombatSignalTracker {
             state.t.pulse(HudTrigger.IN_COMBAT, now, hideDelay);
         }
     }
-
-    private final CombatSignalScanner combatSignalScanner = new CombatSignalScanner();
 
     private boolean hasNpcTargetingPlayer(
             PlayerTickContext tickContext,
