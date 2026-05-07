@@ -16,7 +16,7 @@ public final class PlayerTickContextFactory {
     public PlayerTickContext build(PlayerRef playerRef) {
         try {
             Ref<EntityStore> ref = playerRef.getReference();
-            if (ref == null) {
+            if (ref == null || !ref.isValid()) {
                 return null;
             }
 
