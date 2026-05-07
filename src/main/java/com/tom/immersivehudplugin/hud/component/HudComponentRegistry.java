@@ -3,11 +3,9 @@ package com.tom.immersivehudplugin.hud.component;
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
-import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -30,12 +28,12 @@ public final class HudComponentRegistry {
 
     public enum Group {
 
-        CORE    ("CORE",    "Core"),
-        BARS    ("BARS",    "Bars"),
-        UI      ("UI",      "UI"),
-        SOCIAL  ("SOCIAL",  "Social"),
-        PANELS  ("PANELS",  "Panels"),
-        BUILDER ("BUILDER", "Builder");
+        CORE    ("core",    "Core"),
+        BARS    ("bars",    "Bars"),
+        UI      ("ui",      "UI"),
+        SOCIAL  ("social",  "Social"),
+        PANELS  ("panels",  "Panels"),
+        BUILDER ("builder", "Builder");
 
         public final String key;
         public final String label;
@@ -137,13 +135,9 @@ public final class HudComponentRegistry {
         DynamicHudConfig cfg = new DynamicHudConfig();
 
         for (HudComponent entry : dynamicList()) {
-            DynamicHudRuleConfig ruleCfg = entry.getDynamicRuleConfig(cfg);
-            if (ruleCfg == null) {
-                continue;
-            }
+            DynamicHudRuleConfig ruleCfg = entry.requireDynamicRuleConfig(cfg);
 
-            EnumSet<HudTrigger> defaultRules = entry.defaultRules();
-            ruleCfg.setRules(defaultRules != null ? defaultRules : EnumSet.noneOf(HudTrigger.class));
+            ruleCfg.setRules(entry.defaultRules());
 
             if (entry.supportsThreshold()) {
                 ruleCfg.setThreshold(entry.defaultThreshold());
