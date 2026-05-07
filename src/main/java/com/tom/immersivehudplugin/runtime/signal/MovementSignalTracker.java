@@ -1,5 +1,6 @@
 package com.tom.immersivehudplugin.runtime.signal;
 
+import com.hypixel.hytale.protocol.MovementStates;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
@@ -12,25 +13,22 @@ public final class MovementSignalTracker {
             long now,
             int hideDelay
     ) {
-        var movementStates = tickContext.movement() != null ? tickContext.movement().getMovementStates() : null;
-        if (movementStates == null) {
-            return;
+        MovementStates movementStates = tickContext.movement() != null
+                ? tickContext.movement().getMovementStates()
+                : null;
+
+        if (movementStates != null) {
+            pulseDirectMovementSignals(state, movementStates, now, hideDelay);
         }
+    }
 
-        boolean isMoving =
-                movementStates.walking
-                        || movementStates.running
-                        || movementStates.sprinting
-                        || movementStates.swimming
-                        || movementStates.mounting
-                        || movementStates.flying
-                        || movementStates.gliding
-                        || movementStates.jumping
-                        || movementStates.climbing
-                        || movementStates.falling
-                        || movementStates.rolling;
-
-        if (isMoving) state.t.pulse(HudTrigger.PLAYER_MOVING, now, hideDelay);
+    private void pulseDirectMovementSignals(
+            PlayerHudState state,
+            MovementStates movementStates,
+            long now,
+            int hideDelay
+    ) {
+        if (isMoving(movementStates)) state.t.pulse(HudTrigger.PLAYER_MOVING, now, hideDelay);
         if (movementStates.walking) state.t.pulse(HudTrigger.PLAYER_WALKING, now, hideDelay);
         if (movementStates.running) state.t.pulse(HudTrigger.PLAYER_RUNNING, now, hideDelay);
         if (movementStates.sprinting) state.t.pulse(HudTrigger.PLAYER_SPRINTING, now, hideDelay);
@@ -48,5 +46,23 @@ public final class MovementSignalTracker {
         if (movementStates.sleeping) state.t.pulse(HudTrigger.PLAYER_SLEEPING, now, hideDelay);
         if (movementStates.inFluid) state.t.pulse(HudTrigger.PLAYER_IN_FLUID, now, hideDelay);
         if (movementStates.onGround) state.t.pulse(HudTrigger.PLAYER_ON_GROUND, now, hideDelay);
+    }
+
+    private boolean isMoving(MovementStates movementStates) {
+        return movementStates.walking
+                || movementStates.running
+                || movementStates.sprinting
+                || movementStates.swimming
+                || movementStates.mounting
+                || movementStates.flying
+                || movementStates.gliding
+                || movementStates.jumping
+                || movementStates.climbing
+                || movementStates.falling
+                || movementStates.fallingFar
+                || movementStates.rolling
+                || movementStates.swimJumping
+                || movementStates.mantling
+                || movementStates.sliding;
     }
 }
