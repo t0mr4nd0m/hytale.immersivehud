@@ -55,6 +55,15 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
     }
 
     @Override
+    public void onDismiss(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store
+    ) {
+        uiService.discard(playerRef);
+        uiService.resumeWorld(ref, store);
+    }
+
+    @Override
     public void handleDataEvent(
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,

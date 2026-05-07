@@ -81,7 +81,6 @@ public final class HudConfigUiService {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player != null) {
             player.getPageManager().setPage(ref, store, Page.None);
-            pauseWorld(player, false);
         }
     }
 
@@ -90,6 +89,16 @@ public final class HudConfigUiService {
         World world = player.getWorld();
         if (world != null) {
             world.setPaused(paused);
+        }
+    }
+
+    public void resumeWorld(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store
+    ) {
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player != null) {
+            pauseWorld(player, false);
         }
     }
 }
