@@ -70,7 +70,7 @@ public enum HudTrigger {
     private final Source source;
     private final boolean usesThreshold;
 
-    HudTrigger(Category category, Source source, Boolean usesThreshold) {
+    HudTrigger(Category category, Source source, boolean usesThreshold) {
         this.category = category;
         this.source = source;
         this.usesThreshold = usesThreshold;
@@ -124,6 +124,9 @@ public enum HudTrigger {
     }
 
     public static String displayNameUpper(HudTrigger trigger) {
+        if  (trigger == null) {
+            return "";
+        }
         return Arrays.stream(trigger.name().split("_"))
                 .map(String::toUpperCase)
                 .collect(Collectors.joining(" "));
