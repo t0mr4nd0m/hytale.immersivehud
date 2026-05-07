@@ -76,11 +76,7 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public DynamicHudRuleConfig getDynamicRuleConfig(@Nonnull HudComponent entry) {
-        DynamicHudRuleConfig cfg = entry.getDynamicRuleConfig(draftDynamicHud);
-        if (cfg == null) {
-            throw new IllegalStateException("Entry is not dynamic-capable: " + entry.key());
-        }
-        return cfg;
+        return entry.requireDynamicRuleConfig(draftDynamicHud);
     }
 
     public boolean isRuleEnabled(
