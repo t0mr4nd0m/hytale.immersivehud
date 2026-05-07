@@ -31,7 +31,9 @@ public enum Profile {
     }
 
     public static Profile fromString(String s) {
-        if (s == null) return null;
+        if (s == null) {
+            return null;
+        }
 
         try {
             return Profile.valueOf(s.trim().toUpperCase());
