@@ -22,8 +22,8 @@ public final class HudBarState {
         return ratio() * 100f;
     }
 
-    public boolean isBelowPercent(float percent) {
-        return isValid() && percent() < percent;
+    public boolean isBelowPercent(float thresholdPercent) {
+        return isValid() && percent() < thresholdPercent;
     }
 
     public void reset() {
