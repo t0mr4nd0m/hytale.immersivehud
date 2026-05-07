@@ -29,15 +29,10 @@ public final class HudRuleEvaluator {
             }
 
             if (!component.hasActiveRules(dynamicConfig)) {
-                // Components without active rules are treated as static and handled
-                // by HudVisibilityCoordinator (not here)
                 continue;
             }
 
-            DynamicHudRuleConfig ruleConfig = component.getDynamicRuleConfig(dynamicConfig);
-            if  (ruleConfig == null) {
-                continue;
-            }
+            DynamicHudRuleConfig ruleConfig = component.requireDynamicRuleConfig(dynamicConfig);
 
             if (!shouldShowDynamic(ruleConfig, triggersContext)) {
                 state.addDynamicHidden(component.hudComponent());
@@ -54,7 +49,6 @@ public final class HudRuleEvaluator {
                 return true;
             }
         }
-
         return false;
     }
 }
