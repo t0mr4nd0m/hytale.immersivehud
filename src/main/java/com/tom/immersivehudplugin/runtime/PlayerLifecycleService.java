@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
+import javax.annotation.Nullable;
 
 public final class PlayerLifecycleService {
 
@@ -43,11 +43,15 @@ public final class PlayerLifecycleService {
 
     private void onPlayerReady(PlayerReadyEvent event) {
         PlayerRef playerRef = resolvePlayerRef(event.getPlayer());
+        if  (playerRef == null) {
+            return;
+        }
 
-        playerConfigService.getOrLoadPlayerConfig(Objects.requireNonNull(playerRef).getUuid());
+        playerConfigService.getOrLoadPlayerConfig(playerRef.getUuid());
         hudRuntimeService.onPlayerReady(playerRef);
     }
 
+    @Nullable
     private PlayerRef resolvePlayerRef(@Nonnull Player player) {
         Ref<EntityStore> ref = player.getReference();
 
