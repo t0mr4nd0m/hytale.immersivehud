@@ -20,12 +20,7 @@ public final class PlayerConfigService {
         this.globalConfigSupplier = globalConfigSupplier;
     }
 
-    @Nullable
-    public PlayerConfig requirePlayerConfig(@Nullable PlayerRef playerRef) {
-        if (playerRef == null) {
-            return null;
-        }
-
+    public PlayerConfig getPlayerConfig(PlayerRef playerRef) {
         return getOrLoadPlayerConfig(playerRef.getUuid());
     }
 

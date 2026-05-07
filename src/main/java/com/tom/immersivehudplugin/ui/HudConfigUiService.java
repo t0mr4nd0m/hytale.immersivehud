@@ -37,10 +37,7 @@ public final class HudConfigUiService {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store
     ) {
-        PlayerConfig playerCfg = playerConfigService.requirePlayerConfig(playerRef);
-        if (playerCfg == null) {
-            return;
-        }
+        PlayerConfig playerCfg = playerConfigService.getPlayerConfig(playerRef);
 
         sessions.put(playerRef.getUuid(), new HudConfigUiSession(playerCfg));
 
