@@ -58,7 +58,7 @@ public final class HudTickProcessor {
         hudVisibilityCoordinator.ensureStaticHudBuilt(
                 evaluation.state(),
                 evaluation.hudConfig(),
-                evaluation.dynamicConfig
+                evaluation.dynamicConfig()
         );
 
         if (shouldEvaluateDynamicHud(evaluation)) {
