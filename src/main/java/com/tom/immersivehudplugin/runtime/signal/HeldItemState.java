@@ -13,6 +13,8 @@ public final class HeldItemState {
             "Dagger", "Sword", "Axe", "Hammer", "Mace", "Spear"
     );
 
+    private HeldItemState() {}
+
     public static boolean isRangedWeapon(Item item) {
         return isWeapon(item) && checkItemFamily(item, RANGED_WEAPONS);
     }
@@ -30,7 +32,17 @@ public final class HeldItemState {
     }
 
     public static String getItemType(Item item) {
-        return item == null? "<null>" : item.getData().getRawTags().get("Type")[0].trim();
+        if (item == null || item.getData() == null) {
+            return "";
+        }
+
+        String[] type = item.getData().getRawTags().get("Type");
+
+        if (type == null || type.length == 0 || type[0] == null) {
+            return "";
+        }
+
+        return type[0].trim();
     }
 
     public static boolean checkItemFamily(Item item, Set<String> familiesList) {
