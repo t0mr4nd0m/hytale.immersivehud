@@ -1,7 +1,6 @@
 package com.tom.immersivehudplugin.profiles;
 
 import com.tom.immersivehudplugin.config.DynamicHudConfig;
-import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
@@ -36,6 +35,8 @@ public final class ProfilePresets {
         cfg.setDynamicHud(HudComponentRegistry.buildDefaultDynamicHud());
     }
 
+    private static final EnumSet<HudTrigger> NO_RULES = EnumSet.noneOf(HudTrigger.class);
+
     private static void applyImmersive(PlayerConfig cfg) {
         HudComponentsConfig hud = cfg.getHudComponents();
         DynamicHudConfig dyn = cfg.getDynamicHud();
@@ -43,10 +44,10 @@ public final class ProfilePresets {
         hud.setHideNotificationsHud(true);
         hud.setHideInputBindingsHud(true);
 
-        dyn.getHealth().setRules(EnumSet.noneOf(HudTrigger.class));
-        dyn.getStamina().setRules(EnumSet.noneOf(HudTrigger.class));
-        dyn.getMana().setRules(EnumSet.noneOf(HudTrigger.class));
-        dyn.getOxygen().setRules(EnumSet.noneOf(HudTrigger.class));
+        dyn.getHealth().setRules(NO_RULES);
+        dyn.getStamina().setRules(NO_RULES);
+        dyn.getMana().setRules(NO_RULES);
+        dyn.getOxygen().setRules(NO_RULES);
 
         dyn.getCompass().setRules(EnumSet.of(
                 HudTrigger.PLAYER_CROUCHING,
@@ -60,7 +61,7 @@ public final class ProfilePresets {
                 HudTrigger.TARGET_ENTITY,
                 HudTrigger.HOLDING_RANGED_WEAPON
         ));
-        dyn.getHotbar().setRules(EnumSet.noneOf(HudTrigger.class));
+        dyn.getHotbar().setRules(NO_RULES);
     }
 
     private static void applyVanilla(PlayerConfig cfg) {
@@ -72,10 +73,7 @@ public final class ProfilePresets {
         }
 
         for (HudComponent entry : HudComponentRegistry.dynamicList()) {
-            DynamicHudRuleConfig ruleCfg = entry.dynamicGetter() != null ? entry.dynamicGetter().apply(dyn) : null;
-            if (ruleCfg != null) {
-                ruleCfg.setRules(EnumSet.noneOf(HudTrigger.class));
-            }
+            entry.requireDynamicRuleConfig(dyn).setRules(NO_RULES);
         }
     }
 }
