@@ -13,9 +13,12 @@ public final class ProfilePresets {
 
     private ProfilePresets() {
     }
+    private static EnumSet<HudTrigger> noRules() {
+        return EnumSet.noneOf(HudTrigger.class);
+    }
 
     public static void applyTo(PlayerConfig cfg, Profile profile) {
-        if (cfg == null || profile == null) {
+        if (cfg == null || profile == null || profile == Profile.CUSTOM) {
             return;
         }
 
@@ -24,7 +27,7 @@ public final class ProfilePresets {
         switch (profile) {
             case IMMERSIVE -> applyImmersive(cfg);
             case VANILLA -> applyVanilla(cfg);
-            case BALANCED -> { /* DO NOTHING */ }
+            default -> { /* DO NOTHING */ }
         }
 
         cfg.sanitize();
@@ -35,8 +38,6 @@ public final class ProfilePresets {
         cfg.setDynamicHud(HudComponentRegistry.buildDefaultDynamicHud());
     }
 
-    private static final EnumSet<HudTrigger> NO_RULES = EnumSet.noneOf(HudTrigger.class);
-
     private static void applyImmersive(PlayerConfig cfg) {
         HudComponentsConfig hud = cfg.getHudComponents();
         DynamicHudConfig dyn = cfg.getDynamicHud();
@@ -44,10 +45,10 @@ public final class ProfilePresets {
         hud.setHideNotificationsHud(true);
         hud.setHideInputBindingsHud(true);
 
-        dyn.getHealth().setRules(NO_RULES);
-        dyn.getStamina().setRules(NO_RULES);
-        dyn.getMana().setRules(NO_RULES);
-        dyn.getOxygen().setRules(NO_RULES);
+        dyn.getHealth().setRules(noRules());
+        dyn.getStamina().setRules(noRules());
+        dyn.getMana().setRules(noRules());
+        dyn.getOxygen().setRules(noRules());
 
         dyn.getCompass().setRules(EnumSet.of(
                 HudTrigger.PLAYER_CROUCHING,
@@ -61,7 +62,7 @@ public final class ProfilePresets {
                 HudTrigger.TARGET_ENTITY,
                 HudTrigger.HOLDING_RANGED_WEAPON
         ));
-        dyn.getHotbar().setRules(NO_RULES);
+        dyn.getHotbar().setRules(noRules());
     }
 
     private static void applyVanilla(PlayerConfig cfg) {
@@ -73,7 +74,7 @@ public final class ProfilePresets {
         }
 
         for (HudComponent entry : HudComponentRegistry.dynamicList()) {
-            entry.requireDynamicRuleConfig(dyn).setRules(NO_RULES);
+            entry.requireDynamicRuleConfig(dyn).setRules(noRules());
         }
     }
 }
