@@ -2,8 +2,8 @@ package com.tom.immersivehudplugin.runtime;
 
 public final class DynamicHudCache {
 
-    private boolean known;
-    private boolean enabled;
+    private volatile boolean known;
+    private volatile boolean enabled;
 
     public void invalidate() {
         known = false;
