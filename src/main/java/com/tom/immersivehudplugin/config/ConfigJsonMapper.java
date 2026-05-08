@@ -192,46 +192,44 @@ public final class ConfigJsonMapper {
         }
 
         JsonElement rulesEl = obj.get(RULES);
-        JsonElement thresholdEl = obj.get(THRESHOLD);
 
-        if (rulesEl == null || rulesEl.isJsonNull()) {
-            cfg.setRules(rules);
-            return cfg;
-        }
+        if (rulesEl != null && !rulesEl.isJsonNull()) {
+            if (rulesEl.isJsonPrimitive()) {
+                String csv = rulesEl.getAsString();
 
-        if (rulesEl.isJsonPrimitive()) {
-            String csv = rulesEl.getAsString();
-
-            for (String ruleName : csv.split(",")) {
-                HudTrigger t = HudTrigger.fromString(ruleName.trim());
-                if (t != null) {
-                    rules.add(t);
-                }
-            }
-        } else if (rulesEl.isJsonArray()) {
-            JsonArray arr = rulesEl.getAsJsonArray();
-
-            for (JsonElement el : arr) {
-                if (el == null || el.isJsonNull() || !el.isJsonPrimitive()) {
-                    continue;
+                for (String ruleName : csv.split(",")) {
+                    HudTrigger t = HudTrigger.fromString(ruleName.trim());
+                    if (t != null) {
+                        rules.add(t);
+                    }
                 }
 
-                HudTrigger trigger = HudTrigger.fromString(el.getAsString());
-                if (trigger != null) {
-                    rules.add(trigger);
+            } else if (rulesEl.isJsonArray()) {
+                JsonArray arr = rulesEl.getAsJsonArray();
+
+                for (JsonElement el : arr) {
+                    if (el == null || el.isJsonNull() || !el.isJsonPrimitive()) {
+                        continue;
+                    }
+
+                    HudTrigger trigger = HudTrigger.fromString(el.getAsString());
+                    if (trigger != null) {
+                        rules.add(trigger);
+                    }
                 }
             }
         }
 
         cfg.setRules(rules);
 
-        if (thresholdEl != null && thresholdEl.isJsonPrimitive()) {
-            cfg.setThreshold(thresholdEl.getAsFloat());
+        if (isNumber(obj, THRESHOLD)) {
+            cfg.setThreshold(obj.get(THRESHOLD).getAsFloat());
         }
 
         return cfg;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean isString(JsonObject obj, String key) {
         JsonElement el = obj.get(key);
         return el != null
