@@ -23,13 +23,8 @@ public record HudComponent(
         @Nullable Float defaultThreshold
 ) {
     public HudComponent {
-        allowedRules = allowedRules == null || allowedRules.isEmpty()
-                ? EnumSet.noneOf(HudTrigger.class)
-                : EnumSet.copyOf(allowedRules);
-
-        defaultRules = defaultRules == null || defaultRules.isEmpty()
-                ? EnumSet.noneOf(HudTrigger.class)
-                : EnumSet.copyOf(defaultRules);
+        allowedRules = copyRules(allowedRules);
+        defaultRules = copyRules(defaultRules);
 
         if (!allowedRules.containsAll(defaultRules)) {
             throw new IllegalArgumentException(
@@ -112,5 +107,11 @@ public record HudComponent(
     public boolean hasActiveRules(DynamicHudConfig cfg) {
         DynamicHudRuleConfig rules = getDynamicRuleConfig(cfg);
         return rules != null && rules.hasRules();
+    }
+
+    private static EnumSet<HudTrigger> copyRules(@Nullable EnumSet<HudTrigger> rules) {
+        return rules == null || rules.isEmpty()
+                ? EnumSet.noneOf(HudTrigger.class)
+                : EnumSet.copyOf(rules);
     }
 }
