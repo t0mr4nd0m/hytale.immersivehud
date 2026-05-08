@@ -6,6 +6,7 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -137,7 +138,7 @@ public final class HudComponentRegistry {
         for (HudComponent entry : dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.requireDynamicRuleConfig(cfg);
 
-            ruleCfg.setRules(entry.defaultRules());
+            ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
 
             if (entry.supportsThreshold()) {
                 ruleCfg.setThreshold(entry.defaultThreshold());
