@@ -3,34 +3,38 @@ package com.tom.immersivehudplugin.runtime.signal;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.server.core.asset.type.attitude.Attitude;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.npc.blackboard.view.combat.CombatViewSystems;
+import com.hypixel.hytale.server.npc.blackboard.view.combat.InterpretedCombatData;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
 
-import javax.annotation.Nonnull;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 
 public final class CombatSignalScanner {
 
     private static final String LOCKED_TARGET_SLOT = "LockedTarget";
 
-    public boolean hasNpcTargetingPlayer(
+    public CombatScanResult scanNpcCombat(
             Store<EntityStore> store,
             Ref<EntityStore> playerRef,
+            Ref<EntityStore> currentCombatTargetRef,
             float range
     ) {
         if (store == null || playerRef == null || !playerRef.isValid()) {
-            return false;
+            return CombatScanResult.none();
         }
 
-        TransformComponent playerTransform = store.getComponent(playerRef, TransformComponent.getComponentType());
+        TransformComponent playerTransform =
+                store.getComponent(playerRef, TransformComponent.getComponentType());
 
         if (playerTransform == null) {
-            return false;
+            return CombatScanResult.none();
         }
 
-        AtomicBoolean found = new AtomicBoolean(false);
+        final CombatScanResult[] result = { CombatScanResult.none() };
 
         store.forEachChunk(
                 Query.and(
@@ -38,85 +42,97 @@ public final class CombatSignalScanner {
                         TransformComponent.getComponentType()
                 ),
                 (chunk, _) -> {
-                    if (found.get()) {
-                        return;
-                    }
-
                     for (int i = 0; i < chunk.size(); i++) {
+
                         Ref<EntityStore> npcRef = chunk.getReferenceTo(i);
                         if (!npcRef.isValid()) {
                             continue;
                         }
 
-                        TransformComponent npcTransform = chunk.getComponent(i, TransformComponent.getComponentType());
+                        TransformComponent npcTransform =
+                                chunk.getComponent(i, TransformComponent.getComponentType());
 
                         if (!isWithinRange(playerTransform, npcTransform, range)) {
                             continue;
                         }
 
-                        var entityComponentType = NPCEntity.getComponentType();
-                        if (entityComponentType == null) {
-                            continue;
-                        }
-
-                        NPCEntity npc = chunk.getComponent(i, entityComponentType);
+                        NPCEntity npc = chunk.getComponent(i, NPCEntity.getComponentType());
                         if (npc == null) {
                             continue;
                         }
 
-                        if (isNpcTargetingPlayer(npc, playerRef)) {
-                            found.set(true);
+                        Role role = npc.getRole();
+                        if (role == null) {
+                            continue;
+                        }
+
+                        CombatScanResult scan = scanNpc(npcRef, role, playerRef, currentCombatTargetRef, store);
+
+                        if (scan.active()) {
+                            result[0] = scan;
                             return;
                         }
                     }
                 }
         );
 
-        return found.get();
+        return result[0];
     }
 
-    private boolean isNpcEngagedWithPlayer(Role role, Ref<EntityStore> playerRef) {
+    private CombatScanResult scanNpc(
+            Ref<EntityStore> npcRef,
+            Role role,
+            Ref<EntityStore> playerRef,
+            Ref<EntityStore> currentCombatTargetRef,
+            Store<EntityStore> store
+    ) {
+        boolean hostile = isHostileTowardsPlayer(role, npcRef, playerRef, store);
+        boolean attacking = isNpcPerformingAttack(npcRef, store);
+        boolean targetingPlayer = isNpcTargetingPlayer(role, playerRef);
+        boolean pursuingPlayer = isNpcPursuingPlayer(role, playerRef);
 
-        var combatSupport = role.getCombatSupport();
-        if (combatSupport.isExecutingAttack()) {
-            return true;
+        boolean sameCombatTarget = isSameValidRef(npcRef, currentCombatTargetRef);
+
+        boolean engagedWithPlayer = targetingPlayer || pursuingPlayer;
+
+        if (hostile && engagedWithPlayer) {
+            return new CombatScanResult(true, npcRef, attacking);
         }
 
+        if (hostile && sameCombatTarget) {
+            return new CombatScanResult(true, npcRef, false);
+        }
+
+        return CombatScanResult.none();
+    }
+
+    private boolean isNpcTargetingPlayer(Role role, Ref<EntityStore> playerRef) {
+        var markedEntitySupport = role.getMarkedEntitySupport();
+
+        Ref<EntityStore> lockedTarget =
+                markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
+
+        return isSameValidRef(lockedTarget, playerRef);
+    }
+
+    private boolean isNpcPursuingPlayer(Role role, Ref<EntityStore> playerRef) {
         var bodyMotion = role.getLastBodySteeringMotion();
         if (bodyMotion == null) {
             return false;
         }
 
-        Ref<EntityStore> desiredTarget = bodyMotion.getDesiredTargetEntity();
-        return playerRef.equals(desiredTarget);
+        return isSameValidRef(bodyMotion.getDesiredTargetEntity(), playerRef);
     }
 
-    private boolean isNpcTargetingPlayer(
-            @Nonnull NPCEntity npc,
-            Ref<EntityStore> playerRef
+    private boolean isSameValidRef(
+            Ref<EntityStore> a,
+            Ref<EntityStore> b
     ) {
-        if (playerRef == null || !playerRef.isValid()) {
-            return false;
-        }
-
-        Role role = npc.getRole();
-        if (role == null) {
-            return false;
-        }
-
-        var markedEntitySupport = role.getMarkedEntitySupport();
-
-        Ref<EntityStore> lockedTarget = markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
-
-        if (lockedTarget == null || !lockedTarget.isValid()) {
-            return false;
-        }
-
-        if (!playerRef.equals(lockedTarget)) {
-            return false;
-        }
-
-        return isNpcEngagedWithPlayer(role, playerRef);
+        return a != null
+                && b != null
+                && a.isValid()
+                && b.isValid()
+                && a.equals(b);
     }
 
     private boolean isWithinRange(
@@ -138,5 +154,46 @@ public final class CombatSignalScanner {
         double rangeSq = (double) range * range;
 
         return (dx * dx + dy * dy + dz * dz) <= rangeSq;
+    }
+
+    public record CombatScanResult(
+            boolean active,
+            Ref<EntityStore> npcRef,
+            boolean attacking
+    ) {
+        public static CombatScanResult none() {
+            return new CombatScanResult(false, null, false);
+        }
+    }
+
+    private boolean isNpcPerformingAttack(
+            Ref<EntityStore> npcRef,
+            Store<EntityStore> store
+    ) {
+        List<InterpretedCombatData> combatData =
+                CombatViewSystems.getCombatData(npcRef, store);
+
+        for (InterpretedCombatData data : combatData) {
+            if (data.isPerformingMeleeAttack()
+                    || data.isPerformingRangedAttack()
+                    || data.isCharging()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isHostileTowardsPlayer(
+            Role role,
+            Ref<EntityStore> npcRef,
+            Ref<EntityStore> playerRef,
+            Store<EntityStore> store
+    ) {
+        try {
+            return role.getWorldSupport().getAttitude(npcRef, playerRef, store) == Attitude.HOSTILE;
+        } catch (RuntimeException ex) {
+            return true;
+        }
     }
 }

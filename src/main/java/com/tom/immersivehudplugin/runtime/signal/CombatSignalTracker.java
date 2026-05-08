@@ -42,21 +42,25 @@ public final class CombatSignalTracker {
 
         state.lastCombatScanMs = now;
 
-        if (hasNpcTargetingPlayer(tickContext, global)) {
-            state.t.pulse(HudTrigger.IN_COMBAT, now, hideDelay);
-        }
-    }
-
-    private boolean hasNpcTargetingPlayer(
-            PlayerTickContext tickContext,
-            GlobalConfig global
-    ) {
-        float range = combatScanRange(global);
-
-        return combatSignalScanner.hasNpcTargetingPlayer(
+        var result = combatSignalScanner.scanNpcCombat(
                 tickContext.store(),
                 tickContext.ref(),
-                range
+                state.combatTargetRef,
+                combatScanRange(global)
         );
+
+        int combatHideDelay = Math.max(hideDelay, combatScanIntervalMs(global) * 2);
+
+        if (result.active()) {
+            state.combatTargetRef = result.npcRef();
+            state.lastCombatTargetSeenMs = now;
+            state.t.pulse(HudTrigger.IN_COMBAT, now, combatHideDelay);
+            return;
+        }
+
+        if (state.combatTargetRef != null && now - state.lastCombatTargetSeenMs > combatHideDelay) {
+            state.combatTargetRef = null;
+            state.lastCombatTargetSeenMs = 0L;
+        }
     }
 }

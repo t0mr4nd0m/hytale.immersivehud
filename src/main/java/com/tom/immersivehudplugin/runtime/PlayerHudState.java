@@ -1,6 +1,8 @@
 package com.tom.immersivehudplugin.runtime;
 
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudBarState;
 
@@ -28,6 +30,8 @@ public final class PlayerHudState {
     public boolean staticHudInitialized;
     public boolean staticDirty = true;
 
+    public volatile Ref<EntityStore> combatTargetRef;
+    public volatile long lastCombatTargetSeenMs;
     public volatile long lastCombatScanMs;
     public volatile long lastReticleScanMs;
     public volatile int hideDelayMs = GlobalConfig.HIDE_DELAY_MS;
@@ -137,6 +141,8 @@ public final class PlayerHudState {
         t.clearAll();
         lastReticleScanMs = 0L;
         lastCombatScanMs = 0L;
+        combatTargetRef = null;
+        lastCombatTargetSeenMs = 0L;
     }
 
     public record HudDelta(
