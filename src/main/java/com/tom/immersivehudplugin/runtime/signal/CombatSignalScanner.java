@@ -106,13 +106,38 @@ public final class CombatSignalScanner {
         return CombatScanResult.none();
     }
 
-    private boolean isNpcTargetingPlayer(Role role, Ref<EntityStore> playerRef) {
+    private boolean isNpcTargetingPlayer(
+            Role role,
+            Ref<EntityStore> playerRef
+    ) {
+
+        return role != null && (hasLockedTarget(role, playerRef)
+                || hasDesiredTarget(role, playerRef)
+                || isExecutingAttack(role));
+    }
+
+    private boolean hasLockedTarget(Role role, Ref<EntityStore> playerRef) {
         var markedEntitySupport = role.getMarkedEntitySupport();
 
         Ref<EntityStore> lockedTarget =
                 markedEntitySupport.getMarkedEntityRef(LOCKED_TARGET_SLOT);
 
-        return isSameValidRef(lockedTarget, playerRef);
+        return playerRef.equals(lockedTarget);
+    }
+
+    private boolean hasDesiredTarget(Role role, Ref<EntityStore> playerRef) {
+        var bodyMotion = role.getLastBodySteeringMotion();
+        if (bodyMotion == null) {
+            return false;
+        }
+
+        Ref<EntityStore> desiredTarget = bodyMotion.getDesiredTargetEntity();
+        return isSameValidRef(desiredTarget, playerRef);
+    }
+
+    private boolean isExecutingAttack(Role role) {
+        var combatSupport = role.getCombatSupport();
+        return combatSupport.isExecutingAttack();
     }
 
     private boolean isNpcPursuingPlayer(Role role, Ref<EntityStore> playerRef) {
