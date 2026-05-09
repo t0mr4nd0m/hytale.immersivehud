@@ -129,9 +129,20 @@ public final class HudTickProcessor {
     }
 
     private void applyHud(TickEvaluation evaluation) {
+        PlayerHudState state = evaluation.state();
+
+        if (!state.isRuntimeInitialized()) {
+            hudVisibilityCoordinator.applyInitialHudSnapshot(
+                    evaluation.tickContext(),
+                    state
+            );
+            state.markRuntimeInitialized();
+            return;
+        }
+
         hudVisibilityCoordinator.applyHudDelta(
                 evaluation.tickContext(),
-                evaluation.state()
+                state
         );
     }
 

@@ -99,4 +99,8 @@ public final class HudVisibilityCoordinator {
     public void applyHudDelta(PlayerTickContext tickContext, PlayerHudState state) {
         hudDeltaApplier.apply(tickContext, state);
     }
+
+    public void applyInitialHudSnapshot(PlayerTickContext tickContext, PlayerHudState state) {
+        hudDeltaApplier.applySnapshot(tickContext, state);
+    }
 }

@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 
-@SuppressWarnings("FieldCanBeLocal")
 public final class HudRuntimeService {
 
     private final JavaPlugin plugin;
@@ -34,13 +33,6 @@ public final class HudRuntimeService {
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
     private final HeldItemSignalTracker heldItemSignalTracker;
-    private final MovementSignalTracker movementSignalTracker;
-    private final ReticleSignalTracker reticleSignalTracker;
-    private final CombatSignalTracker combatSignalTracker;
-    private final HudSignalPipeline hudSignalPipeline;
-    private final HudBarStateUpdater barUpdater;
-    private final PlayerTickContextFactory tickContextFactory;
-    private final HudTriggerContextFactory triggerContextFactory;
 
     private final HudTickProcessor hudTickProcessor;
 
@@ -65,23 +57,23 @@ public final class HudRuntimeService {
         this.globalConfigSupplier = globalConfigSupplier;
 
         this.heldItemSignalTracker = new HeldItemSignalTracker();
-        this.tickContextFactory = new PlayerTickContextFactory();
-        this.movementSignalTracker = new MovementSignalTracker();
-        this.reticleSignalTracker = new ReticleSignalTracker();
-        this.combatSignalTracker = new CombatSignalTracker();
-        this.hudSignalPipeline = new HudSignalPipeline(
+        PlayerTickContextFactory tickContextFactory = new PlayerTickContextFactory();
+        MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
+        ReticleSignalTracker reticleSignalTracker = new ReticleSignalTracker();
+        CombatSignalTracker combatSignalTracker = new CombatSignalTracker();
+        HudSignalPipeline hudSignalPipeline = new HudSignalPipeline(
                 heldItemSignalTracker,
                 movementSignalTracker,
                 reticleSignalTracker,
                 combatSignalTracker
         );
-        this.barUpdater = new HudBarStateUpdater(
+        HudBarStateUpdater barUpdater = new HudBarStateUpdater(
                 healthState,
                 staminaState,
                 manaState,
                 oxygenState
         );
-        this.triggerContextFactory = new HudTriggerContextFactory();
+        HudTriggerContextFactory triggerContextFactory = new HudTriggerContextFactory();
 
         this.hudTickProcessor = new HudTickProcessor(
                 tickContextFactory,
@@ -140,7 +132,9 @@ public final class HudRuntimeService {
 
         int hideDelay = hideDelayMs(getGlobalConfig());
         PlayerHudState state = stateFor(playerRef.getUuid());
+
         state.reset(hideDelay);
+        state.startInitialHudGrace(nowMs(), hideDelay);
     }
 
     public void onPlayerDisconnect(@Nullable PlayerRef playerRef) {
@@ -219,6 +213,13 @@ public final class HudRuntimeService {
 
         long now = nowMs();
         PlayerHudState state = stateFor(uuid);
+
+        if (state.isInitialHudGraceActive(now)) {
+            return;
+        }
+
+        state.finishInitialHudGrace();
+
         PlayerConfig playerConfig = playerConfigService.getCachedPlayerConfig(uuid);
         if (playerConfig == null) {
             return;

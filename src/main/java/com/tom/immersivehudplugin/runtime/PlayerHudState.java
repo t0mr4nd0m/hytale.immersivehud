@@ -10,6 +10,22 @@ import java.util.EnumSet;
 
 public final class PlayerHudState {
 
+    private boolean runtimeInitialized;
+
+    private long initialHudGraceUntilMs;
+
+    public void startInitialHudGrace(long now, int durationMs) {
+        this.initialHudGraceUntilMs = now + Math.max(0, durationMs);
+    }
+
+    public boolean isInitialHudGraceActive(long now) {
+        return now < initialHudGraceUntilMs;
+    }
+
+    public void finishInitialHudGrace() {
+        this.initialHudGraceUntilMs = 0L;
+    }
+
     private final EnumSet<HudComponent> staticHidden = EnumSet.noneOf(HudComponent.class);
     private final EnumSet<HudComponent> dynamicHidden = EnumSet.noneOf(HudComponent.class);
     private final EnumSet<HudComponent> lastAppliedHidden = EnumSet.noneOf(HudComponent.class);
@@ -44,6 +60,7 @@ public final class PlayerHudState {
         dynamicHudCache.reset();
 
         hideDelayMs = hideDelay;
+        initialHudGraceUntilMs = 0L;
     }
 
     public void markStaticHudDirty() {
@@ -126,6 +143,7 @@ public final class PlayerHudState {
         tempToHide.clear();
         tempToShow.clear();
 
+        runtimeInitialized = false;
         staticHudInitialized = false;
         staticDirty = true;
     }
@@ -154,5 +172,13 @@ public final class PlayerHudState {
 
     public boolean needsHeldItemRepair() {
         return heldItem.needsRepair();
+    }
+
+    public boolean isRuntimeInitialized() {
+        return runtimeInitialized;
+    }
+
+    public void markRuntimeInitialized() {
+        runtimeInitialized = true;
     }
 }

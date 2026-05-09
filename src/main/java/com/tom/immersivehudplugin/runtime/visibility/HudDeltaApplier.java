@@ -29,4 +29,17 @@ public final class HudDeltaApplier {
 
         state.commitAppliedHidden(delta.effectiveHidden());
     }
+
+    public void applySnapshot(PlayerTickContext tickContext, PlayerHudState state) {
+        PlayerHudState.HudDelta delta = state.prepareHudDelta();
+
+        if (!delta.effectiveHidden().isEmpty()) {
+            tickContext.player().getHudManager().hideHudComponents(
+                    tickContext.playerRef(),
+                    delta.effectiveHidden().toArray(HudComponent[]::new)
+            );
+        }
+
+        state.commitAppliedHidden(delta.effectiveHidden());
+    }
 }
