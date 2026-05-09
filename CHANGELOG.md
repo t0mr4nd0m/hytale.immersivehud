@@ -1,13 +1,14 @@
 # Changelog
 
-## v1.2.4 - Hytale Update 5
+## v1.2.4 - Hytale Update 5 + IN_COMBAT trigger
 
-* Updated to Hytale Update 5 - 2026.04.30-b4f6a911e
+* Updated to Hytale Update 5 - 2026.05.07-5efa15f6d
 * Removed deprecated method: getActiveHotbarItem > IntentoryComponent.getItemInHand
 * Removed obsolete commands: status, profile, toggle and rules
-* Extensive refactor related to UI files: code cleaning, improved logic and readability
+* Extensive refactor: code cleaning, improved logic and readability
 * Added: world paused while config UI is open
 * Added: new dynamic trigger IN_COMBAT
+* Added: grace delay before applying Immersive Hud configuration
 
 ## v1.2.3 - Technical update + added StatusIcons to dynamic components + Config UI redesign
 
