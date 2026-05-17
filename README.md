@@ -187,9 +187,10 @@ You can switch between them instantly using commands.
 
 | Profile     | Description                                       |
 |-------------|---------------------------------------------------|
-| `balanced`  | Balanced. Shows HUD components only when relevant |
-| `immersive` | Minimal HUD, maximum immersion                    |
-| `vanilla`   | HUD always visible (vanilla-like)                 |
+| `Balanced`  | Balanced. Shows HUD components only when relevant |
+| `Immersive` | Minimal HUD, maximum immersion                    |
+| `Vanilla`   | HUD always visible (vanilla-like)                 |
+| `Custom`    | Custom profile defined by player                  |
 
 ---
 
@@ -235,7 +236,7 @@ Example:
 
 ```json
 {
-  "ConfigVersion": "1.2.0",
+  "ConfigVersion": "1.2.4",
   "IntervalMs": 250,
   "HideDelayMs": 2000,
   "ReticleTargetRange": 8.0,
@@ -474,7 +475,7 @@ hud/
 profiles/
    Profile.java
    ProfilePresets.java
-   
+
 runtime/
    DynamicHudCache.java
    HudRuntimeService.java
@@ -489,6 +490,8 @@ runtime/
       PlayerTickContext.java
       PLayerTickContextFactory.java
    signal/
+      CombatSignalScanner.java
+      CombatSignalTracker.java
       HeldItemSignalTracker.java
       HeldItemState.java
       HudSignalPipeline.java
@@ -507,6 +510,9 @@ ui/
    HudConfigView.java
    HudConfigVisibilityRenderer.java
    HudConfigPage.java
+   VisibilityComponentSelectorRenderer
+   VisibilityDynamicDetailRenderer
+   VisibilityStaticDetailRenderer
 ```
 
 ---
