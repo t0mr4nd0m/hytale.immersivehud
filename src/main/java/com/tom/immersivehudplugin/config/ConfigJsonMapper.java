@@ -16,6 +16,7 @@ public final class ConfigJsonMapper {
     private static final String CONFIG_VERSION = "ConfigVersion";
     private static final String INTERVAL_MS = "IntervalMs";
     private static final String HIDE_DELAY_MS = "HideDelayMs";
+    private static final String INITIAL_HUD_GRACE_MS = "InitialHudGraceMs";
     private static final String RETICLE_TARGET_RANGE = "ReticleTargetRange";
     private static final String COMBAT_SCAN_RANGE = "CombatScanRange";
     private static final String DEFAULT_HUD_COMPONENTS = "DefaultHudComponents";
@@ -32,6 +33,7 @@ public final class ConfigJsonMapper {
         root.addProperty(CONFIG_VERSION, cfg.getConfigVersion());
         root.addProperty(INTERVAL_MS, cfg.getIntervalMs());
         root.addProperty(HIDE_DELAY_MS, cfg.getHideDelayMs());
+        root.addProperty(INITIAL_HUD_GRACE_MS, cfg.getInitialHudGraceMs());
         root.addProperty(RETICLE_TARGET_RANGE, cfg.getReticleTargetRange());
         root.addProperty(COMBAT_SCAN_RANGE, cfg.getCombatScanRange());
         root.add(DEFAULT_HUD_COMPONENTS, toJson(cfg.getDefaultHudComponents()));
@@ -55,6 +57,9 @@ public final class ConfigJsonMapper {
         }
         if (isNumber(root, HIDE_DELAY_MS)) {
             cfg.setHideDelayMs(root.get(HIDE_DELAY_MS).getAsInt());
+        }
+        if (isNumber(root, INITIAL_HUD_GRACE_MS)) {
+            cfg.setInitialHudGraceMs(root.get(INITIAL_HUD_GRACE_MS).getAsInt());
         }
         if (isNumber(root, RETICLE_TARGET_RANGE)) {
             cfg.setReticleTargetRange(root.get(RETICLE_TARGET_RANGE).getAsFloat());

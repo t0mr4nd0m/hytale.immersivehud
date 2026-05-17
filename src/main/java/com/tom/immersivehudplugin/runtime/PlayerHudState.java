@@ -12,18 +12,18 @@ public final class PlayerHudState {
 
     private boolean runtimeInitialized;
 
-    private long initialHudGraceUntilMs;
+    private long initialHudVisibleUntilMs;
 
-    public void startInitialHudGrace(long now, int durationMs) {
-        this.initialHudGraceUntilMs = now + Math.max(0, durationMs);
+    public void startInitialHudVisibleGrace(long now, int durationMs) {
+        this.initialHudVisibleUntilMs = now + Math.max(0, durationMs);
     }
 
-    public boolean isInitialHudGraceActive(long now) {
-        return now < initialHudGraceUntilMs;
+    public boolean isInitialHudVisibleGraceActive(long now) {
+        return now < initialHudVisibleUntilMs;
     }
 
-    public void finishInitialHudGrace() {
-        this.initialHudGraceUntilMs = 0L;
+    public void finishInitialHudVisibleGrace() {
+        this.initialHudVisibleUntilMs = 0L;
     }
 
     private final EnumSet<HudComponent> staticHidden = EnumSet.noneOf(HudComponent.class);
@@ -60,7 +60,7 @@ public final class PlayerHudState {
         dynamicHudCache.reset();
 
         hideDelayMs = hideDelay;
-        initialHudGraceUntilMs = 0L;
+        initialHudVisibleUntilMs = 0L;
     }
 
     public void markStaticHudDirty() {
