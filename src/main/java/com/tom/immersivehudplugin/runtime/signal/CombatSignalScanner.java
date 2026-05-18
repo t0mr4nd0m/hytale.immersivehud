@@ -290,7 +290,15 @@ public final class CombatSignalScanner {
             Ref<EntityStore> playerRef,
             Store<EntityStore> store
     ) {
-        return role != null && role.getWorldSupport().getAttitude(npcRef, playerRef, store) == Attitude.HOSTILE;
+        try {
+            return role != null
+                    && npcRef != null
+                    && playerRef != null
+                    && store != null
+                    && role.getWorldSupport().getAttitude(npcRef, playerRef, store) == Attitude.HOSTILE;
+        } catch (RuntimeException ex) {
+            return false;
+        }
     }
 
     private boolean isWithinRange(
