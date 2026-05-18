@@ -6,7 +6,6 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,8 +67,7 @@ public final class HudComponentRegistry {
         DYNAMIC_LIST = ALL_LIST.stream()
                 .filter(HudComponent::supportsDynamicRules)
                 .toList();
-
-        REGISTRY = buildRegistry(ALL_LIST);
+        REGISTRY = buildRegistry();
         GROUPED = ALL_LIST.stream()
                 .collect(Collectors.groupingBy(
                         HudComponent::group,
@@ -93,9 +91,9 @@ public final class HudComponentRegistry {
                 .toList();
     }
 
-    private static Map<String, HudComponent> buildRegistry(List<HudComponent> entries) {
+    private static Map<String, HudComponent> buildRegistry() {
         Map<String, HudComponent> map = new LinkedHashMap<>();
-        for (HudComponent entry : entries) {
+        for (HudComponent entry : HudComponentRegistry.ALL_LIST) {
             map.put(normalize(entry.key()), entry);
         }
         return Collections.unmodifiableMap(map);
@@ -138,7 +136,7 @@ public final class HudComponentRegistry {
         for (HudComponent entry : dynamicList()) {
             DynamicHudRuleConfig ruleCfg = entry.requireDynamicRuleConfig(cfg);
 
-            ruleCfg.setRules(EnumSet.copyOf(entry.defaultRules()));
+            ruleCfg.setRules(entry.defaultRules());
 
             if (entry.supportsThreshold()) {
                 ruleCfg.setThreshold(entry.defaultThreshold());
