@@ -9,7 +9,7 @@
 
 **Technical Changes**
 * Updated to Hytale 0.5.0-pre.8
-* Removed deprecated method: getActiveHotbarItem > IntentoryComponent.getItemInHand
+* Replaced deprecated method getActiveHotbarItem with IntentoryComponent.getItemInHand
 * Removed obsolete commands: status, profile, toggle and rules
 * Extensive refactor: code cleaning, improved logic and readability
 

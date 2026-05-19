@@ -519,9 +519,11 @@ ui/
 
 ## 🐞 Known Issues
 
-- **Input Bindings**: Due to limitations in the Hytale API, visibility for this HUD component cannot be reliably controlled by the plugin. To fully hide it, use the in-game settings.
-- **Status Icons**: Due to limitations in the Hytale API, this HUD component's visibility cannot currently be controlled by the plugin, and there is no available way to hide it.
-- **Network Quality**: Due to limitations in the Hytale API, visibility for this HUD component cannot currently be controlled by the plugin. To fully hide it, use the in-game settings.
+- [Input Bindings do not hide completely](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/7)
+- [Status Icons cannot be hidden](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/8)
+- [Network Quality icon cannot be hidden](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/9)
+
+Check them in GitHub to look for workarounds or fixes.
 
 ---
 
@@ -529,13 +531,13 @@ ui/
 
 Possible future improvements:
 - ~~GUI configuration menu~~
-- Additional dynamic triggers:
+- ~~Additional dynamic triggers:~~
   - ~~PLAYER_FLYING~~
   - ~~PLAYER_GLIDING~~
   - ~~IN_COMBAT~~
 - Import / export custom config profiles
 - Support for future Hytale Hud components
-- Support for Hud components from other mods (API)
+- Support for Hud components from other mods (IHUD API)
 
 ---
 
