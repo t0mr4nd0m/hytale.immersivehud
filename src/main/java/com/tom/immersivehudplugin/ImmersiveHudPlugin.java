@@ -12,17 +12,21 @@ import com.tom.immersivehudplugin.config.GlobalConfigStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.config.PlayerConfigStore;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
-import com.tom.immersivehudplugin.runtime.PlayerLifecycleService;
+import com.tom.immersivehudplugin.runtime.PlayerSessionService;
 import com.tom.immersivehudplugin.runtime.visibility.HudDeltaApplier;
 import com.tom.immersivehudplugin.runtime.visibility.HudRuleEvaluator;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
+import java.util.logging.Level;
+
 public final class ImmersiveHudPlugin extends JavaPlugin {
 
     private GlobalConfigStore globalConfigStore;
     private PlayerConfigStore playerConfigStore;
+
     private PlayerConfigService playerConfigService;
+    private PlayerSessionService playerSessionService;
     private HudRuntimeService hudRuntimeService;
     private HudConfigUiService hudConfigUiService;
 
@@ -42,9 +46,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     @Override
     public void shutdown() {
-        if (hudRuntimeService != null) {
-            hudRuntimeService.shutdown();
-        }
+        shutdownRuntimeServices();
     }
 
     private void setupConfigServices() {
@@ -52,7 +54,41 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         ConfigSupport configSupport = new ConfigSupport(this, gson);
         this.globalConfigStore = new GlobalConfigStore(this, configSupport);
         this.playerConfigStore = new PlayerConfigStore(this, configSupport);
+
         globalConfigStore.load();
+
+        getLogger().at(Level.INFO).log("Setup complete. Version: " + getPluginVersion());
+    }
+
+    private void startRuntimeServices() {
+        if (hudRuntimeService != null) {
+            getLogger().at(Level.WARNING).log("Runtime services are already started.");
+            return;
+        }
+
+        this.playerConfigService = createPlayerConfigService();
+        this.hudRuntimeService = createHudRuntimeService();
+        this.playerSessionService = createPlayerSessionService();
+        this.hudConfigUiService = createHudConfigUiService();
+
+        hudRuntimeService.start();
+        playerSessionService.start();
+
+        registerCommands();
+
+        getLogger().at(Level.INFO).log("Runtime services started.");
+    }
+
+    private void shutdownRuntimeServices() {
+        if (hudRuntimeService != null) {
+            hudRuntimeService.shutdown();
+            hudRuntimeService = null;
+            hudConfigUiService = null;
+            playerSessionService = null;
+            playerConfigService = null;
+        }
+
+        getLogger().at(Level.INFO).log("Runtime services stopped.");
     }
 
     public String getPluginVersion() {
@@ -61,17 +97,6 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
     public GlobalConfig getGlobalConfig() {
         return globalConfigStore.get();
-    }
-
-    private void startRuntimeServices() {
-        this.playerConfigService = createPlayerConfigService();
-        this.hudRuntimeService = createHudRuntimeService();
-        PlayerLifecycleService playerLifecycleService = createPlayerLifecycleService();
-        this.hudConfigUiService = new HudConfigUiService(playerConfigService, hudRuntimeService);
-
-        hudRuntimeService.start();
-        playerLifecycleService.start();
-        registerCommands();
     }
 
     private PlayerConfigService createPlayerConfigService() {
@@ -99,9 +124,16 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         );
     }
 
-    private PlayerLifecycleService createPlayerLifecycleService() {
-        return new PlayerLifecycleService(
+    private PlayerSessionService createPlayerSessionService() {
+        return new PlayerSessionService(
                 this,
+                playerConfigService,
+                hudRuntimeService
+        );
+    }
+
+    private HudConfigUiService createHudConfigUiService() {
+        return new HudConfigUiService(
                 playerConfigService,
                 hudRuntimeService
         );

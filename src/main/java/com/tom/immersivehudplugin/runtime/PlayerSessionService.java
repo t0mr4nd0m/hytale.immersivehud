@@ -13,7 +13,7 @@ import com.tom.immersivehudplugin.config.PlayerConfigService;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public final class PlayerLifecycleService {
+public final class PlayerSessionService {
 
     private final JavaPlugin plugin;
     private final PlayerConfigService playerConfigService;
@@ -21,7 +21,7 @@ public final class PlayerLifecycleService {
 
     private boolean playerEventsRegistered;
 
-    public PlayerLifecycleService(
+    public PlayerSessionService(
             JavaPlugin plugin,
             PlayerConfigService playerConfigService,
             HudRuntimeService hudRuntimeService
@@ -43,7 +43,7 @@ public final class PlayerLifecycleService {
 
     private void onPlayerReady(PlayerReadyEvent event) {
         PlayerRef playerRef = resolvePlayerRef(event.getPlayer());
-        if  (playerRef == null) {
+        if (playerRef == null) {
             return;
         }
 
