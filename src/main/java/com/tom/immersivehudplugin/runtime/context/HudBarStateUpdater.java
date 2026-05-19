@@ -1,6 +1,7 @@
 package com.tom.immersivehudplugin.runtime.context;
 
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.tom.immersivehudplugin.hud.trigger.HudBarState;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 
 public final class HudBarStateUpdater {
@@ -25,27 +26,20 @@ public final class HudBarStateUpdater {
     public void update(PlayerHudState state, PlayerTickContext tickContext) {
         EntityStatMap stats = tickContext.stats();
 
-        state.healthBar.update(getCurrentBar(stats, healthState), getMaxBar(stats, healthState));
-        state.staminaBar.update(getCurrentBar(stats, staminaState), getMaxBar(stats, staminaState));
-        state.manaBar.update(getCurrentBar(stats, manaState), getMaxBar(stats, manaState));
-        state.oxygenBar.update(getCurrentBar(stats, oxygenState), getMaxBar(stats, oxygenState));
+        updateBar(state.healthBar, stats, healthState);
+        updateBar(state.staminaBar, stats, staminaState);
+        updateBar(state.manaBar, stats, manaState);
+        updateBar(state.oxygenBar, stats, oxygenState);
     }
 
-    private float getCurrentBar(EntityStatMap stats, int statIndex) {
-        if (stats == null) {
-            return 0f;
+    private void updateBar(HudBarState barState, EntityStatMap stats, int statIndex) {
+        var component = stats == null ? null : stats.get(statIndex);
+
+        if (component == null) {
+            barState.update(1f, 1f);
+            return;
         }
 
-        var component = stats.get(statIndex);
-        return component != null ? component.get() : 0f;
-    }
-
-    private float getMaxBar(EntityStatMap stats, int statIndex) {
-        if (stats == null) {
-            return 0f;
-        }
-
-        var component = stats.get(statIndex);
-        return component != null ? component.getMax() : 0f;
+        barState.update(component.get(), component.getMax());
     }
 }
