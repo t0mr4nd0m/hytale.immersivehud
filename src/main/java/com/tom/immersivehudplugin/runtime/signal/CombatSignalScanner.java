@@ -23,16 +23,11 @@ public final class CombatSignalScanner {
      */
     private static final float PLAYER_COMBAT_FOV_DEGREES = 120f;
 
-    /**
-     * Range used for the "hostile enemy in front of the player" rule.
-     */
-    private static final float VISIBLE_HOSTILE_RANGE = 12f;
-
     public CombatScanResult scanNpcCombat(
             Store<EntityStore> store,
             Ref<EntityStore> playerRef,
             Ref<EntityStore> currentCombatTargetRef,
-            float range
+            float scanRange
     ) {
         if (store == null || playerRef == null || !playerRef.isValid()) {
             return CombatScanResult.none();
@@ -62,7 +57,7 @@ public final class CombatSignalScanner {
                         TransformComponent npcTransform =
                                 chunk.getComponent(i, TransformComponent.getComponentType());
 
-                        if (!isWithinRange(playerTransform, npcTransform, range)) {
+                        if (!isWithinRange(playerTransform, npcTransform, scanRange)) {
                             continue;
                         }
 
@@ -91,7 +86,8 @@ public final class CombatSignalScanner {
                                 store,
                                 playerTransform,
                                 npcTransform,
-                                fov
+                                fov,
+                                scanRange
                         );
 
                         if (scan.active()) {
@@ -113,7 +109,8 @@ public final class CombatSignalScanner {
             Store<EntityStore> store,
             TransformComponent playerTransform,
             TransformComponent npcTransform,
-            FovCheckResult fov
+            FovCheckResult fov,
+            float scanRange
     ) {
         boolean hostile = isHostileTowardsPlayer(role, npcRef, playerRef, store);
         if (!hostile) {
@@ -145,7 +142,7 @@ public final class CombatSignalScanner {
             );
         }
 
-        if (isVisibleHostileThreat(playerTransform, npcTransform, fov)) {
+        if (isVisibleHostileThreat(playerTransform, npcTransform, fov, scanRange)) {
             return new CombatScanResult(
                     true,
                     npcRef,
@@ -160,10 +157,11 @@ public final class CombatSignalScanner {
     private boolean isVisibleHostileThreat(
             TransformComponent playerTransform,
             TransformComponent npcTransform,
-            FovCheckResult fov
+            FovCheckResult fov,
+            float range
     ) {
         return fov.inside()
-                && isWithinRange(playerTransform, npcTransform, VISIBLE_HOSTILE_RANGE);
+                && isWithinRange(playerTransform, npcTransform, range);
     }
 
     private FovCheckResult checkPlayerFov(
