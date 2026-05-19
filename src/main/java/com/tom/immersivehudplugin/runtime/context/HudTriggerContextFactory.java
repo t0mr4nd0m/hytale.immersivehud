@@ -12,7 +12,6 @@ public final class HudTriggerContextFactory {
 
         EnumSet<HudTrigger> activeSignals = EnumSet.noneOf(HudTrigger.class);
 
-        // --- SIGNAL triggers
         for (HudTrigger trigger : HudTrigger.values()) {
             if (trigger.source() != HudTrigger.Source.SIGNAL) { continue; }
             if (state.t.active(trigger, now)) { activeSignals.add(trigger); }
@@ -20,7 +19,6 @@ public final class HudTriggerContextFactory {
 
         addWeaponSignals(activeSignals, state, now);
 
-        // --- STATUS triggers
         return new HudTriggerContext(
                 activeSignals,
                 state.healthBar,
