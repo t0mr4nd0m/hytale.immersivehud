@@ -9,7 +9,7 @@ public final class GlobalConfig {
     public static final int INITIAL_HUD_GRACE_MS = 2000;
 
     public static final float RETICLE_TARGET_RANGE = 8.0f;
-    public static final float COMBAT_SCAN_RANGE = 24f;
+    public static final float COMBAT_SCAN_RANGE = 12f;
 
     private String configVersion = "";
     private int intervalMs = INTERVAL_MS;
