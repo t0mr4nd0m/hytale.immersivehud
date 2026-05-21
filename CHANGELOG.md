@@ -5,7 +5,8 @@
 **Features**
 * Added new dynamic trigger IN_COMBAT. Activates when a hostile npc is in front of player or a npc is attacking player
 * Now world pauses when config UI is open
-* When joining a world the HUD will remain visible for a brief moment before applying the HUD visibility configuration. 
+* When joining a world the HUD will remain visible for a brief moment before applying the HUD visibility configuration.
+* Changed `ammo` to dynamic component with default rule `HOLDING_RANGED_WEAPON`
 
 **Technical Changes**
 * Updated to Hytale 0.5.0-pre.8

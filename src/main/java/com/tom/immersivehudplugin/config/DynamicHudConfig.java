@@ -87,6 +87,10 @@ public final class DynamicHudConfig {
         return getByKey("statusicons");
     }
 
+    public DynamicHudRuleConfig getAmmo() {
+        return getByKey("ammo");
+    }
+
     public void setStatusIcons(@Nullable DynamicHudRuleConfig value) {
         setByKey("statusicons", value);
     }

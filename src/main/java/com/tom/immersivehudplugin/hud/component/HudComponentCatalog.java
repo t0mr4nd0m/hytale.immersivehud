@@ -198,6 +198,18 @@ final class HudComponentCatalog {
                         EnumSet.of(HudTrigger.HOTBAR_INPUT),
                         null
                 ),
+                dynamicComponent(
+                        "ammo",
+                        "Ammo Indicator",
+                        HudComponentRegistry.Group.UI,
+                        AmmoIndicator,
+                        HudComponentsConfig::isHideAmmoIndicatorHud,
+                        HudComponentsConfig::setHideAmmoIndicatorHud,
+                        DynamicHudConfig::getAmmo,
+                        EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON),
+                        EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON),
+                        null
+                ),
                 staticComponent(
                         "inputbindings",
                         "Input Bindings",
@@ -206,15 +218,6 @@ final class HudComponentCatalog {
                         HudComponentsConfig::isHideInputBindingsHud,
                         HudComponentsConfig::setHideInputBindingsHud,
                         true
-                ),
-                staticComponent(
-                        "ammo",
-                        "Ammo Indicator",
-                        HudComponentRegistry.Group.UI,
-                        AmmoIndicator,
-                        HudComponentsConfig::isHideAmmoIndicatorHud,
-                        HudComponentsConfig::setHideAmmoIndicatorHud,
-                        false
                 ),
                 staticComponent(
                         "notifications",

@@ -6,7 +6,7 @@
 
 # Immersive HUD
 
-ImmersiveHud is a lightweight, fully configurable Hytale mod designed to reduce visual HUD noise without losing critical information.
+<span style="color:orange">ImmersiveHUD</span> is a lightweight, fully configurable Hytale mod designed to reduce visual HUD noise without losing critical information.
 
 Instead of disabling HUD elements, it makes them context-aware: they appear only when relevant and disappear when not needed.
 
@@ -39,7 +39,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 
 ## ⚡ Quick Start
 
-Get ImmersiveHud running in under a minute:
+Get <span style="color:orange">ImmersiveHUD</span> running in under a minute:
 
 ### 1. Install the mod
 
@@ -101,32 +101,32 @@ Examples:
 
 HUD components supported by ImmersiveHUD
 
-| Component                         | Group   | Type     | Default state | Default rules                                                                                   |
-|-----------------------------------|---------|----------|---------------|-------------------------------------------------------------------------------------------------|
-| hotbar                            | Core    | Dynamic  | Hidden        | `HOTBAR_INPUT`                                                                                  |
-| compass                           | Core    | Dynamic  | Hidden        | `PLAYER_MOVING`                                                                                 |
-| reticle                           | Core    | Dynamic  | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
-| health                            | Bars    | Dynamic  | Hidden        | `HEALTH_NOT_FULL`                                                                               |
-| stamina                           | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL`                                                                              |
-| mana                              | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL`                                                                                 |
-| oxygen                            | Bars    | Dynamic  | Hidden        | `OXYGEN_NOT_FULL`                                                                               |
-| inputbindings                     | UI      | Static   | Hidden        | —                                                                                               |
-| notifications                     | UI      | Static   | Hidden        | —                                                                                               |
-| statusicons                       | UI      | Static   | Visible       | —                                                                                               |
-| speedometer                       | UI      | Static   | Visible       | —                                                                                               |
-| ammo                              | UI      | Static   | Visible       | —                                                                                               |
-| utilityslotselector               | UI      | Static   | Visible       | —                                                                                               |
-| chat                              | Social  | Static   | Visible       | —                                                                                               |
-| requests                          | Social  | Static   | Visible       | —                                                                                               |
-| killfeed                          | Social  | Static   | Visible       | —                                                                                               |
-| playerlist                        | Social  | Static   | Visible       | —                                                                                               |
-| eventtitle                        | Panels  | Static   | Visible       | —                                                                                               |
-| objectivepanel                    | Panels  | Static   | Visible       | —                                                                                               |
-| portalpanel                       | Panels  | Static   | Visible       | —                                                                                               |
-| sleep                             | Panels  | Static   | Visible       | —                                                                                               |
-| blockvariantselector              | Builder | Static   | Visible       | —                                                                                               |
-| buildertoolslegend                | Builder | Static   | Visible       | —                                                                                               |
-| buildertoolsmaterialslotselector  | Builder | Static   | Visible       | —                                                                                               |
+| Component                                     | Group   | Type    | Default state | Default rules                                                                                   |
+|-----------------------------------------------|---------|---------|---------------|-------------------------------------------------------------------------------------------------|
+| <span style="color:orange">hotbar</span>      | Core    | Dynamic | Hidden        | `HOTBAR_INPUT`                                                                                  |
+| <span style="color:orange">compass</span>     | Core    | Dynamic | Hidden        | `PLAYER_MOVING`                                                                                 |
+| <span style="color:orange">reticle</span>     | Core    | Dynamic | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
+| <span style="color:orange">health</span>      | Bars    | Dynamic | Hidden        | `HEALTH_NOT_FULL`                                                                               |
+| <span style="color:orange">stamina</span>     | Bars    | Dynamic | Hidden        | `STAMINA_NOT_FULL`                                                                              |
+| <span style="color:orange">mana</span>        | Bars    | Dynamic | Hidden        | `MANA_NOT_FULL`                                                                                 |
+| <span style="color:orange">oxygen</span>      | Bars    | Dynamic | Hidden        | `OXYGEN_NOT_FULL`                                                                               |
+| <span style="color:orange">statusicons</span> | UI      | Dynamic | Visible       | `HOTBAR_INPUT`                                                                                  |
+| <span style="color:orange">ammo</span>        | UI      | Dynamic | Visible       | `HOLDING_RANGED_WEAPON`                                                                          |
+| inputbindings                                 | UI      | Static  | Hidden        | —                                                                                               |
+| notifications                                 | UI      | Static  | Hidden        | —                                                                                               |
+| speedometer                                   | UI      | Static  | Visible       | —                                                                                               |
+| utilityslotselector                           | UI      | Static  | Visible       | —                                                                                               |
+| chat                                          | Social  | Static  | Visible       | —                                                                                               |
+| requests                                      | Social  | Static  | Visible       | —                                                                                               |
+| killfeed                                      | Social  | Static  | Visible       | —                                                                                               |
+| playerlist                                    | Social  | Static  | Visible       | —                                                                                               |
+| eventtitle                                    | Panels  | Static  | Visible       | —                                                                                               |
+| objectivepanel                                | Panels  | Static  | Visible       | —                                                                                               |
+| portalpanel                                   | Panels  | Static  | Visible       | —                                                                                               |
+| sleep                                         | Panels  | Static  | Visible       | —                                                                                               |
+| blockvariantselector                          | Builder | Static  | Visible       | —                                                                                               |
+| buildertoolslegend                            | Builder | Static  | Visible       | —                                                                                               |
+| buildertoolsmaterialslotselector              | Builder | Static  | Visible       | —                                                                                               |
 
 All bar components (Health, Stamina, Mana and Oxygen) support threshold-based visibility.
 

@@ -9,6 +9,7 @@ $C = "../Common.ui";
 @compassIcon      = PatchStyle(TexturePath: "../Assets/7compass_active.png");
 @statusiconsIcon  = PatchStyle(TexturePath: "../Assets/8statusicons_active.png");
 @staticIcon       = PatchStyle(TexturePath: "../Assets/9staticicon_active.png");
+@ammoIcon         = PatchStyle(TexturePath: "../Assets/10ammoicons_active.png");
 
 $C.@SecondaryButton #ComponentButton {
   Anchor: (Left: 4, Right: 4);
