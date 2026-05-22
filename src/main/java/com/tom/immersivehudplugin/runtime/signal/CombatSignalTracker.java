@@ -42,23 +42,29 @@ public final class CombatSignalTracker {
 
         state.lastCombatScanMs = now;
 
+        int scanInterval = combatScanIntervalMs(global);
+        int combatHideDelay = Math.max(hideDelay, scanInterval * 2);
+
         var result = combatSignalScanner.scanNpcCombat(
                 tickContext.store(),
                 tickContext.ref(),
-                state.combatTargetRef,
-                combatScanRange(global)
+                combatScanRange(global),
+                global
         );
-
-        int combatHideDelay = Math.max(hideDelay, combatScanIntervalMs(global) * 2);
 
         if (result.active()) {
             state.combatTargetRef = result.npcRef();
             state.lastCombatTargetSeenMs = now;
             state.t.pulse(HudTrigger.IN_COMBAT, now, combatHideDelay);
+
             return;
         }
 
-        if (state.combatTargetRef != null && now - state.lastCombatTargetSeenMs > combatHideDelay) {
+        long lastSeenAge = state.lastCombatTargetSeenMs > 0L
+                ? now - state.lastCombatTargetSeenMs
+                : -1L;
+
+        if (state.combatTargetRef != null && lastSeenAge > combatHideDelay) {
             state.combatTargetRef = null;
             state.lastCombatTargetSeenMs = 0L;
         }

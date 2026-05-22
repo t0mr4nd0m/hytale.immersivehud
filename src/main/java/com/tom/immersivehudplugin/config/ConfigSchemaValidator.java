@@ -20,6 +20,10 @@ public final class ConfigSchemaValidator {
         if (hasAndNotNumber(obj, "InitialHudGraceMs")) return false;
         if (hasAndNotNumber(obj, "ReticleTargetRange")) return false;
         if (hasAndNotNumber(obj, "CombatScanRange")) return false;
+        if (hasAndNotNumber(obj, "PlayerCombatHorizontalFovDegrees")) return false;
+        if (hasAndNotNumber(obj, "PlayerCombatVerticalFovDegrees")) return false;
+        if (hasAndNotNumber(obj, "LosNpcTargetHeight")) return false;
+        if (hasAndNotNumber(obj, "LosTargetEpsilon")) return false;
         if (hasAndNotObject(obj, "DefaultHudComponents")) return false;
         if (hasAndNotObject(obj, "DefaultDynamicHud")) return false;
 

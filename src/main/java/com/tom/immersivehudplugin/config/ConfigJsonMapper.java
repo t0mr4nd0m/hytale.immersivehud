@@ -19,6 +19,10 @@ public final class ConfigJsonMapper {
     private static final String INITIAL_HUD_GRACE_MS = "InitialHudGraceMs";
     private static final String RETICLE_TARGET_RANGE = "ReticleTargetRange";
     private static final String COMBAT_SCAN_RANGE = "CombatScanRange";
+    private static final String PLAYER_COMBAT_HORIZONTAL_FOV_DEGREES = "PlayerCombatHorizontalFovDegrees";
+    private static final String PLAYER_COMBAT_VERTICAL_FOV_DEGREES = "PlayerCombatVerticalFovDegrees";
+    private static final String LOS_NPC_TARGET_HEIGHT = "LosNpcTargetHeight";
+    private static final String LOS_TARGET_EPSILON = "LosTargetEpsilon";
     private static final String DEFAULT_HUD_COMPONENTS = "DefaultHudComponents";
     private static final String DEFAULT_DYNAMIC_HUD = "DefaultDynamicHud";
     private static final String HUD_COMPONENTS = "HudComponents";
@@ -36,6 +40,10 @@ public final class ConfigJsonMapper {
         root.addProperty(INITIAL_HUD_GRACE_MS, cfg.getInitialHudGraceMs());
         root.addProperty(RETICLE_TARGET_RANGE, cfg.getReticleTargetRange());
         root.addProperty(COMBAT_SCAN_RANGE, cfg.getCombatScanRange());
+        root.addProperty(PLAYER_COMBAT_HORIZONTAL_FOV_DEGREES, cfg.getPlayerCombatHorizontalFovDegrees());
+        root.addProperty(PLAYER_COMBAT_VERTICAL_FOV_DEGREES, cfg.getPlayerCombatVerticalFovDegrees());
+        root.addProperty(LOS_NPC_TARGET_HEIGHT, cfg.getLosNpcTargetHeight());
+        root.addProperty(LOS_TARGET_EPSILON, cfg.getLosTargetEpsilon());
         root.add(DEFAULT_HUD_COMPONENTS, toJson(cfg.getDefaultHudComponents()));
         root.add(DEFAULT_DYNAMIC_HUD, toJson(cfg.getDefaultDynamicHud()));
 
@@ -66,6 +74,18 @@ public final class ConfigJsonMapper {
         }
         if (isNumber(root, COMBAT_SCAN_RANGE)) {
             cfg.setCombatScanRange(root.get(COMBAT_SCAN_RANGE).getAsFloat());
+        }
+        if (isNumber(root, PLAYER_COMBAT_HORIZONTAL_FOV_DEGREES)) {
+            cfg.setPlayerCombatHorizontalFovDegrees(root.get(PLAYER_COMBAT_HORIZONTAL_FOV_DEGREES).getAsDouble());
+        }
+        if (isNumber(root, PLAYER_COMBAT_VERTICAL_FOV_DEGREES)) {
+            cfg.setPlayerCombatVerticalFovDegrees(root.get(PLAYER_COMBAT_VERTICAL_FOV_DEGREES).getAsDouble());
+        }
+        if (isNumber(root, LOS_NPC_TARGET_HEIGHT)) {
+            cfg.setLosNpcTargetHeight(root.get(LOS_NPC_TARGET_HEIGHT).getAsDouble());
+        }
+        if (isNumber(root, LOS_TARGET_EPSILON)) {
+            cfg.setLosTargetEpsilon(root.get(LOS_TARGET_EPSILON).getAsDouble());
         }
 
         JsonObject hudObj = getObject(root, DEFAULT_HUD_COMPONENTS);
