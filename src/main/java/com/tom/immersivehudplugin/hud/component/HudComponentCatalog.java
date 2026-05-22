@@ -206,7 +206,7 @@ final class HudComponentCatalog {
                         HudComponentsConfig::isHideAmmoIndicatorHud,
                         HudComponentsConfig::setHideAmmoIndicatorHud,
                         DynamicHudConfig::getAmmo,
-                        EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON),
+                        EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON, HudTrigger.IN_COMBAT),
                         EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON),
                         null
                 ),
