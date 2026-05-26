@@ -9,7 +9,7 @@
 * Changed `ammo` to dynamic component with default rules `HOLDING_RANGED_WEAPON` and `IN_COMBAT`
 
 **Technical Changes**
-* Updated to Hytale 0.5.0-pre.9.1
+* Updated to Hytale 0.5.0
 * Replaced deprecated method getActiveHotbarItem with IntentoryComponent.getItemInHand
 * Removed obsolete commands: status, profile, toggle and rules
 * Extensive refactor: code cleaning, improved logic and readability
