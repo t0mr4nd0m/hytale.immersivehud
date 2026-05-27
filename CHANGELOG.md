@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.5 - Hytale 0.5.1
+
+**Technical Changes**
+* Update to Hytale 0.5.1
+
 ## v1.2.4 - Hytale 0.5.0 + IN_COMBAT trigger
 
 **Features**

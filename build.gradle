@@ -4,7 +4,6 @@ plugins {
     id 'com.gradleup.shadow' version '9.3.1'
 }
 
-
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.internal.os.OperatingSystem
@@ -82,7 +81,7 @@ tasks.register('updatePluginManifest') {
         }
         def manifestJson = new JsonSlurper().parseText(manifestFile.text)
         manifestJson.Version = version
-        manifestJson.ServerVersion = hytale_build
+        manifestJson.ServerVersion = hytale_build_supported
         manifestJson.IncludesAssetPack = includes_pack.toBoolean()
         manifestFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(manifestJson))
     }
