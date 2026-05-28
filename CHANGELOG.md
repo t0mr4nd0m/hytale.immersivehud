@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.6 - Hytale 0.5.2
+
+**Technical Changes**
+* Update to Hytale 0.5.2
+
 ## v1.2.5 - Hytale 0.5.1
 
 **Technical Changes**

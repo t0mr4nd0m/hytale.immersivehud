@@ -111,7 +111,7 @@ HUD components supported by ImmersiveHUD
 | <span style="color:orange">mana</span>           | Bars    | Dynamic | Hidden        | `MANA_NOT_FULL`                                                                                 |
 | <span style="color:orange">oxygen</span>         | Bars    | Dynamic | Hidden        | `OXYGEN_NOT_FULL`                                                                               |
 | <span style="color:orange">statusicons</span> ⚠️ | UI      | Dynamic | Visible       | `HOTBAR_INPUT`                                                                                  |
-| <span style="color:orange">ammo</span> ⚠️        | UI      | Dynamic | Visible       | `HOLDING_RANGED_WEAPON`                                                                         |
+| <span style="color:orange">ammo</span>           | UI      | Dynamic | Visible       | `HOLDING_RANGED_WEAPON`                                                                         |
 | inputbindings ⚠️                                 | UI      | Static  | Hidden        | —                                                                                               |
 | notifications                                    | UI      | Static  | Hidden        | —                                                                                               |
 | speedometer                                      | UI      | Static  | Visible       | —                                                                                               |
@@ -544,7 +544,6 @@ src/main/resources/Server/Languages/
 - [Input Bindings do not hide completely](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/7)
 - [Status Icons cannot be hidden](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/8)
 - [Network Quality icon cannot be hidden](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/9)
-- Ammo indicator is always hidden
 
 Check them in GitHub to look for workarounds or fixes.
 
