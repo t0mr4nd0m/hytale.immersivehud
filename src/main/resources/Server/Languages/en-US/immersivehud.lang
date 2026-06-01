@@ -39,7 +39,7 @@ gui.triggers.checkbox.tooltip="Check to apply trigger"
 gui.threshold="BELOW"
 
 msg.visibility.disabled.triggers="Triggers disabled while component is set to VISIBLE"
-msg.visibility.no.triggers="No active triggers"
+msg.visibility.no.triggers="No active triggers. This component will remain hidden at all times"
 
 gui.component.state.hidden="hidden"
 gui.component.state.visible="visible"
