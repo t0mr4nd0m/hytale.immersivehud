@@ -71,7 +71,10 @@ final class HudComponentCatalog {
                                 HudTrigger.PLAYER_ON_GROUND,
                                 HudTrigger.IN_COMBAT
                         ),
-                        EnumSet.of(HudTrigger.PLAYER_MOVING),
+                        EnumSet.of(
+                                HudTrigger.PLAYER_MOVING,
+                                HudTrigger.IN_COMBAT
+                        ),
                         null
                 ),
                 dynamicComponent(
@@ -89,7 +92,10 @@ final class HudComponentCatalog {
                                 HudTrigger.HOLDING_RANGED_WEAPON,
                                 HudTrigger.IN_COMBAT
                         ),
-                        EnumSet.of(HudTrigger.HOTBAR_INPUT),
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.IN_COMBAT
+                        ),
                         null
                 ),
                 dynamicComponent(
@@ -116,7 +122,8 @@ final class HudComponentCatalog {
                                 HudTrigger.CONSUMABLE_USE,
                                 HudTrigger.TARGET_ENTITY,
                                 HudTrigger.INTERACTABLE_BLOCK,
-                                HudTrigger.HOLDING_RANGED_WEAPON
+                                HudTrigger.HOLDING_RANGED_WEAPON,
+                                HudTrigger.IN_COMBAT
                         ),
                         null
                 ),
@@ -133,7 +140,10 @@ final class HudComponentCatalog {
                                 HudTrigger.HEALTH_NOT_FULL,
                                 HudTrigger.IN_COMBAT
                         ),
-                        EnumSet.of(HudTrigger.HEALTH_NOT_FULL),
+                        EnumSet.of(
+                                HudTrigger.HEALTH_NOT_FULL,
+                                HudTrigger.IN_COMBAT
+                        ),
                         100f
                 ),
                 dynamicComponent(
@@ -149,7 +159,10 @@ final class HudComponentCatalog {
                                 HudTrigger.STAMINA_NOT_FULL,
                                 HudTrigger.IN_COMBAT
                         ),
-                        EnumSet.of(HudTrigger.STAMINA_NOT_FULL),
+                        EnumSet.of(
+                                HudTrigger.STAMINA_NOT_FULL,
+                                HudTrigger.IN_COMBAT
+                        ),
                         100f
                 ),
                 dynamicComponent(
@@ -165,7 +178,10 @@ final class HudComponentCatalog {
                                 HudTrigger.MANA_NOT_FULL,
                                 HudTrigger.IN_COMBAT
                         ),
-                        EnumSet.of(HudTrigger.MANA_NOT_FULL),
+                        EnumSet.of(
+                                HudTrigger.MANA_NOT_FULL,
+                                HudTrigger.IN_COMBAT
+                        ),
                         100f
                 ),
                 dynamicComponent(
@@ -178,9 +194,12 @@ final class HudComponentCatalog {
                         DynamicHudConfig::getOxygen,
                         EnumSet.of(
                                 HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.OXYGEN_NOT_FULL,
+                                HudTrigger.PLAYER_IN_FLUID
+                        ),
+                        EnumSet.of(
                                 HudTrigger.OXYGEN_NOT_FULL
                         ),
-                        EnumSet.of(HudTrigger.OXYGEN_NOT_FULL),
                         100f
                 ),
                 dynamicComponent(
@@ -195,7 +214,10 @@ final class HudComponentCatalog {
                                 HudTrigger.HOTBAR_INPUT,
                                 HudTrigger.IN_COMBAT
                         ),
-                        EnumSet.of(HudTrigger.HOTBAR_INPUT),
+                        EnumSet.of(
+                                HudTrigger.HOTBAR_INPUT,
+                                HudTrigger.IN_COMBAT
+                        ),
                         null
                 ),
                 dynamicComponent(
@@ -206,8 +228,14 @@ final class HudComponentCatalog {
                         HudComponentsConfig::isHideAmmoIndicatorHud,
                         HudComponentsConfig::setHideAmmoIndicatorHud,
                         DynamicHudConfig::getAmmo,
-                        EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON, HudTrigger.IN_COMBAT),
-                        EnumSet.of(HudTrigger.HOLDING_RANGED_WEAPON),
+                        EnumSet.of(
+                                HudTrigger.HOLDING_RANGED_WEAPON,
+                                HudTrigger.IN_COMBAT
+                        ),
+                        EnumSet.of(
+                                HudTrigger.HOLDING_RANGED_WEAPON,
+                                HudTrigger.IN_COMBAT
+                        ),
                         null
                 ),
                 staticComponent(
