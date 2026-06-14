@@ -2,8 +2,12 @@
 
 ## v1.2.6 - Hytale 0.5.2
 
+**Features**
+* Updated available and default triggers of dynamic components
+
 **Technical Changes**
 * Update to Hytale 0.5.2
+* Added in game plugin image
 
 ## v1.2.5 - Hytale 0.5.1
 
