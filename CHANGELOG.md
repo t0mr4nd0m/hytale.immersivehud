@@ -1,13 +1,18 @@
 # Changelog
 
+## v1.2.61
+
+**Features**
+* Changed in game plugin image
+
 ## v1.2.6 - Hytale 0.5.2
 
 **Features**
 * Updated available and default triggers of dynamic components
-
+* Added in game plugin image
+* 
 **Technical Changes**
 * Update to Hytale 0.5.2
-* Added in game plugin image
 
 ## v1.2.5 - Hytale 0.5.1
 
