@@ -1,9 +1,3 @@
-<p style="text-align:center; margin-bottom:-32px">
-<img src="assets/logo.png" width="400" alt="Immersive HUD logo"/>
-</p>
-
-<p style="text-align:center;"><img src="assets/000_ihudvdefault.png" alt="Immersive HUD"/></p>
-
 # Immersive HUD
 
 <span style="color:orange">ImmersiveHUD</span> is a lightweight, fully configurable Hytale mod designed to reduce visual HUD noise without losing critical information.
