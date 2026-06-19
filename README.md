@@ -52,11 +52,11 @@ Get <span style="color:orange">ImmersiveHUD</span> running in under a minute:
 
   >   macOS: ~/Library/Application Support/Hytale/UserData/Mods
 
-### 2. Start your server
-- Launch your Hytale server and activate the mod
+### 2. Start Hytale
+- Launch your Hytale and activate the mod
 
 ### 3. You're done
-The HUD will now dynamically hide or show based on gameplay actions and conditions.
+- The HUD will now dynamically hide or show based on gameplay actions and conditions. 
 
 ---
 
@@ -95,32 +95,32 @@ Examples:
 
 HUD components supported by ImmersiveHUD
 
-| Component                                        | Group   | Type    | Default state | Default rules                                                                                   |
-|--------------------------------------------------|---------|---------|---------------|-------------------------------------------------------------------------------------------------|
-| <span style="color:orange">hotbar</span>         | Core    | Dynamic | Hidden        | `HOTBAR_INPUT`                                                                                  |
-| <span style="color:orange">compass</span>        | Core    | Dynamic | Hidden        | `PLAYER_MOVING`                                                                                 |
-| <span style="color:orange">reticle</span>        | Core    | Dynamic | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
-| <span style="color:orange">health</span>         | Bars    | Dynamic | Hidden        | `HEALTH_NOT_FULL`                                                                               |
-| <span style="color:orange">stamina</span>        | Bars    | Dynamic | Hidden        | `STAMINA_NOT_FULL`                                                                              |
-| <span style="color:orange">mana</span>           | Bars    | Dynamic | Hidden        | `MANA_NOT_FULL`                                                                                 |
-| <span style="color:orange">oxygen</span>         | Bars    | Dynamic | Hidden        | `OXYGEN_NOT_FULL`                                                                               |
-| <span style="color:orange">statusicons</span> ⚠️ | UI      | Dynamic | Visible       | `HOTBAR_INPUT`                                                                                  |
-| <span style="color:orange">ammo</span>           | UI      | Dynamic | Visible       | `HOLDING_RANGED_WEAPON`                                                                         |
-| inputbindings ⚠️                                 | UI      | Static  | Hidden        | —                                                                                               |
-| notifications                                    | UI      | Static  | Hidden        | —                                                                                               |
-| speedometer                                      | UI      | Static  | Visible       | —                                                                                               |
-| utilityslotselector                              | UI      | Static  | Visible       | —                                                                                               |
-| chat                                             | Social  | Static  | Visible       | —                                                                                               |
-| requests                                         | Social  | Static  | Visible       | —                                                                                               |
-| killfeed                                         | Social  | Static  | Visible       | —                                                                                               |
-| playerlist                                       | Social  | Static  | Visible       | —                                                                                               |
-| eventtitle                                       | Panels  | Static  | Visible       | —                                                                                               |
-| objectivepanel                                   | Panels  | Static  | Visible       | —                                                                                               |
-| portalpanel                                      | Panels  | Static  | Visible       | —                                                                                               |
-| sleep                                            | Panels  | Static  | Visible       | —                                                                                               |
-| blockvariantselector                             | Builder | Static  | Visible       | —                                                                                               |
-| buildertoolslegend                               | Builder | Static  | Visible       | —                                                                                               |
-| buildertoolsmaterialslotselector                 | Builder | Static  | Visible       | —                                                                                               |
+| Component                                         | Group   | Type    | Default state | Default rules                                                                                   |
+|---------------------------------------------------|---------|---------|---------------|-------------------------------------------------------------------------------------------------|
+| <span style="color:orange">hotbar</span>          | Core    | Dynamic | Hidden        | `HOTBAR_INPUT`                                                                                  |
+| <span style="color:orange">compass</span>         | Core    | Dynamic | Hidden        | `PLAYER_MOVING`                                                                                 |
+| <span style="color:orange">reticle</span>         | Core    | Dynamic | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` |
+| <span style="color:orange">health</span>          | Bars    | Dynamic | Hidden        | `HEALTH_NOT_FULL`                                                                               |
+| <span style="color:orange">stamina</span>         | Bars    | Dynamic | Hidden        | `STAMINA_NOT_FULL`                                                                              |
+| <span style="color:orange">mana</span>            | Bars    | Dynamic | Hidden        | `MANA_NOT_FULL`                                                                                 |
+| <span style="color:orange">oxygen</span>          | Bars    | Dynamic | Hidden        | `OXYGEN_NOT_FULL`                                                                               |
+| <span style="color:orange">statusicons</span> ⚠️  | UI      | Dynamic | Visible       | `HOTBAR_INPUT`                                                                                  |
+| <span style="color:orange">ammo</span>            | UI      | Dynamic | Visible       | `HOLDING_RANGED_WEAPON`                                                                         |
+| inputbindings ⚠️                                  | UI      | Static  | Hidden        | —                                                                                               |
+| notifications                                     | UI      | Static  | Hidden        | —                                                                                               |
+| speedometer                                       | UI      | Static  | Visible       | —                                                                                               |
+| utilityslotselector                               | UI      | Static  | Visible       | —                                                                                               |
+| chat                                              | Social  | Static  | Visible       | —                                                                                               |
+| requests                                          | Social  | Static  | Visible       | —                                                                                               |
+| killfeed                                          | Social  | Static  | Visible       | —                                                                                               |
+| playerlist                                        | Social  | Static  | Visible       | —                                                                                               |
+| eventtitle                                        | Panels  | Static  | Visible       | —                                                                                               |
+| objectivepanel                                    | Panels  | Static  | Visible       | —                                                                                               |
+| portalpanel                                       | Panels  | Static  | Visible       | —                                                                                               |
+| sleep                                             | Panels  | Static  | Visible       | —                                                                                               |
+| blockvariantselector                              | Builder | Static  | Visible       | —                                                                                               |
+| buildertoolslegend                                | Builder | Static  | Visible       | —                                                                                               |
+| buildertoolsmaterialslotselector                  | Builder | Static  | Visible       | —                                                                                               |
 
 ⚠️ This component is affected by some kind of issue in Hytale API. See `Know Issues` section for more details and possible workarounds
 
@@ -200,10 +200,12 @@ or even better, use in-game **Config UI**
 Use command `/ihud config` to open in-game configuration UI to manage visibility, rules and profiles interactively.
 
 1. Select one of the available profiles to start customizing your experience
-<p style="text-align:center;"><img src="assets/006_config_0_profile.png" alt="Immersive HUD Config Profile"/></p>
+<p style="text-align:center;"><img src="assets/001_iHUD_Config_Profiles.png" alt="Immersive HUD Config Profile"/></p>
 
 2. Configure the visibility and rules to hide or show the different HUD elements
-<p style="text-align:center;"><img src="assets/006_config_1_visibility.png" alt="Immersive HUD Config Visibility"/></p>
+<p style="text-align:center;"><img src="assets/002_iHUD_Config_Visibility_dynamic_component.png" alt="Immersive HUD Config Visibility Dynamic component"/></p>
+
+<p style="text-align:center;"><img src="assets/003_iHUD_Config_Visibility_static_components.png" alt="Immersive HUD Config Visibility Static components"/></p>
 
 Finally, press **APPLY** to save and activate your configuration and start enjoying your new Immersive HUD experience.
 
