@@ -13,6 +13,10 @@ import com.hypixel.hytale.server.npc.blackboard.view.combat.CombatViewSystems;
 import com.hypixel.hytale.server.npc.blackboard.view.combat.InterpretedCombatData;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 import com.hypixel.hytale.server.npc.role.Role;
+import com.hypixel.hytale.server.npc.role.support.CombatSupport;
+import com.hypixel.hytale.server.npc.role.support.MarkedEntitySupport;
+import com.hypixel.hytale.server.npc.role.support.WorldSupport;
+
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import org.joml.Vector3i;
 
@@ -131,14 +135,14 @@ public final class CombatSignalScanner {
             CombatGeometry geometry,
             GlobalConfig global
     ) {
-        boolean hostile = isHostileTowardsPlayer(role, npcRef, playerRef, store);
+        boolean hostile = isHostileTowardsPlayer(npcRef, playerRef, store);
 
-        boolean lockedTarget = hasLockedTarget(role, playerRef);
+        boolean lockedTarget = hasLockedTarget(npcRef, playerRef, store);
         boolean desiredTarget = hasDesiredTarget(role, playerRef);
         boolean targetingPlayer = lockedTarget || desiredTarget;
 
         boolean performingAttack = isNpcPerformingAttack(npcRef, store);
-        boolean executingAttack = isExecutingAttack(role);
+        boolean executingAttack = isExecutingAttack(npcRef, store);
         boolean attackingPlayer = hostile && targetingPlayer && (performingAttack || executingAttack);
 
         boolean visibleHostileCandidate =
@@ -289,18 +293,24 @@ public final class CombatSignalScanner {
     }
 
     private boolean hasLockedTarget(
-            Role role,
-            Ref<EntityStore> playerRef
+            Ref<EntityStore> npcRef,
+            Ref<EntityStore> playerRef,
+            Store<EntityStore> store
     ) {
         try {
-            if (role == null || playerRef == null) {
+            if (npcRef == null || playerRef == null || store == null) {
                 return false;
             }
 
-            Ref<EntityStore> lockedTarget = role.getMarkedEntitySupport().getMarkedEntityRef(LOCKED_TARGET_SLOT);
+            MarkedEntitySupport markedEntitySupport =
+                    MarkedEntitySupport.get(npcRef, store);
+
+            Ref<EntityStore> lockedTarget =
+                    markedEntitySupport.getMarkedEntityRef(MarkedEntitySupport.DEFAULT_TARGET_SLOT);
 
             return isSameValidRef(lockedTarget, playerRef);
-        } catch (RuntimeException ex) {
+
+        } catch (RuntimeException | AssertionError ex) {
             return false;
         }
     }
@@ -322,9 +332,20 @@ public final class CombatSignalScanner {
         }
     }
 
-    private boolean isExecutingAttack(Role role) {
+    private boolean isExecutingAttack(
+            Ref<EntityStore> npcRef,
+            Store<EntityStore> store
+    ) {
         try {
-            return role != null && role.getCombatSupport().isExecutingAttack();
+            if (npcRef == null || store == null) {
+                return false;
+            }
+
+            CombatSupport combatSupport =
+                    store.getComponent(npcRef, CombatSupport.getComponentType());
+
+            return combatSupport != null && combatSupport.isExecutingAttack();
+
         } catch (RuntimeException ex) {
             return false;
         }
@@ -353,17 +374,21 @@ public final class CombatSignalScanner {
     }
 
     private boolean isHostileTowardsPlayer(
-            Role role,
             Ref<EntityStore> npcRef,
             Ref<EntityStore> playerRef,
             Store<EntityStore> store
     ) {
         try {
-            return role != null
-                    && npcRef != null
-                    && playerRef != null
-                    && store != null
-                    && role.getWorldSupport().getAttitude(npcRef, playerRef, store) == Attitude.HOSTILE;
+            if (npcRef == null || playerRef == null || store == null) {
+                return false;
+            }
+
+            WorldSupport worldSupport =
+                    store.getComponent(npcRef, WorldSupport.getComponentType());
+
+            return worldSupport != null
+                    && worldSupport.getAttitude(npcRef, playerRef, store) == Attitude.HOSTILE;
+
         } catch (RuntimeException ex) {
             return false;
         }
