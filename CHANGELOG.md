@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.7
+
+**Technical Changes**
+* Update to Hytale 0.6.0
+* Fix: adapt combat signal scanner to new NPC support components included with latest Hytale update
+
+**Features**
+* Added support for new static hud component, included with latest Hytale update: Abilities
+
 ## v1.2.61
 
 **Features**
