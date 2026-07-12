@@ -39,6 +39,9 @@ public final class HudComponentsConfig {
     public boolean isHideOxygenHud() { return getByKey("oxygen"); }
     public void setHideOxygenHud(boolean v) { setByKey("oxygen", v); }
 
+    public boolean isHideAbilitiesHud() { return getByKey("abilities"); }
+    public void setHideAbilitiesHud(boolean v) { setByKey("abilities", v); }
+
     public boolean isHideInputBindingsHud() { return getByKey("inputbindings"); }
     public void setHideInputBindingsHud(boolean v) { setByKey("inputbindings", v); }
 

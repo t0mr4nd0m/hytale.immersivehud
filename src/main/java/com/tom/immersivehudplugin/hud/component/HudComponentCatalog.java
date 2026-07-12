@@ -10,6 +10,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.Abilities;
 import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.AmmoIndicator;
 import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.BlockVariantSelector;
 import static com.hypixel.hytale.protocol.packets.interface_.HudComponent.BuilderToolsLegend;
@@ -237,6 +238,15 @@ final class HudComponentCatalog {
                                 HudTrigger.IN_COMBAT
                         ),
                         null
+                ),
+                staticComponent(
+                        "abilities",
+                        "Abilities",
+                        HudComponentRegistry.Group.UI,
+                        Abilities,
+                        HudComponentsConfig::isHideAbilitiesHud,
+                        HudComponentsConfig::setHideAbilitiesHud,
+                        true
                 ),
                 staticComponent(
                         "inputbindings",
