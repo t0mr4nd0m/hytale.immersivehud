@@ -3,7 +3,6 @@ package com.tom.immersivehudplugin.runtime.signal;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
