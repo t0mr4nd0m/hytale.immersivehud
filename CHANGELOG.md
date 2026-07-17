@@ -5,6 +5,7 @@
 **Technical Changes**
 * Update to Hytale 0.6.0
 * Fix: adapt combat signal scanner to new NPC support components included with latest Hytale update
+* Fix: update interactable block detection for latest Hytale API
 
 **Features**
 * Added support for new static hud component, included with latest Hytale update: Abilities
