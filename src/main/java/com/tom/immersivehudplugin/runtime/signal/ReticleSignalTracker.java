@@ -1,7 +1,9 @@
 package com.tom.immersivehudplugin.runtime.signal;
 
 import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.TargetUtil;
@@ -83,8 +85,8 @@ public final class ReticleSignalTracker {
 
         if (blockPos != null) {
             BlockType blockType = world.getBlockType(blockPos);
-            var flags = blockType != null ? blockType.getFlags() : null;
-            lookingAtInteractable = flags != null && flags.isUsable;
+            var interactions = blockType != null ? blockType.getInteractions() : null;
+            lookingAtInteractable = interactions != null && interactions.containsKey(InteractionType.Use);
         }
 
         return new ReticleScanResult(hasEntityTarget, lookingAtInteractable);
