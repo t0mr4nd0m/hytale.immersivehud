@@ -214,7 +214,7 @@ public final class CombatSignalScanner {
         double forwardZ = lookDir.z / forwardHorizontalLength;
 
         double dot = forwardX * dirToNpcX + forwardZ * dirToNpcZ;
-        dot = Math.max(-1d, Math.min(1d, dot));
+        dot = Math.clamp(dot, -1d, 1d);
 
         double horizontalAngle = Math.toDegrees(Math.acos(dot));
         boolean insideHorizontal =
