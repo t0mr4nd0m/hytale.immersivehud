@@ -73,7 +73,7 @@ public final class ReticleSignalTracker {
                 targetRange,
                 tickContext.store()
         );
-        boolean hasEntityTarget = target != null && !target.equals(tickContext.ref());
+        boolean hasEntityTarget = target != null && target.isValid() && !target.equals(tickContext.ref());
 
         boolean lookingAtInteractable = false;
         var blockPos = TargetUtil.getTargetBlock(
