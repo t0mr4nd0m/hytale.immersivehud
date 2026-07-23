@@ -24,8 +24,6 @@ import java.util.List;
 
 public final class CombatSignalScanner {
 
-    private static final String LOCKED_TARGET_SLOT = "LockedTarget";
-
     private double playerCombatHorizontalFovDegrees (GlobalConfig cfg) {
         return cfg != null
                 ? cfg.getPlayerCombatHorizontalFovDegrees()
