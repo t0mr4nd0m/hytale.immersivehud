@@ -51,11 +51,7 @@ public final class GlobalConfigStore {
         try {
             configSupport.writeJson(configPath, ConfigJsonMapper.toJson(globalConfig));
         } catch (Throwable t) {
-            plugin.getLogger().at(Level.WARNING).log(
-                    " Failed to save global config. [{}]: {}",
-                    t.getClass().getSimpleName(),
-                    t.getMessage()
-            );
+            plugin.getLogger().at(Level.WARNING).withCause(t).log(" Failed to save global config.");
         }
     }
 

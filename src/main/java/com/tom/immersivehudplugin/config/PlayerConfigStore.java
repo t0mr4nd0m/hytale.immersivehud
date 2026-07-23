@@ -87,12 +87,7 @@ public final class PlayerConfigStore {
             dirty.remove(uuid);
 
         } catch (Throwable t) {
-            plugin.getLogger().at(Level.WARNING).log(
-                    " Failed to save player config for {} [{}]: {}",
-                    uuid,
-                    t.getClass().getSimpleName(),
-                    t.getMessage()
-            );
+            plugin.getLogger().at(Level.WARNING).withCause(t).log(" Failed to save player config for {}", uuid);
         }
     }
 
