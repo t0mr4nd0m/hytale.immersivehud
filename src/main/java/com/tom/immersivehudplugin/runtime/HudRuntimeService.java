@@ -14,7 +14,11 @@ import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.runtime.context.HudBarStateUpdater;
 import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContextFactory;
-import com.tom.immersivehudplugin.runtime.signal.*;
+import com.tom.immersivehudplugin.runtime.signal.CombatSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.HudSignalPipeline;
+import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 
 import javax.annotation.Nullable;
