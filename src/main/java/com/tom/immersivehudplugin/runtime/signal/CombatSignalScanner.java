@@ -194,40 +194,33 @@ public final class CombatSignalScanner {
         double rawDz = npcPos.z - lookPos.z;
 
         double horizontalDistance = Math.sqrt(rawDx * rawDx + rawDz * rawDz);
+        double lookHorizontalLength = Math.sqrt(lookDir.x * lookDir.x + lookDir.z * lookDir.z);
+        boolean insideHorizontal;
 
         if (horizontalDistance <= 0.0001d) {
-            return new CombatGeometry(
-                    true,
-                    false
-            );
+            insideHorizontal = true;
+        } else if (lookHorizontalLength <= 0.0001d) {
+            insideHorizontal = true;
+        } else {
+            double dirToNpcX = rawDx / horizontalDistance;
+            double dirToNpcZ = rawDz / horizontalDistance;
+
+            double forwardX = lookDir.x / lookHorizontalLength;
+            double forwardZ = lookDir.z / lookHorizontalLength;
+
+            double horizontalDot = forwardX * dirToNpcX + forwardZ * dirToNpcZ;
+            horizontalDot = Math.clamp(horizontalDot, -1d, 1d);
+
+            double horizontalAngle = Math.toDegrees(Math.acos(horizontalDot));
+            insideHorizontal = horizontalAngle <= playerCombatHorizontalFovDegrees(global) * 0.5d;
         }
 
-        double dirToNpcX = rawDx / horizontalDistance;
-        double dirToNpcZ = rawDz / horizontalDistance;
+        double targetElevation = Math.atan2(rawDy, horizontalDistance);
+        double lookElevation = Math.atan2(lookDir.y, lookHorizontalLength);
+        double verticalAngleDelta = Math.toDegrees(targetElevation - lookElevation);
+        boolean insideVertical = Math.abs(verticalAngleDelta) <= playerCombatVerticalFovDegrees(global) * 0.5d;
 
-        double forwardHorizontalLength = Math.sqrt(lookDir.x * lookDir.x + lookDir.z * lookDir.z);
-        if (forwardHorizontalLength <= 0.0001d) {
-            return CombatGeometry.outside();
-        }
-
-        double forwardX = lookDir.x / forwardHorizontalLength;
-        double forwardZ = lookDir.z / forwardHorizontalLength;
-
-        double dot = forwardX * dirToNpcX + forwardZ * dirToNpcZ;
-        dot = Math.clamp(dot, -1d, 1d);
-
-        double horizontalAngle = Math.toDegrees(Math.acos(dot));
-        boolean insideHorizontal =
-                horizontalAngle <= (playerCombatHorizontalFovDegrees(global) * 0.5d);
-
-        double verticalAngle = Math.toDegrees(Math.atan2(rawDy, horizontalDistance));
-        boolean insideVertical =
-                Math.abs(verticalAngle) <= (playerCombatVerticalFovDegrees(global) * 0.5d);
-
-        return new CombatGeometry(
-                insideHorizontal,
-                insideVertical
-        );
+        return new CombatGeometry(insideHorizontal, insideVertical);
     }
 
     private boolean hasLineOfSightToNpc(
@@ -437,6 +430,7 @@ public final class CombatSignalScanner {
             boolean insideVerticalFov
     ) {
         private static CombatGeometry outside() {
+
             return new CombatGeometry(false, false);
         }
     }
