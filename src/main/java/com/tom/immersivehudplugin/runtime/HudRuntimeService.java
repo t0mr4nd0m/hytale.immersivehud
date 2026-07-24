@@ -199,36 +199,72 @@ public final class HudRuntimeService {
     ) {
         state.hideDelayMs = hideDelayMs(global);
 
-        ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
-        if (resolved == null) {
+        if (!state.tryMarkTickPending()) {
             return;
         }
 
-        resolved.world().execute(() ->
-                processReadyPlayerTickOnWorldThread(resolved.uuid(), resolved.worldUuid(), global)
-        );
+        ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
+        if (resolved == null) {
+            state.clearTickPending();
+            return;
+        }
+
+        try {
+            resolved.world().execute(() -> {
+                try {
+                    processReadyPlayerTickOnWorldThread(
+                            resolved.uuid(),
+                            resolved.worldUuid(),
+                            state,
+                            global
+                    );
+                } catch (Exception exception) {
+                    plugin.getLogger()
+                            .at(Level.WARNING)
+                            .withCause(exception)
+                            .log("Failed to process HUD tick for {}", uuid);
+                } finally {
+                    state.clearTickPending();
+                }
+            });
+        } catch (Exception exception) {
+            state.clearTickPending();
+
+            plugin.getLogger()
+                    .at(Level.WARNING)
+                    .withCause(exception)
+                    .log("Failed to queue HUD tick for {}", uuid);
+        }
     }
 
     private void processReadyPlayerTickOnWorldThread(
             UUID uuid,
             UUID expectedWorldUuid,
+            PlayerHudState expectedState,
             GlobalConfig global
     ) {
-        ResolvedPlayerWorld resolved = revalidatePlayerWorldOnWorldThread(uuid, expectedWorldUuid);
+        if (playerState.get(uuid) != expectedState) {
+            return;
+        }
+
+        ResolvedPlayerWorld resolved =
+                revalidatePlayerWorldOnWorldThread(uuid, expectedWorldUuid);
+
         if (resolved == null) {
             return;
         }
 
         long now = nowMs();
-        PlayerHudState state = stateFor(uuid);
 
-        if (state.isInitialHudVisibleGraceActive(now)) {
+        if (expectedState.isInitialHudVisibleGraceActive(now)) {
             return;
         }
 
-        state.finishInitialHudVisibleGrace();
+        expectedState.finishInitialHudVisibleGrace();
 
-        PlayerConfig playerConfig = playerConfigService.getCachedPlayerConfig(uuid);
+        PlayerConfig playerConfig =
+                playerConfigService.getCachedPlayerConfig(uuid);
+
         if (playerConfig == null) {
             return;
         }
@@ -238,7 +274,7 @@ public final class HudRuntimeService {
                 resolved.world(),
                 global,
                 now,
-                state,
+                expectedState,
                 playerConfig
         );
     }

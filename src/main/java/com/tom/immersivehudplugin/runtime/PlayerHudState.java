@@ -7,12 +7,15 @@ import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudBarState;
 
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class PlayerHudState {
 
     private boolean runtimeInitialized;
 
     private long initialHudVisibleUntilMs;
+
+    private final AtomicBoolean tickPending = new AtomicBoolean();
 
     public void startInitialHudVisibleGrace(long now, int durationMs) {
         this.initialHudVisibleUntilMs = now + Math.max(0, durationMs);
@@ -180,5 +183,13 @@ public final class PlayerHudState {
 
     public void markRuntimeInitialized() {
         runtimeInitialized = true;
+    }
+
+    public boolean tryMarkTickPending() {
+        return tickPending.compareAndSet(false, true);
+    }
+
+    public void clearTickPending() {
+        tickPending.set(false);
     }
 }
