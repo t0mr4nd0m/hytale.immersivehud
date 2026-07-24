@@ -84,8 +84,7 @@ public final class ReticleSignalTracker {
 
         if (blockPos != null) {
             BlockType blockType = world.getBlockType(blockPos);
-            var interactions = blockType != null ? blockType.getInteractions() : null;
-            lookingAtInteractable = interactions != null && interactions.containsKey(InteractionType.Use);
+            lookingAtInteractable = isInteractableBlock(blockType);
         }
 
         return new ReticleScanResult(hasEntityTarget, lookingAtInteractable);
@@ -95,4 +94,26 @@ public final class ReticleSignalTracker {
             boolean targetEntity,
             boolean interactableBlock
     ) {}
+
+    private static final String GENERIC_INTERACTION_HINT =
+            "server.interactionHints.generic";
+
+    private boolean isInteractableBlock(BlockType blockType) {
+        if (blockType == null) {
+            return false;
+        }
+
+        String interactionHint = blockType.getInteractionHint();
+
+        boolean hasContextualHint = interactionHint != null
+                && !GENERIC_INTERACTION_HINT.equals(interactionHint);
+
+        var interactions = blockType.getInteractions();
+        boolean hasExplicitInteraction = interactions != null
+                && (interactions.containsKey(InteractionType.Use)
+                || interactions.containsKey(InteractionType.Pickup)
+                || interactions.containsKey(InteractionType.Pick));
+
+        return hasContextualHint || hasExplicitInteraction;
+    }
 }
