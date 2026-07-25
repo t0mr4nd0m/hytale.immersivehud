@@ -7,18 +7,23 @@ import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 public final class CombatSignalTracker {
 
-    private final CombatSignalScanner combatSignalScanner = new CombatSignalScanner();
+    private final CombatSignalScanner combatSignalScanner =
+            new CombatSignalScanner();
 
     private int combatScanIntervalMs(GlobalConfig global) {
         return Math.max(100, intervalMs(global));
     }
 
     private int intervalMs(GlobalConfig cfg) {
-        return cfg != null ? cfg.getIntervalMs() : GlobalConfig.INTERVAL_MS;
+        return cfg != null
+                ? cfg.getIntervalMs()
+                : GlobalConfig.INTERVAL_MS;
     }
 
     private float combatScanRange(GlobalConfig cfg) {
-        return cfg != null ? cfg.getCombatScanRange() : GlobalConfig.COMBAT_SCAN_RANGE;
+        return cfg != null
+                ? cfg.getCombatScanRange()
+                : GlobalConfig.COMBAT_SCAN_RANGE;
     }
 
     private boolean shouldScanCombat(
@@ -26,7 +31,8 @@ public final class CombatSignalTracker {
             GlobalConfig global,
             long now
     ) {
-        return (now - state.lastCombatScanMs) >= combatScanIntervalMs(global);
+        return (now - state.lastCombatScanMs)
+                >= combatScanIntervalMs(global);
     }
 
     public void updateCombatSignalIfNeeded(
@@ -43,30 +49,23 @@ public final class CombatSignalTracker {
         state.lastCombatScanMs = now;
 
         int scanInterval = combatScanIntervalMs(global);
-        int combatHideDelay = Math.max(hideDelay, scanInterval * 2);
+        int combatHideDelay =
+                Math.max(hideDelay, scanInterval * 2);
 
-        var result = combatSignalScanner.scanNpcCombat(
-                tickContext.store(),
-                tickContext.ref(),
-                combatScanRange(global),
-                global
-        );
+        boolean inCombat =
+                combatSignalScanner.scanNpcCombat(
+                        tickContext.store(),
+                        tickContext.ref(),
+                        combatScanRange(global),
+                        global
+                );
 
-        if (result.active()) {
-            state.combatTargetRef = result.npcRef();
-            state.lastCombatTargetSeenMs = now;
-            state.t.pulse(HudTrigger.IN_COMBAT, now, combatHideDelay);
-
-            return;
-        }
-
-        long lastSeenAge = state.lastCombatTargetSeenMs > 0L
-                ? now - state.lastCombatTargetSeenMs
-                : -1L;
-
-        if (state.combatTargetRef != null && lastSeenAge > combatHideDelay) {
-            state.combatTargetRef = null;
-            state.lastCombatTargetSeenMs = 0L;
+        if (inCombat) {
+            state.t.pulse(
+                    HudTrigger.IN_COMBAT,
+                    now,
+                    combatHideDelay
+            );
         }
     }
 }

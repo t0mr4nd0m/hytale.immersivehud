@@ -15,7 +15,6 @@ import com.hypixel.hytale.server.npc.role.Role;
 import com.hypixel.hytale.server.npc.role.support.CombatSupport;
 import com.hypixel.hytale.server.npc.role.support.MarkedEntitySupport;
 import com.hypixel.hytale.server.npc.role.support.WorldSupport;
-
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import org.joml.Vector3i;
 
@@ -23,19 +22,19 @@ import java.util.List;
 
 public final class CombatSignalScanner {
 
-    private double playerCombatHorizontalFovDegrees (GlobalConfig cfg) {
+    private double playerCombatHorizontalFovDegrees(GlobalConfig cfg) {
         return cfg != null
                 ? cfg.getPlayerCombatHorizontalFovDegrees()
                 : GlobalConfig.PLAYER_COMBAT_HORIZONTAL_FOV_DEGREES;
     }
 
-    private double playerCombatVerticalFovDegrees (GlobalConfig cfg) {
+    private double playerCombatVerticalFovDegrees(GlobalConfig cfg) {
         return cfg != null
                 ? cfg.getPlayerCombatVerticalFovDegrees()
                 : GlobalConfig.PLAYER_COMBAT_VERTICAL_FOV_DEGREES;
     }
 
-    private double losNpcTargetHeight (GlobalConfig cfg) {
+    private double losNpcTargetHeight(GlobalConfig cfg) {
         return cfg != null
                 ? cfg.getLosNpcTargetHeight()
                 : GlobalConfig.LOS_NPC_TARGET_HEIGHT;
@@ -47,24 +46,27 @@ public final class CombatSignalScanner {
                 : GlobalConfig.LOS_TARGET_EPSILON;
     }
 
-    public CombatScanResult scanNpcCombat(
+    public boolean scanNpcCombat(
             Store<EntityStore> store,
             Ref<EntityStore> playerRef,
             float scanRange,
             GlobalConfig global
     ) {
         if (store == null || playerRef == null || !playerRef.isValid()) {
-            return CombatScanResult.none();
+            return false;
         }
 
         TransformComponent playerTransform =
-                store.getComponent(playerRef, TransformComponent.getComponentType());
+                store.getComponent(
+                        playerRef,
+                        TransformComponent.getComponentType()
+                );
 
         if (playerTransform == null) {
-            return CombatScanResult.none();
+            return false;
         }
 
-        final CombatScanResult[] result = {CombatScanResult.none()};
+        final boolean[] combatDetected = {false};
 
         store.forEachChunk(
                 Query.and(
@@ -72,54 +74,65 @@ public final class CombatSignalScanner {
                         TransformComponent.getComponentType()
                 ),
                 (chunk, _) -> {
-
-                    if (result[0].active()) {
+                    if (combatDetected[0]) {
                         return;
                     }
 
-                    for (int i = 0; i < chunk.size() && !result[0].active(); i++) {
+                    for (int i = 0; i < chunk.size() && !combatDetected[0]; i++) {
                         Ref<EntityStore> npcRef = chunk.getReferenceTo(i);
+
                         if (!npcRef.isValid()) {
                             continue;
                         }
 
-                        TransformComponent npcTransform = chunk.getComponent(i, TransformComponent.getComponentType());
+                        TransformComponent npcTransform =
+                                chunk.getComponent(
+                                        i,
+                                        TransformComponent.getComponentType()
+                                );
 
-                        if (!isWithinRange(playerTransform, npcTransform, scanRange)) {
+                        if (!isWithinRange(
+                                playerTransform,
+                                npcTransform,
+                                scanRange
+                        )) {
                             continue;
                         }
 
-                        NPCEntity npc = chunk.getComponent(i, NPCEntity.getComponentType());
+                        NPCEntity npc =
+                                chunk.getComponent(
+                                        i,
+                                        NPCEntity.getComponentType()
+                                );
 
                         if (npc == null) {
                             continue;
                         }
 
                         Role role = npc.getRole();
+
                         if (role == null) {
                             continue;
                         }
 
-                        CombatScanResult scan = scanNpc(
+                        if (scanNpc(
                                 npcRef,
                                 role,
                                 playerRef,
                                 store,
                                 npcTransform,
                                 global
-                        );
-
-                        if (scan.active()) {
-                            result[0] = scan;
+                        )) {
+                            combatDetected[0] = true;
                         }
                     }
                 }
         );
 
-        return result[0];
+        return combatDetected[0];
     }
 
-    private CombatScanResult scanNpc(
+    private boolean scanNpc(
             Ref<EntityStore> npcRef,
             Role role,
             Ref<EntityStore> playerRef,
@@ -127,57 +140,55 @@ public final class CombatSignalScanner {
             TransformComponent npcTransform,
             GlobalConfig global
     ) {
-        boolean hostile = isHostileTowardsPlayer(npcRef, playerRef, store);
+        boolean hostile =
+                isHostileTowardsPlayer(npcRef, playerRef, store);
 
         if (!hostile) {
-            return CombatScanResult.none();
+            return false;
         }
 
-        boolean lockedTarget = hasLockedTarget(npcRef, playerRef, store);
-        boolean desiredTarget = hasDesiredTarget(role, playerRef);
-        boolean targetingPlayer = lockedTarget || desiredTarget;
+        boolean lockedTarget =
+                hasLockedTarget(npcRef, playerRef, store);
 
-        boolean performingAttack = isNpcPerformingAttack(npcRef, store);
-        boolean executingAttack = isExecutingAttack(npcRef, store);
+        boolean desiredTarget =
+                hasDesiredTarget(role, playerRef);
+
+        boolean targetingPlayer =
+                lockedTarget || desiredTarget;
+
+        boolean performingAttack =
+                isNpcPerformingAttack(npcRef, store);
+
+        boolean executingAttack =
+                isExecutingAttack(npcRef, store);
 
         boolean attackingPlayer =
-                targetingPlayer && (performingAttack || executingAttack);
+                targetingPlayer
+                        && (performingAttack || executingAttack);
 
         if (attackingPlayer) {
-            return new CombatScanResult(
-                    true,
-                    npcRef,
-                    true,
-                    CombatActivationReason.ATTACKING_PLAYER
-            );
+            return true;
         }
 
         CombatGeometry geometry =
-                checkCombatGeometry(playerRef, store, npcTransform, global);
-
-        boolean visibleHostileCandidate =
-                geometry.insideHorizontalFov()
-                        && geometry.insideVerticalFov();
-
-        boolean visibleHostile =
-                visibleHostileCandidate
-                        && hasLineOfSightToNpc(
+                checkCombatGeometry(
                         playerRef,
                         store,
                         npcTransform,
                         global
                 );
 
-        if (visibleHostile) {
-            return new CombatScanResult(
-                    true,
-                    npcRef,
-                    performingAttack || executingAttack,
-                    CombatActivationReason.VISIBLE_HOSTILE
-            );
-        }
+        boolean visibleHostileCandidate =
+                geometry.insideHorizontalFov()
+                        && geometry.insideVerticalFov();
 
-        return CombatScanResult.none();
+        return visibleHostileCandidate
+                && hasLineOfSightToNpc(
+                playerRef,
+                store,
+                npcTransform,
+                global
+        );
     }
 
     private CombatGeometry checkCombatGeometry(
@@ -197,11 +208,21 @@ public final class CombatSignalScanner {
         var lookDir = look.getDirection();
 
         double rawDx = npcPos.x - lookPos.x;
-        double rawDy = npcPos.y + losNpcTargetHeight(global) - lookPos.y;
+        double rawDy =
+                npcPos.y
+                        + losNpcTargetHeight(global)
+                        - lookPos.y;
         double rawDz = npcPos.z - lookPos.z;
 
-        double horizontalDistance = Math.sqrt(rawDx * rawDx + rawDz * rawDz);
-        double lookHorizontalLength = Math.sqrt(lookDir.x * lookDir.x + lookDir.z * lookDir.z);
+        double horizontalDistance =
+                Math.sqrt(rawDx * rawDx + rawDz * rawDz);
+
+        double lookHorizontalLength =
+                Math.sqrt(
+                        lookDir.x * lookDir.x
+                                + lookDir.z * lookDir.z
+                );
+
         boolean insideHorizontal;
 
         if (horizontalDistance <= 0.0001d) {
@@ -215,19 +236,45 @@ public final class CombatSignalScanner {
             double forwardX = lookDir.x / lookHorizontalLength;
             double forwardZ = lookDir.z / lookHorizontalLength;
 
-            double horizontalDot = forwardX * dirToNpcX + forwardZ * dirToNpcZ;
-            horizontalDot = Math.clamp(horizontalDot, -1d, 1d);
+            double horizontalDot =
+                    forwardX * dirToNpcX
+                            + forwardZ * dirToNpcZ;
 
-            double horizontalAngle = Math.toDegrees(Math.acos(horizontalDot));
-            insideHorizontal = horizontalAngle <= playerCombatHorizontalFovDegrees(global) * 0.5d;
+            horizontalDot =
+                    Math.clamp(horizontalDot, -1d, 1d);
+
+            double horizontalAngle =
+                    Math.toDegrees(Math.acos(horizontalDot));
+
+            insideHorizontal =
+                    horizontalAngle
+                            <= playerCombatHorizontalFovDegrees(global)
+                            * 0.5d;
         }
 
-        double targetElevation = Math.atan2(rawDy, horizontalDistance);
-        double lookElevation = Math.atan2(lookDir.y, lookHorizontalLength);
-        double verticalAngleDelta = Math.toDegrees(targetElevation - lookElevation);
-        boolean insideVertical = Math.abs(verticalAngleDelta) <= playerCombatVerticalFovDegrees(global) * 0.5d;
+        double targetElevation =
+                Math.atan2(rawDy, horizontalDistance);
 
-        return new CombatGeometry(insideHorizontal, insideVertical);
+        double lookElevation =
+                Math.atan2(
+                        lookDir.y,
+                        lookHorizontalLength
+                );
+
+        double verticalAngleDelta =
+                Math.toDegrees(
+                        targetElevation - lookElevation
+                );
+
+        boolean insideVertical =
+                Math.abs(verticalAngleDelta)
+                        <= playerCombatVerticalFovDegrees(global)
+                        * 0.5d;
+
+        return new CombatGeometry(
+                insideHorizontal,
+                insideVertical
+        );
     }
 
     private boolean hasLineOfSightToNpc(
@@ -237,31 +284,47 @@ public final class CombatSignalScanner {
             GlobalConfig global
     ) {
         try {
-            if (playerRef == null || store == null || npcTransform == null) {
+            if (playerRef == null
+                    || store == null
+                    || npcTransform == null) {
                 return false;
             }
 
-            EntityStore entityStore = store.getExternalData();
+            EntityStore entityStore =
+                    store.getExternalData();
 
-            World world = entityStore.getWorld();
+            World world =
+                    entityStore.getWorld();
 
-            var look = TargetUtil.getLook(playerRef, store);
-            var playerPos = look.getPosition();
-            var npcPos = npcTransform.getPosition();
+            var look =
+                    TargetUtil.getLook(playerRef, store);
+
+            var playerPos =
+                    look.getPosition();
+
+            var npcPos =
+                    npcTransform.getPosition();
 
             double originX = playerPos.x;
             double originY = playerPos.y;
             double originZ = playerPos.z;
 
             double targetX = npcPos.x;
-            double targetY = npcPos.y + losNpcTargetHeight(global);
+            double targetY =
+                    npcPos.y + losNpcTargetHeight(global);
             double targetZ = npcPos.z;
 
             double dx = targetX - originX;
             double dy = targetY - originY;
             double dz = targetZ - originZ;
 
-            double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            double distance =
+                    Math.sqrt(
+                            dx * dx
+                                    + dy * dy
+                                    + dz * dz
+                    );
+
             if (distance <= 0.0001d) {
                 return true;
             }
@@ -270,19 +333,24 @@ public final class CombatSignalScanner {
             double dirY = dy / distance;
             double dirZ = dz / distance;
 
-            double maxDistance = Math.max(0d, distance - losTargetEpsilon(global));
+            double maxDistance =
+                    Math.max(
+                            0d,
+                            distance - losTargetEpsilon(global)
+                    );
 
-            Vector3i blockingBlock = TargetUtil.getTargetBlock(
-                    world,
-                    (blockId, _) -> blockId != 0,
-                    originX,
-                    originY,
-                    originZ,
-                    dirX,
-                    dirY,
-                    dirZ,
-                    maxDistance
-            );
+            Vector3i blockingBlock =
+                    TargetUtil.getTargetBlock(
+                            world,
+                            (blockId, _) -> blockId != 0,
+                            originX,
+                            originY,
+                            originZ,
+                            dirX,
+                            dirY,
+                            dirZ,
+                            maxDistance
+                    );
 
             return blockingBlock == null;
         } catch (RuntimeException ex) {
@@ -296,7 +364,9 @@ public final class CombatSignalScanner {
             Store<EntityStore> store
     ) {
         try {
-            if (npcRef == null || playerRef == null || store == null) {
+            if (npcRef == null
+                    || playerRef == null
+                    || store == null) {
                 return false;
             }
 
@@ -304,10 +374,14 @@ public final class CombatSignalScanner {
                     MarkedEntitySupport.get(npcRef, store);
 
             Ref<EntityStore> lockedTarget =
-                    markedEntitySupport.getMarkedEntityRef(MarkedEntitySupport.DEFAULT_TARGET_SLOT);
+                    markedEntitySupport.getMarkedEntityRef(
+                            MarkedEntitySupport.DEFAULT_TARGET_SLOT
+                    );
 
-            return isSameValidRef(lockedTarget, playerRef);
-
+            return isSameValidRef(
+                    lockedTarget,
+                    playerRef
+            );
         } catch (RuntimeException | AssertionError ex) {
             return false;
         }
@@ -318,13 +392,20 @@ public final class CombatSignalScanner {
             Ref<EntityStore> playerRef
     ) {
         try {
-            if (role == null || playerRef == null || role.getLastBodySteeringMotion() == null) {
+            if (role == null
+                    || playerRef == null
+                    || role.getLastBodySteeringMotion() == null) {
                 return false;
             }
 
-            Ref<EntityStore> desiredTarget = role.getLastBodySteeringMotion().getDesiredTargetEntity();
+            Ref<EntityStore> desiredTarget =
+                    role.getLastBodySteeringMotion()
+                            .getDesiredTargetEntity();
 
-            return isSameValidRef(desiredTarget, playerRef);
+            return isSameValidRef(
+                    desiredTarget,
+                    playerRef
+            );
         } catch (RuntimeException ex) {
             return false;
         }
@@ -340,10 +421,13 @@ public final class CombatSignalScanner {
             }
 
             CombatSupport combatSupport =
-                    store.getComponent(npcRef, CombatSupport.getComponentType());
+                    store.getComponent(
+                            npcRef,
+                            CombatSupport.getComponentType()
+                    );
 
-            return combatSupport != null && combatSupport.isExecutingAttack();
-
+            return combatSupport != null
+                    && combatSupport.isExecutingAttack();
         } catch (RuntimeException ex) {
             return false;
         }
@@ -355,7 +439,10 @@ public final class CombatSignalScanner {
     ) {
         try {
             List<InterpretedCombatData> combatData =
-                    CombatViewSystems.getCombatData(npcRef, store);
+                    CombatViewSystems.getCombatData(
+                            npcRef,
+                            store
+                    );
 
             for (InterpretedCombatData data : combatData) {
                 if (data.isPerformingMeleeAttack()
@@ -377,16 +464,24 @@ public final class CombatSignalScanner {
             Store<EntityStore> store
     ) {
         try {
-            if (npcRef == null || playerRef == null || store == null) {
+            if (npcRef == null
+                    || playerRef == null
+                    || store == null) {
                 return false;
             }
 
             WorldSupport worldSupport =
-                    store.getComponent(npcRef, WorldSupport.getComponentType());
+                    store.getComponent(
+                            npcRef,
+                            WorldSupport.getComponentType()
+                    );
 
             return worldSupport != null
-                    && worldSupport.getAttitude(npcRef, playerRef, store) == Attitude.HOSTILE;
-
+                    && worldSupport.getAttitude(
+                    npcRef,
+                    playerRef,
+                    store
+            ) == Attitude.HOSTILE;
         } catch (RuntimeException ex) {
             return false;
         }
@@ -397,20 +492,26 @@ public final class CombatSignalScanner {
             TransformComponent npcTransform,
             float range
     ) {
-        if (playerTransform == null || npcTransform == null || range <= 0f) {
+        if (playerTransform == null
+                || npcTransform == null
+                || range <= 0f) {
             return false;
         }
 
-        var playerPos = playerTransform.getPosition();
-        var npcPos = npcTransform.getPosition();
+        var playerPos =
+                playerTransform.getPosition();
+
+        var npcPos =
+                npcTransform.getPosition();
 
         double dx = playerPos.x - npcPos.x;
         double dy = playerPos.y - npcPos.y;
         double dz = playerPos.z - npcPos.z;
 
-        double rangeSq = (double) range * range;
+        double rangeSq =
+                (double) range * range;
 
-        return (dx * dx + dy * dy + dz * dz) <= rangeSq;
+        return dx * dx + dy * dy + dz * dz <= rangeSq;
     }
 
     private boolean isSameValidRef(
@@ -424,37 +525,12 @@ public final class CombatSignalScanner {
                 && a.equals(b);
     }
 
-    private enum CombatActivationReason {
-        NONE,
-        /** Hostile NPC in front of the player and not blocked by terrain. */
-        VISIBLE_HOSTILE,
-        /** NPC is actively attacking while it has the player as target. */
-        ATTACKING_PLAYER
-    }
-
     private record CombatGeometry(
             boolean insideHorizontalFov,
             boolean insideVerticalFov
     ) {
         private static CombatGeometry outside() {
-
             return new CombatGeometry(false, false);
-        }
-    }
-
-    public record CombatScanResult(
-            boolean active,
-            Ref<EntityStore> npcRef,
-            boolean attacking,
-            CombatActivationReason reason
-    ) {
-        public static CombatScanResult none() {
-            return new CombatScanResult(
-                    false,
-                    null,
-                    false,
-                    CombatActivationReason.NONE
-            );
         }
     }
 }
