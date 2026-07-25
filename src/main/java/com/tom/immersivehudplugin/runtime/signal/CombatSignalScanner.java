@@ -100,15 +100,12 @@ public final class CombatSignalScanner {
                             continue;
                         }
 
-                        CombatGeometry geometry = checkCombatGeometry(playerRef, store, npcTransform, global);
-
                         CombatScanResult scan = scanNpc(
                                 npcRef,
                                 role,
                                 playerRef,
                                 store,
                                 npcTransform,
-                                geometry,
                                 global
                         );
 
@@ -128,10 +125,13 @@ public final class CombatSignalScanner {
             Ref<EntityStore> playerRef,
             Store<EntityStore> store,
             TransformComponent npcTransform,
-            CombatGeometry geometry,
             GlobalConfig global
     ) {
         boolean hostile = isHostileTowardsPlayer(npcRef, playerRef, store);
+
+        if (!hostile) {
+            return CombatScanResult.none();
+        }
 
         boolean lockedTarget = hasLockedTarget(npcRef, playerRef, store);
         boolean desiredTarget = hasDesiredTarget(role, playerRef);
@@ -139,16 +139,9 @@ public final class CombatSignalScanner {
 
         boolean performingAttack = isNpcPerformingAttack(npcRef, store);
         boolean executingAttack = isExecutingAttack(npcRef, store);
-        boolean attackingPlayer = hostile && targetingPlayer && (performingAttack || executingAttack);
 
-        boolean visibleHostileCandidate =
-                hostile
-                        && geometry.insideHorizontalFov()
-                        && geometry.insideVerticalFov();
-
-        boolean visibleHostile =
-                visibleHostileCandidate
-                        && hasLineOfSightToNpc(playerRef, store, npcTransform, global);
+        boolean attackingPlayer =
+                targetingPlayer && (performingAttack || executingAttack);
 
         if (attackingPlayer) {
             return new CombatScanResult(
@@ -158,6 +151,22 @@ public final class CombatSignalScanner {
                     CombatActivationReason.ATTACKING_PLAYER
             );
         }
+
+        CombatGeometry geometry =
+                checkCombatGeometry(playerRef, store, npcTransform, global);
+
+        boolean visibleHostileCandidate =
+                geometry.insideHorizontalFov()
+                        && geometry.insideVerticalFov();
+
+        boolean visibleHostile =
+                visibleHostileCandidate
+                        && hasLineOfSightToNpc(
+                        playerRef,
+                        store,
+                        npcTransform,
+                        global
+                );
 
         if (visibleHostile) {
             return new CombatScanResult(
