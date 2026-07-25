@@ -64,10 +64,13 @@ public final class HudComponentRegistry {
 
     static {
         ALL_LIST = List.copyOf(sortByGroupOrder(HudComponentCatalog.createAll()));
+
         DYNAMIC_LIST = ALL_LIST.stream()
                 .filter(HudComponent::supportsDynamicRules)
                 .toList();
+
         REGISTRY = buildRegistry();
+
         GROUPED = ALL_LIST.stream()
                 .collect(Collectors.groupingBy(
                         HudComponent::group,
