@@ -1,6 +1,5 @@
 package com.tom.immersivehudplugin.runtime.signal;
 
-import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
@@ -73,25 +72,25 @@ public final class CombatSignalScanner {
                         TransformComponent.getComponentType()
                 ),
                 (chunk, _) -> {
-                    for (int i = 0; i < chunk.size(); i++) {
+
+                    if (result[0].active()) {
+                        return;
+                    }
+
+                    for (int i = 0; i < chunk.size() && !result[0].active(); i++) {
                         Ref<EntityStore> npcRef = chunk.getReferenceTo(i);
                         if (!npcRef.isValid()) {
                             continue;
                         }
 
-                        TransformComponent npcTransform =
-                                chunk.getComponent(i, TransformComponent.getComponentType());
+                        TransformComponent npcTransform = chunk.getComponent(i, TransformComponent.getComponentType());
 
                         if (!isWithinRange(playerTransform, npcTransform, scanRange)) {
                             continue;
                         }
 
-                        ComponentType<EntityStore, NPCEntity> componentType = NPCEntity.getComponentType();
-                        if (componentType == null) {
-                            continue;
-                        }
+                        NPCEntity npc = chunk.getComponent(i, NPCEntity.getComponentType());
 
-                        NPCEntity npc = chunk.getComponent(i, componentType);
                         if (npc == null) {
                             continue;
                         }
@@ -115,7 +114,6 @@ public final class CombatSignalScanner {
 
                         if (scan.active()) {
                             result[0] = scan;
-                            return;
                         }
                     }
                 }
