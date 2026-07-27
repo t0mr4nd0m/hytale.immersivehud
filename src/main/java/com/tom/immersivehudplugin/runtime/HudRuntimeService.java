@@ -63,7 +63,7 @@ public final class HudRuntimeService {
         this.heldItemSignalTracker = new HeldItemSignalTracker();
         MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
         ReticleSignalTracker reticleSignalTracker = new ReticleSignalTracker();
-        CombatSignalTracker combatSignalTracker = new CombatSignalTracker();
+        CombatSignalTracker combatSignalTracker = new CombatSignalTracker(plugin);
         HudSignalPipeline hudSignalPipeline = new HudSignalPipeline(
                 heldItemSignalTracker,
                 movementSignalTracker,
@@ -101,9 +101,7 @@ public final class HudRuntimeService {
         tickTask = null;
         runningIntervalMs = -1;
 
-        if (task != null) {
-            task.cancel(false);
-        }
+        if (task != null) task.cancel(false);
 
         playerState.keySet().forEach(playerConfigService::save);
         playerState.clear();
@@ -111,19 +109,13 @@ public final class HudRuntimeService {
 
     public void restartTickTaskIfNeeded() {
 
-        if (!running) {
-            return;
-        }
+        if (!running) return;
 
         GlobalConfig global = getGlobalConfig();
         int wantedInterval = intervalMs(global);
-        if (wantedInterval <= 0) {
-            wantedInterval = GlobalConfig.INTERVAL_MS;
-        }
+        if (wantedInterval <= 0) wantedInterval = GlobalConfig.INTERVAL_MS;
 
-        if (isTickTaskAlreadyRunningFor(wantedInterval)) {
-            return;
-        }
+        if (isTickTaskAlreadyRunningFor(wantedInterval)) return;
 
         cancelCurrentTickTask();
 
@@ -138,9 +130,7 @@ public final class HudRuntimeService {
     }
 
     public void onPlayerReady(@Nullable PlayerRef playerRef) {
-        if (!running || playerRef == null || !playerRef.isValid()) {
-            return;
-        }
+        if (!running || playerRef == null || !playerRef.isValid()) return;
 
         GlobalConfig global = getGlobalConfig();
 
@@ -154,81 +144,51 @@ public final class HudRuntimeService {
     }
 
     public void onPlayerDisconnect(@Nullable PlayerRef playerRef) {
-        if (playerRef == null) {
-            return;
-        }
+        if (playerRef == null) return;
 
         playerState.remove(playerRef.getUuid());
     }
 
     public void onPlayerConfigChanged(@Nullable PlayerRef playerRef) {
-        if (!running || playerRef == null || !playerRef.isValid()) {
-            return;
-        }
+        if (!running || playerRef == null || !playerRef.isValid()) return;
 
         PlayerHudState state = playerState.get(playerRef.getUuid());
 
-        if (state == null) {
-            return;
-        }
+        if (state == null) return;
 
         state.markStaticHudDirty();
         state.invalidateDynamicHudEnabledCache();
     }
 
     private void registerInboundWatcher() {
-        if (inboundRegistered) {
-            return;
-        }
+        if (inboundRegistered) return;
         inboundRegistered = true;
 
         PacketAdapters.registerInbound((PlayerPacketWatcher) (playerRef, packet) -> {
-            if (!running) {
-                return;
-            }
+            if (!running) return;
 
-            if (playerRef == null || !playerRef.isValid()) {
-                return;
-            }
+            if (playerRef == null || !playerRef.isValid()) return;
 
-            if (!(packet instanceof SyncInteractionChains updates)) {
-                return;
-            }
+            if (!(packet instanceof SyncInteractionChains updates)) return;
 
             PlayerHudState state = playerState.get(playerRef.getUuid());
 
-            if (state == null) {
-                return;
-            }
+            if (state == null) return;
 
             long now = nowMs();
 
-            heldItemSignalTracker.applyPacketBatch(
-                    state,
-                    updates,
-                    now
-            );
+            heldItemSignalTracker.applyPacketBatch(state, updates, now);
 
             heldItemSignalTracker.cleanupWeaponSignals(state);
         });
     }
 
     private void tickReadyPlayers() {
-        if (!running) {
-            return;
-        }
+        if (!running) return;
 
         Universe universe = Universe.get();
         GlobalConfig global = getGlobalConfig();
-
-        playerState.forEach((uuid, state) ->
-                processReadyPlayerTick(
-                        universe,
-                        uuid,
-                        state,
-                        global
-                )
-        );
+        playerState.forEach((uuid, state) -> processReadyPlayerTick(universe, uuid, state, global));
     }
 
     private void processReadyPlayerTick(
@@ -239,9 +199,7 @@ public final class HudRuntimeService {
     ) {
         state.hideDelayMs = hideDelayMs(global);
 
-        if (!state.tryMarkTickPending()) {
-            return;
-        }
+        if (!state.tryMarkTickPending()) return;
 
         ResolvedPlayerWorld resolved = resolvePlayerWorld(universe, uuid);
         if (resolved == null) {
@@ -252,12 +210,7 @@ public final class HudRuntimeService {
         try {
             resolved.world().execute(() -> {
                 try {
-                    processReadyPlayerTickOnWorldThread(
-                            resolved.uuid(),
-                            resolved.worldUuid(),
-                            state,
-                            global
-                    );
+                    processReadyPlayerTickOnWorldThread(resolved.uuid(), resolved.worldUuid(), state, global);
                 } catch (Exception exception) {
                     plugin.getLogger()
                             .at(Level.WARNING)
@@ -283,13 +236,9 @@ public final class HudRuntimeService {
             PlayerHudState expectedState,
             GlobalConfig global
     ) {
-        if (!running) {
-            return;
-        }
+        if (!running) return;
 
-        if (playerState.get(uuid) != expectedState) {
-            return;
-        }
+        if (playerState.get(uuid) != expectedState) return;
 
         ResolvedPlayerWorld resolved =
                 revalidatePlayerWorldOnWorldThread(
@@ -297,24 +246,17 @@ public final class HudRuntimeService {
                         expectedWorldUuid
                 );
 
-        if (resolved == null) {
-            return;
-        }
+        if (resolved == null) return;
 
         long now = nowMs();
 
-        if (expectedState.isInitialHudVisibleGraceActive(now)) {
-            return;
-        }
+        if (expectedState.isInitialHudVisibleGraceActive(now)) return;
 
         expectedState.finishInitialHudVisibleGrace();
 
-        PlayerConfig playerConfig =
-                playerConfigService.getCachedPlayerConfig(uuid);
+        PlayerConfig playerConfig = playerConfigService.getCachedPlayerConfig(uuid);
 
-        if (playerConfig == null) {
-            return;
-        }
+        if (playerConfig == null) return;
 
         hudTickProcessor.processPlayerTick(
                 resolved.playerRef(),
@@ -335,9 +277,7 @@ public final class HudRuntimeService {
 
     private void cancelCurrentTickTask() {
         ScheduledFuture<?> current = tickTask;
-        if (current != null) {
-            current.cancel(false);
-        }
+        if (current != null) current.cancel(false);
     }
 
     private PlayerHudState stateFor(UUID uuid) {
@@ -353,9 +293,7 @@ public final class HudRuntimeService {
     }
 
     private int initialHudGraceMs(GlobalConfig config) {
-        return config != null
-                ? config.getInitialHudGraceMs()
-                : GlobalConfig.INITIAL_HUD_GRACE_MS;
+        return config != null ? config.getInitialHudGraceMs() : GlobalConfig.INITIAL_HUD_GRACE_MS;
     }
 
     private int intervalMs(GlobalConfig config) {
@@ -376,19 +314,13 @@ public final class HudRuntimeService {
     @Nullable
     private ResolvedPlayerWorld resolvePlayerWorld(Universe universe, UUID uuid) {
         PlayerRef playerRef = universe.getPlayer(uuid);
-        if (playerRef == null || !playerRef.isValid()) {
-            return null;
-        }
+        if (playerRef == null || !playerRef.isValid()) return null;
 
         UUID worldUuid = playerRef.getWorldUuid();
-        if (worldUuid == null) {
-            return null;
-        }
+        if (worldUuid == null) return null;
 
         World world = universe.getWorld(worldUuid);
-        if (world == null || !world.isAlive()) {
-            return null;
-        }
+        if (world == null || !world.isAlive()) return null;
 
         return new ResolvedPlayerWorld(uuid, playerRef, worldUuid, world);
     }
@@ -401,18 +333,12 @@ public final class HudRuntimeService {
         Universe universe = Universe.get();
 
         PlayerRef playerRef = universe.getPlayer(uuid);
-        if (playerRef == null || !playerRef.isValid()) {
-            return null;
-        }
+        if (playerRef == null || !playerRef.isValid()) return null;
 
-        if (!expectedWorldUuid.equals(playerRef.getWorldUuid())) {
-            return null;
-        }
+        if (!expectedWorldUuid.equals(playerRef.getWorldUuid())) return null;
 
         World world = universe.getWorld(expectedWorldUuid);
-        if (world == null || !world.isAlive()) {
-            return null;
-        }
+        if (world == null || !world.isAlive()) return null;
 
         return new ResolvedPlayerWorld(uuid, playerRef, expectedWorldUuid, world);
     }

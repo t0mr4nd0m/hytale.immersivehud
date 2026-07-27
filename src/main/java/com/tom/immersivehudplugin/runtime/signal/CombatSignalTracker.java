@@ -1,5 +1,6 @@
 package com.tom.immersivehudplugin.runtime.signal;
 
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
@@ -7,8 +8,11 @@ import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 public final class CombatSignalTracker {
 
-    private final CombatSignalScanner combatSignalScanner =
-            new CombatSignalScanner();
+    private final CombatSignalScanner combatSignalScanner;
+
+    public CombatSignalTracker(JavaPlugin plugin) {
+        this.combatSignalScanner = new CombatSignalScanner(plugin);
+    }
 
     private int combatScanIntervalMs(GlobalConfig global) {
         return Math.max(100, intervalMs(global));
