@@ -21,20 +21,14 @@ public final class ReticleSignalTracker {
             long now,
             int hideDelay
     ) {
-        if (!shouldScanReticle(state, global, now)) {
-            return;
-        }
+        if (!shouldScanReticle(state, global, now)) return;
 
         float targetRange = reticleTargetRange(global);
         ReticleScanResult scan = scanReticle(world, tickContext, targetRange);
 
-        if (scan.targetEntity()) {
-            state.t.pulse(HudTrigger.TARGET_ENTITY, now, hideDelay);
-        }
+        if (scan.targetEntity()) state.t.pulse(HudTrigger.TARGET_ENTITY, now, hideDelay);
 
-        if (scan.interactableBlock()) {
-            state.t.pulse(HudTrigger.INTERACTABLE_BLOCK, now, hideDelay);
-        }
+        if (scan.interactableBlock()) state.t.pulse(HudTrigger.INTERACTABLE_BLOCK, now, hideDelay);
 
         markReticleScanExecuted(state, now);
     }
@@ -95,13 +89,10 @@ public final class ReticleSignalTracker {
             boolean interactableBlock
     ) {}
 
-    private static final String GENERIC_INTERACTION_HINT =
-            "server.interactionHints.generic";
+    private static final String GENERIC_INTERACTION_HINT = "server.interactionHints.generic";
 
     private boolean isInteractableBlock(BlockType blockType) {
-        if (blockType == null) {
-            return false;
-        }
+        if (blockType == null) return false;
 
         String interactionHint = blockType.getInteractionHint();
 
