@@ -1,7 +1,10 @@
 package com.tom.immersivehudplugin.commands;
 
+import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
+
+import javax.annotation.Nonnull;
 
 public final class IHudCommands extends AbstractCommandCollection {
 
@@ -17,7 +20,7 @@ public final class IHudCommands extends AbstractCommandCollection {
     }
 
     @Override
-    protected boolean canGeneratePermission() {
-        return false;
+    public boolean hasPermission(@Nonnull CommandSender sender) {
+        return true;
     }
 }

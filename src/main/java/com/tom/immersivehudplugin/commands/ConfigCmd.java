@@ -3,6 +3,7 @@ package com.tom.immersivehudplugin.commands;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.CommandSender;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -17,16 +18,14 @@ public final class ConfigCmd extends AbstractPlayerCommand {
 
     private final HudConfigUiService hudConfigUiService;
 
-    public ConfigCmd(
-            HudConfigUiService hudConfigUiService
-    ){
+    public ConfigCmd(HudConfigUiService hudConfigUiService) {
         super(COMMAND_NAME, "immersivehud.cmd.config");
         this.hudConfigUiService = hudConfigUiService;
     }
 
     @Override
-    protected boolean canGeneratePermission() {
-        return false;
+    public boolean hasPermission(@Nonnull CommandSender sender) {
+        return true;
     }
 
     @Override
