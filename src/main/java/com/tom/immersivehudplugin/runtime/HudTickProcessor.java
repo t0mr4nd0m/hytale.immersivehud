@@ -22,7 +22,6 @@ public final class HudTickProcessor {
     private final HudSignalPipeline hudSignalPipeline;
     private final HudBarStateUpdater barUpdater;
     private final HudTriggerContextFactory triggerContextFactory;
-
     private final HudVisibilityCoordinator hudVisibilityCoordinator;
     private final HeldItemSignalTracker heldItemSignalTracker;
 
@@ -51,9 +50,8 @@ public final class HudTickProcessor {
             PlayerConfig playerConfig
     ) {
         TickEvaluation evaluation = buildTickEvaluation(playerRef, state, playerConfig);
-        if (evaluation == null) {
-            return;
-        }
+
+        if (evaluation == null) return;
 
         hudVisibilityCoordinator.ensureStaticHudBuilt(
                 evaluation.state(),
@@ -62,7 +60,7 @@ public final class HudTickProcessor {
         );
 
         if (shouldEvaluateDynamicHud(evaluation)) {
-            repairHeldItemIfNeeded(evaluation);
+            refreshHeldItemState(evaluation);
             rebuildDynamicHud(evaluation, world, global, now);
         } else {
             clearDynamicHud(evaluation);
@@ -78,9 +76,8 @@ public final class HudTickProcessor {
             PlayerConfig playerConfig
     ) {
         PlayerTickContext tickContext = tickContextFactory.build(playerRef);
-        if (tickContext == null) {
-            return null;
-        }
+
+        if (tickContext == null) return null;
 
         return new TickEvaluation(
                 state,
@@ -94,8 +91,13 @@ public final class HudTickProcessor {
         return isDynamicHudEnabled(evaluation);
     }
 
-    private void repairHeldItemIfNeeded(TickEvaluation evaluation) {
-        heldItemSignalTracker.repairFromInventoryIfNeeded(
+    /**
+     * Always refreshes the held item from the authoritative inventory state.
+     * The 0.6.0 API no longer reliably exposes hotbar changes through the
+     * previous packet-watcher implementation.
+     */
+    private void refreshHeldItemState(TickEvaluation evaluation) {
+        heldItemSignalTracker.refreshFromInventory(
                 evaluation.state(),
                 evaluation.tickContext()
         );
@@ -113,6 +115,12 @@ public final class HudTickProcessor {
     ) {
         PlayerHudState state = evaluation.state();
         PlayerTickContext tickContext = evaluation.tickContext();
+
+        /*
+         * Interaction signals must be updated after refreshing the held item,
+         * because their classification depends on the currently equipped item.
+         */
+        heldItemSignalTracker.updateInteractionSignals(state, tickContext, now);
 
         hudSignalPipeline.update(state, world, tickContext, global, now);
 
@@ -136,6 +144,7 @@ public final class HudTickProcessor {
                     evaluation.tickContext(),
                     state
             );
+
             state.markRuntimeInitialized();
             return;
         }

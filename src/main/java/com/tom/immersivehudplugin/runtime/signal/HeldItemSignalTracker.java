@@ -1,10 +1,12 @@
 package com.tom.immersivehudplugin.runtime.signal;
 
+import com.hypixel.hytale.protocol.InteractionState;
 import com.hypixel.hytale.protocol.InteractionType;
-import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChain;
-import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
+import com.hypixel.hytale.server.core.entity.InteractionChain;
+import com.hypixel.hytale.server.core.entity.InteractionManager;
 import com.hypixel.hytale.server.core.inventory.InventoryComponent;
+import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
@@ -15,101 +17,15 @@ public final class HeldItemSignalTracker {
 
     public HeldItemSignalTracker() {}
 
-    public void applyPacketBatch(
-            PlayerHudState state,
-            SyncInteractionChains updates,
-            long now
-    ) {
-        boolean hasChargingStart = false;
-        boolean hasChargingEnd = false;
-        boolean hasHotbarSwap = false;
-
-        for (SyncInteractionChain update : updates.updates) {
-            if (update.itemInHandId != null && isSecondaryStart(update)) {
-                handleSecondaryInteractionType(state, update.itemInHandId, now);
-            }
-
-            if (isChargingEnd(update)) {
-                hasChargingEnd = true;
-            }
-
-            if (isChargingStart(update) || (!hasChargingEnd && isPrimaryStart(update))) {
-                hasChargingStart = true;
-            }
-
-            if (isSwapStart(update)) {
-                hasHotbarSwap = true;
-            }
-        }
-
-        if (hasChargingEnd) {
-            state.t.clear(HudTrigger.CHARGING_WEAPON);
-        }
-
-        if (hasChargingStart) {
-            state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMs);
-        }
-
-        if (hasHotbarSwap) {
-            state.heldItem.refreshRequested = true;
-            state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMs);
-            state.t.clear(HudTrigger.CHARGING_WEAPON);
-        }
-    }
-
-    private static boolean isPrimaryStart(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.Primary;
-    }
-
-    private static boolean isSecondaryStart(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.Secondary;
-    }
-
-    private static boolean isSwapStart(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.SwapTo
-                || update.interactionType == InteractionType.SwapFrom;
-    }
-
-    private static boolean isChargingStart(SyncInteractionChain update) {
-        Item item = resolveItem(update.itemInHandId);
-        return isPrimaryStart(update) && HeldItemState.isWeapon(item);
-    }
-
-    private static boolean isChargingEnd(SyncInteractionChain update) {
-        return update.interactionType == InteractionType.ProjectileHit
-                || update.interactionType == InteractionType.ProjectileBounce
-                || update.interactionType == InteractionType.ProjectileMiss;
-    }
-
-    @Nullable
-    private Item getHeldItemFromInventory(
-            PlayerTickContext tickContext
-    ) {
-        try {
-            var entityStoreHolder = tickContext.player().toHolder();
-            if (entityStoreHolder == null) { return null; }
-
-            var heldStack = InventoryComponent.getItemInHand(entityStoreHolder);
-            if (heldStack == null) { return null; }
-
-            String itemId = heldStack.getItemId();
-            if (itemId.isBlank()) { return null; }
-
-            return resolveItem(itemId);
-
-        } catch (Throwable ignored) {
-            return null;
-        }
-    }
-
-    public void repairFromInventoryIfNeeded(
+    /**
+     * Refreshes the held-item classification directly from the authoritative
+     * inventory state.
+     * This must run before updateInteractionSignals().
+     */
+    public void refreshFromInventory(
             PlayerHudState state,
             PlayerTickContext tickContext
     ) {
-        if (!state.needsHeldItemRepair()) {
-            return;
-        }
-
         Item heldItem = getHeldItemFromInventory(tickContext);
 
         state.applyHeldItemState(
@@ -119,46 +35,84 @@ public final class HeldItemSignalTracker {
         );
     }
 
+    /**
+     * Reads the active interaction chains from the player's InteractionManager
+     * and updates the corresponding HUD trigger signals.
+     */
+    public void updateInteractionSignals(
+            PlayerHudState state,
+            PlayerTickContext tickContext,
+            long now
+    ) {
+        InteractionManager interactionManager =
+                tickContext.store().getComponent(
+                        tickContext.ref(),
+                        InteractionModule.get().getInteractionManagerComponent()
+                );
+
+        if (interactionManager == null) return;
+
+        boolean chargingWeapon = false;
+        boolean consuming = false;
+        boolean blockingAttack = false;
+
+        for (InteractionChain chain : interactionManager.getChains().values()) {
+            if (chain == null || chain.getServerState() != InteractionState.NotFinished) continue;
+
+            InteractionType type = chain.getType();
+
+            if (type == InteractionType.Primary && state.heldItem.hasAnyWeaponInHand()) chargingWeapon = true;
+
+            if (type == InteractionType.Secondary) {
+                if (state.heldItem.consumableInHand) consuming = true;
+                if (state.heldItem.hasAnyWeaponInHand()) blockingAttack = true;
+            }
+        }
+
+        if (chargingWeapon) state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMs);
+        if (consuming) state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMs);
+        if (blockingAttack) state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMs);
+    }
+
+    /**
+     * Clears weapon-related signals when the corresponding weapon type is no
+     * longer equipped.
+     */
     public void cleanupWeaponSignals(PlayerHudState state) {
         boolean hasMelee = state.heldItem.meleeWeaponInHand;
         boolean hasRanged = state.heldItem.rangedWeaponInHand;
         boolean hasWeapon = state.heldItem.hasAnyWeaponInHand();
 
-        if (!hasMelee) {
-            state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
-        }
-
-        if (!hasRanged) {
-            state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
-        }
-
+        if (!hasMelee) state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
+        if (!hasRanged) state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
         if (!hasWeapon) {
             state.t.clear(HudTrigger.CHARGING_WEAPON);
             state.t.clear(HudTrigger.BLOCKING_ATTACK);
         }
     }
 
-    private void handleSecondaryInteractionType(
-            PlayerHudState state,
-            String itemInHandId,
-            long now
-    ) {
-        Item item = resolveItem(itemInHandId);
+    @Nullable
+    private Item getHeldItemFromInventory(PlayerTickContext tickContext) {
+        try {
+            var entityStoreHolder = tickContext.player().toHolder();
+            if (entityStoreHolder == null) return null;
 
-        if (HeldItemState.isConsumable(item)) {
-            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMs);
-        }
+            var heldStack = InventoryComponent.getItemInHand(entityStoreHolder);
+            if (heldStack == null) return null;
 
-        if (HeldItemState.isWeapon(item)) {
-            state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMs);
+            String itemId = heldStack.getItemId();
+            if (itemId == null || itemId.isBlank()) return null;
+
+            return resolveItem(itemId);
+
+        } catch (Throwable ignored) {
+            return null;
         }
     }
 
     @Nullable
     private static Item resolveItem(@Nullable String itemId) {
-        if (itemId == null || itemId.isBlank()) {
-            return null;
-        }
+        if (itemId == null || itemId.isBlank()) return null;
         return Item.getAssetMap().getAsset(itemId);
     }
 }

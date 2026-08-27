@@ -1,9 +1,6 @@
 package com.tom.immersivehudplugin.runtime;
 
-import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.server.core.HytaleServer;
-import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
-import com.hypixel.hytale.server.core.io.adapter.PlayerPacketWatcher;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -36,13 +33,11 @@ public final class HudRuntimeService {
     private final PlayerConfigService playerConfigService;
     private final Supplier<GlobalConfig> globalConfigSupplier;
 
-    private final HeldItemSignalTracker heldItemSignalTracker;
     private final HudTickProcessor hudTickProcessor;
 
     private final Map<UUID, PlayerHudState> playerState = new ConcurrentHashMap<>();
 
     private volatile boolean running;
-    private volatile boolean inboundRegistered;
     private volatile ScheduledFuture<?> tickTask;
     private volatile int runningIntervalMs = -1;
 
@@ -60,7 +55,7 @@ public final class HudRuntimeService {
         this.playerConfigService = playerConfigService;
         this.globalConfigSupplier = globalConfigSupplier;
 
-        this.heldItemSignalTracker = new HeldItemSignalTracker();
+        HeldItemSignalTracker heldItemSignalTracker = new HeldItemSignalTracker();
         MovementSignalTracker movementSignalTracker = new MovementSignalTracker();
         ReticleSignalTracker reticleSignalTracker = new ReticleSignalTracker();
         CombatSignalTracker combatSignalTracker = new CombatSignalTracker(plugin);
@@ -90,7 +85,6 @@ public final class HudRuntimeService {
 
     public void start() {
         running = true;
-        registerInboundWatcher();
         restartTickTaskIfNeeded();
     }
 
@@ -123,8 +117,8 @@ public final class HudRuntimeService {
         tickTask = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
             try {
                 tickReadyPlayers();
-            } catch (Throwable t) {
-                plugin.getLogger().at(Level.WARNING).withCause(t).log("ImmersiveHud tick crashed");
+            } catch (Throwable throwable) {
+                plugin.getLogger().at(Level.WARNING).withCause(throwable).log("ImmersiveHud tick crashed");
             }
         }, 0, wantedInterval, TimeUnit.MILLISECONDS);
     }
@@ -158,29 +152,6 @@ public final class HudRuntimeService {
 
         state.markStaticHudDirty();
         state.invalidateDynamicHudEnabledCache();
-    }
-
-    private void registerInboundWatcher() {
-        if (inboundRegistered) return;
-        inboundRegistered = true;
-
-        PacketAdapters.registerInbound((PlayerPacketWatcher) (playerRef, packet) -> {
-            if (!running) return;
-
-            if (playerRef == null || !playerRef.isValid()) return;
-
-            if (!(packet instanceof SyncInteractionChains updates)) return;
-
-            PlayerHudState state = playerState.get(playerRef.getUuid());
-
-            if (state == null) return;
-
-            long now = nowMs();
-
-            heldItemSignalTracker.applyPacketBatch(state, updates, now);
-
-            heldItemSignalTracker.cleanupWeaponSignals(state);
-        });
     }
 
     private void tickReadyPlayers() {
