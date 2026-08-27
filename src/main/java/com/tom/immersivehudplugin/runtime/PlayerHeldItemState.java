@@ -22,6 +22,8 @@ public final class PlayerHeldItemState {
         rangedWeaponInHand = false;
         meleeWeaponInHand = false;
         consumableInHand = false;
+        activeHotbarSlot = Integer.MIN_VALUE;
+        hotbarSlotInitialized = false;
     }
 
     public boolean hasAnyWeaponInHand() {
