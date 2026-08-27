@@ -3,12 +3,14 @@
 ## v1.2.7
 
 **Technical Changes**
-* Update to Hytale 0.6.0
-* Fix: adapt combat signal scanner to new NPC support components included with latest Hytale update
-* Fix: update interactable block detection for latest Hytale API
+* Update to Hytale API 0.6.0
+* Adapted the combat signal scanner to new NPC support components
+* Updated interactable block detection for Hytale API 0.6.0
+* Migrated held-item and interaction detection to authoritative ECS state
+* Restored `HOTBAR_INPUT` detection
 
 **Features**
-* Added support for new static hud component, included with latest Hytale update: Abilities
+* Added support for the new `Abilities` static HUD component
 
 ## v1.2.61
 
