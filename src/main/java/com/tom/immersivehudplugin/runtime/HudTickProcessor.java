@@ -60,7 +60,7 @@ public final class HudTickProcessor {
         );
 
         if (shouldEvaluateDynamicHud(evaluation)) {
-            refreshHeldItemState(evaluation);
+            refreshHeldItemState(evaluation, now);
             rebuildDynamicHud(evaluation, world, global, now);
         } else {
             clearDynamicHud(evaluation);
@@ -96,11 +96,8 @@ public final class HudTickProcessor {
      * The 0.6.0 API no longer reliably exposes hotbar changes through the
      * previous packet-watcher implementation.
      */
-    private void refreshHeldItemState(TickEvaluation evaluation) {
-        heldItemSignalTracker.refreshFromInventory(
-                evaluation.state(),
-                evaluation.tickContext()
-        );
+    private void refreshHeldItemState(TickEvaluation evaluation, long now) {
+        heldItemSignalTracker.refreshFromInventory(evaluation.state(), evaluation.tickContext(), now);
     }
 
     private void clearDynamicHud(TickEvaluation evaluation) {
@@ -140,19 +137,12 @@ public final class HudTickProcessor {
         PlayerHudState state = evaluation.state();
 
         if (!state.isRuntimeInitialized()) {
-            hudVisibilityCoordinator.applyInitialHudSnapshot(
-                    evaluation.tickContext(),
-                    state
-            );
-
+            hudVisibilityCoordinator.applyInitialHudSnapshot(evaluation.tickContext(), state);
             state.markRuntimeInitialized();
             return;
         }
 
-        hudVisibilityCoordinator.applyHudDelta(
-                evaluation.tickContext(),
-                state
-        );
+        hudVisibilityCoordinator.applyHudDelta(evaluation.tickContext(), state);
     }
 
     private boolean isDynamicHudEnabled(TickEvaluation evaluation) {

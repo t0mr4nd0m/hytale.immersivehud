@@ -167,10 +167,6 @@ public final class PlayerHudState {
             boolean changed
     ) {}
 
-    public boolean needsHeldItemRepair() {
-        return heldItem.needsRepair();
-    }
-
     public boolean isRuntimeInitialized() {
         return runtimeInitialized;
     }

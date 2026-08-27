@@ -5,8 +5,8 @@ public final class PlayerHeldItemState {
     public volatile boolean rangedWeaponInHand;
     public volatile boolean meleeWeaponInHand;
     public volatile boolean consumableInHand;
-    public volatile boolean initialized;
-    public volatile boolean refreshRequested = true;
+    private int activeHotbarSlot = Integer.MIN_VALUE;
+    private boolean hotbarSlotInitialized;
 
     public void apply(
             boolean rangedWeapon,
@@ -16,23 +16,30 @@ public final class PlayerHeldItemState {
         this.rangedWeaponInHand = rangedWeapon;
         this.meleeWeaponInHand = meleeWeapon;
         this.consumableInHand = consumableItem;
-        this.initialized = true;
-        this.refreshRequested = false;
     }
 
     public void reset() {
         rangedWeaponInHand = false;
         meleeWeaponInHand = false;
         consumableInHand = false;
-        initialized = false;
-        refreshRequested = true;
-    }
-
-    public boolean needsRepair() {
-        return !initialized || refreshRequested;
     }
 
     public boolean hasAnyWeaponInHand() {
         return rangedWeaponInHand || meleeWeaponInHand;
+    }
+
+    public boolean updateActiveHotbarSlot(int activeHotbarSlot) {
+        if (!hotbarSlotInitialized) {
+            this.activeHotbarSlot = activeHotbarSlot;
+            this.hotbarSlotInitialized = true;
+            return false;
+        }
+
+        if (this.activeHotbarSlot == activeHotbarSlot) {
+            return false;
+        }
+
+        this.activeHotbarSlot = activeHotbarSlot;
+        return true;
     }
 }

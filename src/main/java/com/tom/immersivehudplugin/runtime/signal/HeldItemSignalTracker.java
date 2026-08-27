@@ -24,8 +24,11 @@ public final class HeldItemSignalTracker {
      */
     public void refreshFromInventory(
             PlayerHudState state,
-            PlayerTickContext tickContext
+            PlayerTickContext tickContext,
+            long now
     ) {
+        refreshHotbarSlot(state, tickContext, now);
+
         Item heldItem = getHeldItemFromInventory(tickContext);
 
         state.applyHeldItemState(
@@ -33,6 +36,29 @@ public final class HeldItemSignalTracker {
                 HeldItemState.isMeleeWeapon(heldItem),
                 HeldItemState.isConsumable(heldItem)
         );
+    }
+
+    private void refreshHotbarSlot(
+            PlayerHudState state,
+            PlayerTickContext tickContext,
+            long now
+    ) {
+        InventoryComponent.Hotbar hotbar =
+                tickContext.store().getComponent(
+                        tickContext.ref(),
+                        InventoryComponent.Hotbar.getComponentType()
+                );
+
+        if (hotbar == null) return;
+
+        int activeSlot = hotbar.getActiveSlot();
+
+        boolean changed = state.heldItem.updateActiveHotbarSlot(activeSlot);
+        if (!changed) return;
+
+        state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMs);
+        state.t.clear(HudTrigger.CHARGING_WEAPON);
+        state.t.clear(HudTrigger.BLOCKING_ATTACK);
     }
 
     /**
