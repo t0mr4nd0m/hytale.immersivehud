@@ -209,7 +209,7 @@ public final class CombatSignalScanner {
             double maxDistance = Math.max(0d, distance - losTargetEpsilon(global));
 
             Vector3i blockingBlock = TargetUtil.getTargetBlock(
-                world,
+                world.getChunkStore(),
                 (blockId, _) -> blockId != 0,
                 originX,
                 originY,
