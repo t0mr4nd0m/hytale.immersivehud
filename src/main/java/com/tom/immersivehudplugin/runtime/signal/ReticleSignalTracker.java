@@ -11,6 +11,13 @@ import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
+import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
+import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore;
+
+import org.joml.Vector3ic;
+
+import javax.annotation.Nullable;
+
 public final class ReticleSignalTracker {
 
     public void updateReticleSignalsIfNeeded(
@@ -77,7 +84,7 @@ public final class ReticleSignalTracker {
         );
 
         if (blockPos != null) {
-            BlockType blockType = world.getBlockType(blockPos);
+            BlockType blockType = getBlockType(world, blockPos);
             lookingAtInteractable = isInteractableBlock(blockType);
         }
 
@@ -106,5 +113,38 @@ public final class ReticleSignalTracker {
                 || interactions.containsKey(InteractionType.Pick));
 
         return hasContextualHint || hasExplicitInteraction;
+    }
+
+    @Nullable
+    private BlockType getBlockType(World world, Vector3ic blockPos) {
+        ChunkStore chunkStore = world.getChunkStore();
+
+        Ref<ChunkStore> sectionRef =
+                chunkStore.getChunkSectionReferenceAtBlock(
+                        blockPos.x(),
+                        blockPos.y(),
+                        blockPos.z()
+                );
+
+        if (sectionRef == null || !sectionRef.isValid()) {
+            return null;
+        }
+
+        BlockSection blockSection = chunkStore.getStore().getComponent(
+                sectionRef,
+                BlockSection.getComponentType()
+        );
+
+        if (blockSection == null) {
+            return null;
+        }
+
+        int blockId = blockSection.get(
+                blockPos.x(),
+                blockPos.y(),
+                blockPos.z()
+        );
+
+        return BlockType.getAssetMap().getAsset(blockId);
     }
 }
