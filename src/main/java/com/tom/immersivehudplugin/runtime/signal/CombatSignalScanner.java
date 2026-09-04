@@ -224,7 +224,7 @@ public final class CombatSignalScanner {
 
         } catch (RuntimeException ex) {
 
-            logFailure(Level.FINE, "checking line of sight to NPC", ex);
+            logFailure("checking line of sight to NPC", ex);
             return false;
         }
     }
@@ -246,7 +246,7 @@ public final class CombatSignalScanner {
 
         } catch (RuntimeException | AssertionError ex) {
 
-            logFailure(Level.FINE, "resolving NPC locked target", ex);
+            logFailure("resolving NPC locked target", ex);
             return false;
         }
     }
@@ -264,7 +264,7 @@ public final class CombatSignalScanner {
 
         } catch (RuntimeException ex) {
 
-            logFailure(Level.FINE, "resolving NPC desired target", ex);
+            logFailure("resolving NPC desired target", ex);
             return false;
         }
     }
@@ -282,7 +282,7 @@ public final class CombatSignalScanner {
 
         } catch (RuntimeException ex) {
 
-            logFailure(Level.FINE, "checking whether NPC is executing an attack", ex);
+            logFailure("checking whether NPC is executing an attack", ex);
             return false;
         }
     }
@@ -302,7 +302,7 @@ public final class CombatSignalScanner {
 
         } catch (RuntimeException ex) {
 
-            logFailure(Level.FINE, "reading NPC combat data", ex);
+            logFailure("reading NPC combat data", ex);
             return false;
         }
     }
@@ -321,7 +321,7 @@ public final class CombatSignalScanner {
 
         } catch (RuntimeException ex) {
 
-            logFailure(Level.FINE, "checking if NPC attitude is hostile against player", ex);
+            logFailure("checking if NPC attitude is hostile against player", ex);
             return false;
         }
     }
@@ -362,12 +362,11 @@ public final class CombatSignalScanner {
     }
 
     private void logFailure(
-            Level level,
             String operation,
             Throwable throwable
     ) {
         plugin.getLogger()
-                .at(level)
+                .at(Level.WARNING)
                 .withCause(throwable)
                 .log("Combat signal scan failed: " + operation);
     }
