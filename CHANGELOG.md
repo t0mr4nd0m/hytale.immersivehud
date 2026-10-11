@@ -3,7 +3,7 @@
 ## v1.2.8
 
 **Technical Changes**
-* Update to Hytale API 0.7.0-pre.5
+* Update to Hytale API 0.7.0-pre.5.1
 * Migrated reticle block lookup to ChunkStore API
 * Migrate combat line-of-sight raycast to ChunkStore API
 * Removed redundant log level parameter from combat scanner
