@@ -104,7 +104,7 @@ HUD components supported by ImmersiveHUD
 | <span style="color:orange">stamina</span> 📊     | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL`                                                                              | 100               |
 | <span style="color:orange">mana</span> 📊        | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL`                                                                                 | 100               |
 | <span style="color:orange">oxygen</span> 📊      | Bars    | Dynamic  | Hidden        | `OXYGEN_NOT_FULL`                                                                               | 100               |
-| <span style="color:orange">statusicons</span> ⚠️ | UI      | Dynamic  | Visible       | `HOTBAR_INPUT`                                                                                  | —                 |
+| <span style="color:orange">statusicons</span> ⚠️| UI      | Dynamic  | Visible       | `HOTBAR_INPUT`                                                                                  | —                 |
 | <span style="color:orange">ammo</span>           | UI      | Dynamic  | Visible       | `HOLDING_RANGED_WEAPON`                                                                         | —                 |
 | inputbindings                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
 | abilities ✨                                     | UI      | Static   | Hidden        | —                                                                                               | —                 |
@@ -135,36 +135,37 @@ HUD components supported by ImmersiveHUD
 
 Rules to define the visibility behaviour of dynamic HUD components
 
-| Rule                    | Trigger condition                                |
-|-------------------------|--------------------------------------------------|
-| `HOTBAR_INPUT`          | Player changes hotbar selection                  |
-| `CONSUMABLE_USE`        | Player is consuming food or potion               |
-| `TARGET_ENTITY`         | Player is targeting an entity                    |
-| `INTERACTABLE_BLOCK`    | Player is looking at interactable blocks         |
-| `PLAYER_MOVING`         | Player is moving                                 |
-| `PLAYER_WALKING`        | Player is walking                                |
-| `PLAYER_RUNNING`        | Player is running                                |
-| `PLAYER_SPRINTING`      | Player is sprinting                              |
-| `PLAYER_MOUNTING`       | Player is mounting                               |
-| `PLAYER_FLYING`         | Player is flying                                 |
-| `PLAYER_GLIDING`        | Player is gliding                                |
-| `PLAYER_JUMPING`        | Player is jumping                                |
-| `PLAYER_CROUCHING`      | Player is crouching                              |
-| `PLAYER_CLIMBING`       | Player is climbing                               |
-| `PLAYER_IN_FLUID`       | Player is in fluid                               |
-| `PLAYER_ON_GROUND`      | Player is on ground                              |
-| `PLAYER_FALLING`        | Player is falling                                |
-| `PLAYER_SITTING`        | Player is sitting                                |
-| `PLAYER_ROLLING`        | Player is rolling                                |
-| `CHARGING_WEAPON`       | Player is aiming or charging a weapon            |
-| `HOLDING_MELEE_WEAPON`  | Player is holding a melee weapon                 |
-| `HOLDING_RANGED_WEAPON` | Player is holding a ranged weapon                |
-| `BLOCKING_ATTACK`       | Player is using a weapon to block an attack      |
-| `IN_COMBAT`             | Player is engaged in combat with an hostile mob  |
-| `HEALTH_NOT_FULL`       | Health bar is not full                           |
-| `STAMINA_NOT_FULL`      | Stamina bar is not full                          |
-| `MANA_NOT_FULL`         | Mana bar is not full                             |
-| `OXYGEN_NOT_FULL`       | Oxygen bar is not full                           |
+| Rule                     | Trigger condition                                 |
+|--------------------------|---------------------------------------------------|
+| `HOTBAR_INPUT`           | Player changes hotbar selection                   |
+| `CONSUMABLE_USE`         | Player is consuming food or potion                |
+| `TARGET_ENTITY`          | Player is targeting an entity                     |
+| `INTERACTABLE_BLOCK`     | Player is looking at interactable blocks          |
+| `HOLDING_BUILDING_BLOCK` | Player is holding a placeable block or decoration |
+| `PLAYER_MOVING`          | Player is moving                                  |
+| `PLAYER_WALKING`         | Player is walking                                 |
+| `PLAYER_RUNNING`         | Player is running                                 |
+| `PLAYER_SPRINTING`       | Player is sprinting                               |
+| `PLAYER_MOUNTING`        | Player is mounting                                |
+| `PLAYER_FLYING`          | Player is flying                                  |
+| `PLAYER_GLIDING`         | Player is gliding                                 |
+| `PLAYER_JUMPING`         | Player is jumping                                 |
+| `PLAYER_CROUCHING`       | Player is crouching                               |
+| `PLAYER_CLIMBING`        | Player is climbing                                |
+| `PLAYER_IN_FLUID`        | Player is in fluid                                |
+| `PLAYER_ON_GROUND`       | Player is on ground                               |
+| `PLAYER_FALLING`         | Player is falling                                 |
+| `PLAYER_SITTING`         | Player is sitting                                 |
+| `PLAYER_ROLLING`         | Player is rolling                                 |
+| `CHARGING_WEAPON`        | Player is aiming or charging a weapon             |
+| `HOLDING_MELEE_WEAPON`   | Player is holding a melee weapon                  |
+| `HOLDING_RANGED_WEAPON`  | Player is holding a ranged weapon                 |
+| `BLOCKING_ATTACK`        | Player is using a weapon to block an attack       |
+| `IN_COMBAT`              | Player is engaged in combat with an hostile mob   |
+| `HEALTH_NOT_FULL`        | Health bar is not full                            |
+| `STAMINA_NOT_FULL`       | Stamina bar is not full                           |
+| `MANA_NOT_FULL`          | Mana bar is not full                              |
+| `OXYGEN_NOT_FULL`        | Oxygen bar is not full                            |
 
 ---
 

@@ -43,6 +43,11 @@ public final class HeldItemState {
         return item != null && item.isConsumable();
     }
 
+    public static boolean isBuildingBlock(Item item) {
+        // Placeable decorations also have a block type, regardless of their tags.
+        return item != null && item.hasBlockType();
+    }
+
     public static String getItemType(Item item) {
         if (item == null || item.getData() == null) { return ""; }
 

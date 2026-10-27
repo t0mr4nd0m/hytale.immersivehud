@@ -34,7 +34,8 @@ public final class HeldItemSignalTracker {
         state.applyHeldItemState(
                 HeldItemState.isRangedWeapon(heldItem),
                 HeldItemState.isMeleeWeapon(heldItem),
-                HeldItemState.isConsumable(heldItem)
+                HeldItemState.isConsumable(heldItem),
+                HeldItemState.isBuildingBlock(heldItem)
         );
     }
 

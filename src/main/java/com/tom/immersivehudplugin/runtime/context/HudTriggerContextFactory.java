@@ -19,6 +19,10 @@ public final class HudTriggerContextFactory {
 
         addWeaponSignals(activeSignals, state, now);
 
+        if (state.heldItem.buildingBlockInHand) {
+            activeSignals.add(HudTrigger.HOLDING_BUILDING_BLOCK);
+        }
+
         return new HudTriggerContext(
                 activeSignals,
                 state.healthBar,

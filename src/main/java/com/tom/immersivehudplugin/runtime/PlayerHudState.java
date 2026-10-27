@@ -86,9 +86,10 @@ public final class PlayerHudState {
     public void applyHeldItemState(
             boolean rangedWeapon,
             boolean meleeWeapon,
-            boolean consumableItem
+            boolean consumableItem,
+            boolean buildingBlock
     ) {
-        heldItem.apply(rangedWeapon, meleeWeapon, consumableItem);
+        heldItem.apply(rangedWeapon, meleeWeapon, consumableItem, buildingBlock);
     }
 
     public void clearStaticHidden() {
