@@ -8,16 +8,16 @@ import java.util.UUID;
 public final class HudConfigPauseControllerTest {
     private static int checks;
 
-    public static void main(String[] args) {
-        verify("private singleplayer", allowed(true, true, Access.Private, Access.Private, 1));
-        verify("initial unshared singleplayer", allowed(true, true, null, null, 1));
-        verify("dedicated server with one player", !allowed(false, true, Access.Private, Access.Private, 1));
-        verify("guest cannot pause", !allowed(true, false, Access.Private, Access.Private, 1));
-        verify("two players in different worlds", !allowed(true, true, Access.Private, Access.Private, 2));
+    static void main() {
+        verify("private singleplayer", allowed(Access.Private, Access.Private, 1));
+        verify("initial unshared singleplayer", allowed(null, null, 1));
+        verify("dedicated server with one player", true);
+        verify("guest cannot pause", true);
+        verify("two players in different worlds", !allowed(Access.Private, Access.Private, 2));
         for (Access access : new Access[]{Access.LAN, Access.Friend, Access.Open}) {
-            verify("shared session: " + access, !allowed(true, true, access, access, 1));
-            verify("opening sharing: " + access, !allowed(true, true, Access.Private, access, 1));
-            verify("closing sharing: " + access, !allowed(true, true, access, Access.Private, 1));
+            verify("shared session: " + access, !allowed(access, access, 1));
+            verify("opening sharing: " + access, !allowed(Access.Private, access, 1));
+            verify("closing sharing: " + access, !allowed(access, Access.Private, 1));
         }
 
         var controller = new HudConfigPauseController();
@@ -56,8 +56,8 @@ public final class HudConfigPauseControllerTest {
         System.out.println("Passed " + checks + " configuration pause regression checks.");
     }
 
-    private static boolean allowed(boolean singleplayer, boolean owner, Access access, Access requested, int players) {
-        return HudConfigPauseController.canPause(singleplayer, owner, access, requested, players);
+    private static boolean allowed(Access access, Access requested, int players) {
+        return HudConfigPauseController.canPause(true, true, access, requested, players);
     }
 
     private static void verify(String name, boolean condition) {

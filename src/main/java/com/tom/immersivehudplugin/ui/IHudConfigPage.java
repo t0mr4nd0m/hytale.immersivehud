@@ -139,7 +139,7 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
                     return;
                 }
 
-                float threshold = Math.max(0f, Math.min(100f, data.getDynamicThreshold()));
+                float threshold = Math.clamp(data.getDynamicThreshold(), 0f, 100f);
                 session.setDynamicThreshold(entry, threshold);
 
                 sendUpdate(new UICommandBuilder(), new UIEventBuilder(), false);

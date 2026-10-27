@@ -44,7 +44,7 @@ public final class HudConfigUiService {
     public void start(@Nonnull JavaPlugin plugin) {
         plugin.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
                 event -> discard(event.getPlayerRef()));
-        plugin.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
+        plugin.getEventRegistry().registerGlobal(PlayerReadyEvent.class, _ -> {
             if (Universe.get().getPlayerCount() > 1) pauseController.releaseAll();
         });
         plugin.getEventRegistry().register(SingleplayerRequestAccessEvent.class, event -> {
