@@ -2,6 +2,13 @@ package com.tom.immersivehudplugin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
+import com.hypixel.hytale.assetstore.event.RemovedAssetsEvent;
+import com.hypixel.hytale.assetstore.AssetMap;
+import com.hypixel.hytale.assetstore.map.JsonAssetWithMap;
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
@@ -12,6 +19,7 @@ import com.tom.immersivehudplugin.config.GlobalConfigStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.config.PlayerConfigStore;
 import com.tom.immersivehudplugin.runtime.HudRuntimeService;
+import com.tom.immersivehudplugin.runtime.signal.HeldItemState;
 import com.tom.immersivehudplugin.runtime.PlayerSessionService;
 import com.tom.immersivehudplugin.runtime.visibility.HudDeltaApplier;
 import com.tom.immersivehudplugin.runtime.visibility.HudRuleEvaluator;
@@ -37,6 +45,17 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     @Override
     protected void setup() {
         setupConfigServices();
+        registerWeaponAssetListeners(Item.class);
+        registerWeaponAssetListeners(Interaction.class);
+        registerWeaponAssetListeners(RootInteraction.class);
+    }
+
+    private <K, T extends JsonAssetWithMap<K, M>, M extends AssetMap<K, T>>
+    void registerWeaponAssetListeners(Class<T> assetType) {
+        getEventRegistry().register(LoadedAssetsEvent.class, assetType,
+                (LoadedAssetsEvent<K, T, M> _) -> HeldItemState.invalidateWeaponCache());
+        getEventRegistry().register(RemovedAssetsEvent.class, assetType,
+                (RemovedAssetsEvent<K, T, M> _) -> HeldItemState.invalidateWeaponCache());
     }
 
     @Override
@@ -47,6 +66,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     @Override
     public void shutdown() {
         shutdownRuntimeServices();
+        HeldItemState.invalidateWeaponCache();
     }
 
     private void setupConfigServices() {

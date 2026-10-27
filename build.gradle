@@ -53,9 +53,27 @@ javadoc {
 dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     compileOnly("com.hypixel.hytale:Server:$hytale_build")
+    testImplementation("com.hypixel.hytale:Server:$hytale_build")
 
     // DO NOT add the local HytaleServer.jar as a runtime dependency.
     // ShadowJar will include it and your plugin jar becomes massive.
+}
+
+// Standalone regression checks using the same interaction walker as the server.
+tasks.register('verifyWeaponClassification', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.runtime.signal.WeaponBehaviorClassifierTest'
+    workingDir = layout.buildDirectory.get().asFile
+}
+
+tasks.named('check') {
+    dependsOn 'verifyWeaponClassification'
+}
+
+tasks.named('test') {
+    // The regression suite above is a standalone runner, rather than JUnit tests.
+    failOnNoDiscoveredTests = false
 }
 
 repositories {

@@ -2,37 +2,20 @@ package com.tom.immersivehudplugin.runtime.signal;
 
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 
-import java.util.Set;
-
-import static com.hypixel.hytale.protocol.InteractionType.Secondary;
-
 public final class HeldItemState {
-
-    private static final Set<String> RANGED_WEAPONS = Set.of(
-            "Bow", "Crossbow", "Staff", "Arrow", "Wand", "Spear", "Bomb", "Gun", "Rifle"
-    );
-    private static final Set<String> MELEE_WEAPONS = Set.of(
-            "Dagger", "Sword", "Axe", "Hammer", "Mace", "Spear", "Club", "Stick"
-    );
 
     private HeldItemState() {}
 
     public static boolean isRangedWeapon(Item item) {
-        if (item == null) return false;
-
-        // TODO: Classify ranged weapons by their attack behavior instead of hard-coded families.
-        boolean rangedFamily = isWeapon(item)
-                && checkItemFamily(item, RANGED_WEAPONS);
-
-        boolean gunAttack = item.getInteractions() != null
-                && "Gun_Attack".equals(item.getInteractions().get(Secondary));
-
-        return rangedFamily || gunAttack;
+        return WeaponBehaviorClassifier.classify(item).ranged();
     }
 
     public static boolean isMeleeWeapon(Item item) {
-        // TODO: Classify melee weapons by their attack behavior instead of hard-coded families.
-        return isWeapon(item) && checkItemFamily(item, MELEE_WEAPONS);
+        return WeaponBehaviorClassifier.classify(item).melee();
+    }
+
+    public static void invalidateWeaponCache() {
+        WeaponBehaviorClassifier.clearCache();
     }
 
     public static boolean isWeapon(Item item) {
@@ -44,7 +27,6 @@ public final class HeldItemState {
     }
 
     public static boolean isBuildingBlock(Item item) {
-        // Placeable decorations also have a block type, regardless of their tags.
         return item != null && item.hasBlockType();
     }
 
@@ -58,21 +40,4 @@ public final class HeldItemState {
         return type[0].trim();
     }
 
-    public static boolean checkItemFamily(Item item, Set<String> familiesList) {
-
-        if (item == null || item.getData() == null || familiesList == null) { return false; }
-
-        String[] families = item.getData().getRawTags().get("Family");
-        if (families == null) { return false; }
-
-        for (String family : families) {
-
-            if (family == null) { continue; }
-
-            String s = family.trim();
-            if (familiesList.stream().anyMatch(s::equalsIgnoreCase)) { return true; }
-
-        }
-        return false;
-    }
 }
