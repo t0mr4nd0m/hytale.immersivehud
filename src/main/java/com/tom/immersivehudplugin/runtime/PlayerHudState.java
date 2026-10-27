@@ -2,6 +2,8 @@ package com.tom.immersivehudplugin.runtime;
 
 import com.hypixel.hytale.protocol.packets.interface_.HudComponent;
 import com.tom.immersivehudplugin.config.GlobalConfig;
+import com.tom.immersivehudplugin.config.DynamicHudConfig;
+import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudBarState;
 
 import java.util.EnumSet;
@@ -67,20 +69,21 @@ public final class PlayerHudState {
         staticDirty = true;
     }
 
-    public void invalidateDynamicHudEnabledCache() {
+    public void invalidateDetectionPlan() {
         dynamicHudCache.invalidate();
     }
 
-    public void cacheDynamicHudEnabled(boolean enabled) {
-        dynamicHudCache.cache(enabled);
-    }
-
-    public boolean hasDynamicHudEnabledCache() {
-        return dynamicHudCache.isKnown();
-    }
-
-    public boolean isDynamicHudEnabledCached() {
-        return dynamicHudCache.isEnabled();
+    public HudDetectionPlan detectionPlan(HudComponentsConfig hud, DynamicHudConfig dynamic) {
+        HudDetectionPlan plan = dynamicHudCache.get();
+        if (plan == null) {
+            // Re-enabled detectors must not reuse signals from the previous configuration.
+            resetTimersAndScans();
+            heldItem.reset();
+            resetBars();
+            plan = HudDetectionPlan.build(hud, dynamic);
+            dynamicHudCache.cache(plan);
+        }
+        return plan;
     }
 
     public void applyHeldItemState(

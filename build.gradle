@@ -8,29 +8,29 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.internal.os.OperatingSystem
 
-ext {
-    if (project.hasProperty('hytale_home')) {
-        hytaleHome = project.findProperty('hytale_home')
-    } else if (System.getenv('HYTALE_HOME')) {
-        hytaleHome = System.getenv('HYTALE_HOME')
-    } else {
-        def os = OperatingSystem.current()
-        if (os.isWindows()) {
-            hytaleHome = "${System.getProperty("user.home")}/AppData/Roaming/Hytale"
-        }
-        else if (os.isMacOsX()) {
-            hytaleHome = "${System.getProperty("user.home")}/Library/Application Support/Hytale"
-        }
-        else if (os.isLinux()) {
-            hytaleHome = "${System.getProperty("user.home")}/.var/app/com.hypixel.HytaleLauncher/data/Hytale"
-            if (!file(hytaleHome).exists()) {
-                hytaleHome = "${System.getProperty("user.home")}/.local/share/Hytale"
-            }
+String hytaleHomePath = null
+if (project.hasProperty('hytale_home')) {
+    hytaleHomePath = project.findProperty('hytale_home')?.toString()
+} else if (System.getenv('HYTALE_HOME')) {
+    hytaleHomePath = System.getenv('HYTALE_HOME')
+} else {
+    def os = OperatingSystem.current()
+    String userHomePath = System.getProperty('user.home')
+    if (os.isWindows()) {
+        hytaleHomePath = new File(userHomePath, 'AppData/Roaming/Hytale').path
+    } else if (os.isMacOsX()) {
+        hytaleHomePath = new File(userHomePath, 'Library/Application Support/Hytale').path
+    } else if (os.isLinux()) {
+        hytaleHomePath = new File(userHomePath, '.var/app/com.hypixel.HytaleLauncher/data/Hytale').path
+        if (!file(hytaleHomePath).exists()) {
+            hytaleHomePath = new File(userHomePath, '.local/share/Hytale').path
         }
     }
 }
 
-def hytaleHomePath = ext.has('hytaleHome') ? hytaleHome : null
+if (hytaleHomePath != null) {
+    ext.set('hytaleHome', hytaleHomePath)
+}
 def hasHytaleHome = (hytaleHomePath != null) && file(hytaleHomePath).exists()
 if (!hasHytaleHome) {
     logger.lifecycle("Hytale install not detected; run configs that launch the server will be skipped. Set -Phytale_home=/path/to/Hytale to enable them.")
@@ -70,6 +70,14 @@ tasks.register('verifyWeaponClassification', JavaExec) {
 tasks.named('check') {
     dependsOn 'verifyWeaponClassification'
     dependsOn 'verifyConfigPause'
+    dependsOn 'verifyDetectorSelection'
+}
+
+tasks.register('verifyDetectorSelection', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.runtime.HudDetectionPlanTest'
+    workingDir = layout.buildDirectory.get().asFile
 }
 
 tasks.register('verifyConfigPause', JavaExec) {

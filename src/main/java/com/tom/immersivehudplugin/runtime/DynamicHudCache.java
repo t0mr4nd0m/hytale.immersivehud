@@ -1,29 +1,25 @@
 package com.tom.immersivehudplugin.runtime;
 
+import javax.annotation.Nullable;
+
 public final class DynamicHudCache {
 
-    private volatile boolean known;
-    private volatile boolean enabled;
+    private volatile HudDetectionPlan plan;
 
     public void invalidate() {
-        known = false;
+        plan = null;
     }
 
-    public void cache(boolean enabled) {
-        this.enabled = enabled;
-        this.known = true;
+    public void cache(HudDetectionPlan plan) {
+        this.plan = plan;
     }
 
-    public boolean isKnown() {
-        return known;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
+    @Nullable
+    public HudDetectionPlan get() {
+        return plan;
     }
 
     public void reset() {
-        known = false;
-        enabled = false;
+        invalidate();
     }
 }

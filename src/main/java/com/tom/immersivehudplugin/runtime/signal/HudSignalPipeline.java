@@ -3,6 +3,8 @@ package com.tom.immersivehudplugin.runtime.signal;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.HudDetectionPlan;
+import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 public final class HudSignalPipeline {
@@ -29,7 +31,8 @@ public final class HudSignalPipeline {
             World world,
             PlayerTickContext tickContext,
             GlobalConfig global,
-            long now
+            long now,
+            HudDetectionPlan plan
     ) {
         int hideDelay = global != null
                 ? global.getHideDelayMs()
@@ -37,9 +40,15 @@ public final class HudSignalPipeline {
 
         state.hideDelayMs = hideDelay;
 
-        movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
-        reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay);
-        heldItemSignalTracker.cleanupWeaponSignals(state);
-        combatSignalTracker.updateCombatSignalIfNeeded(state, tickContext, global, now, hideDelay);
+        if (plan.movement()) {
+            movementSignalTracker.updateMovementSignals(state, tickContext, now, hideDelay);
+        }
+        if (plan.reticle()) {
+            reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay, plan);
+        }
+        if (plan.weapons()) heldItemSignalTracker.cleanupWeaponSignals(state);
+        if (plan.requires(HudTrigger.IN_COMBAT)) {
+            combatSignalTracker.updateCombatSignalIfNeeded(state, tickContext, global, now, hideDelay);
+        }
     }
 }

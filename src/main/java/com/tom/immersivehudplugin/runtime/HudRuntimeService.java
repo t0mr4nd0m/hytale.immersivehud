@@ -151,7 +151,7 @@ public final class HudRuntimeService {
         if (state == null) return;
 
         state.markStaticHudDirty();
-        state.invalidateDynamicHudEnabledCache();
+        state.invalidateDetectionPlan();
     }
 
     private void tickReadyPlayers() {

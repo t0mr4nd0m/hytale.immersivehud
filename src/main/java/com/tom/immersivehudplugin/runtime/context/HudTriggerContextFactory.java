@@ -3,16 +3,17 @@ package com.tom.immersivehudplugin.runtime.context;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.hud.trigger.HudTriggerContext;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.HudDetectionPlan;
 
 import java.util.EnumSet;
 
 public final class HudTriggerContextFactory {
 
-    public HudTriggerContext create(PlayerHudState state, long now) {
+    public HudTriggerContext create(PlayerHudState state, long now, HudDetectionPlan plan) {
 
         EnumSet<HudTrigger> activeSignals = EnumSet.noneOf(HudTrigger.class);
 
-        for (HudTrigger trigger : HudTrigger.values()) {
+        for (HudTrigger trigger : plan.triggers()) {
             if (trigger.source() != HudTrigger.Source.SIGNAL) { continue; }
             if (state.t.active(trigger, now)) { activeSignals.add(trigger); }
         }
@@ -22,6 +23,8 @@ public final class HudTriggerContextFactory {
         if (state.heldItem.buildingBlockInHand) {
             activeSignals.add(HudTrigger.HOLDING_BUILDING_BLOCK);
         }
+
+        activeSignals.retainAll(plan.triggers());
 
         return new HudTriggerContext(
                 activeSignals,

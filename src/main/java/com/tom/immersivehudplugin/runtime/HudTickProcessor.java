@@ -59,8 +59,7 @@ public final class HudTickProcessor {
                 evaluation.dynamicConfig()
         );
 
-        if (shouldEvaluateDynamicHud(evaluation)) {
-            refreshHeldItemState(evaluation, now);
+        if (evaluation.plan().enabled()) {
             rebuildDynamicHud(evaluation, world, global, now);
         } else {
             clearDynamicHud(evaluation);
@@ -75,7 +74,8 @@ public final class HudTickProcessor {
             PlayerHudState state,
             PlayerConfig playerConfig
     ) {
-        PlayerTickContext tickContext = tickContextFactory.build(playerRef);
+        HudDetectionPlan plan = state.detectionPlan(playerConfig.getHudComponents(), playerConfig.getDynamicHud());
+        PlayerTickContext tickContext = tickContextFactory.build(playerRef, plan);
 
         if (tickContext == null) return null;
 
@@ -83,21 +83,9 @@ public final class HudTickProcessor {
                 state,
                 playerConfig.getHudComponents(),
                 playerConfig.getDynamicHud(),
-                tickContext
+                tickContext,
+                plan
         );
-    }
-
-    private boolean shouldEvaluateDynamicHud(TickEvaluation evaluation) {
-        return isDynamicHudEnabled(evaluation);
-    }
-
-    /**
-     * Always refreshes the held item from the authoritative inventory state.
-     * The 0.6.0 API no longer reliably exposes hotbar changes through the
-     * previous packet-watcher implementation.
-     */
-    private void refreshHeldItemState(TickEvaluation evaluation, long now) {
-        heldItemSignalTracker.refreshFromInventory(evaluation.state(), evaluation.tickContext(), now);
     }
 
     private void clearDynamicHud(TickEvaluation evaluation) {
@@ -117,13 +105,19 @@ public final class HudTickProcessor {
          * Interaction signals must be updated after refreshing the held item,
          * because their classification depends on the currently equipped item.
          */
-        heldItemSignalTracker.updateInteractionSignals(state, tickContext, now);
+        HudDetectionPlan plan = evaluation.plan();
+        if (plan.heldItem() || plan.hotbar()) {
+            heldItemSignalTracker.refreshFromInventory(state, tickContext, now, plan);
+        }
+        if (plan.interactions()) {
+            heldItemSignalTracker.updateInteractionSignals(state, tickContext, now, plan);
+        }
 
-        hudSignalPipeline.update(state, world, tickContext, global, now);
+        hudSignalPipeline.update(state, world, tickContext, global, now, plan);
 
-        barUpdater.update(state, tickContext);
+        if (plan.bars()) barUpdater.update(state, tickContext, plan);
 
-        var dynamicContext = triggerContextFactory.create(state, now);
+        var dynamicContext = triggerContextFactory.create(state, now, plan);
 
         hudVisibilityCoordinator.rebuildDynamicHidden(
                 state,
@@ -145,25 +139,11 @@ public final class HudTickProcessor {
         hudVisibilityCoordinator.applyHudDelta(evaluation.tickContext(), state);
     }
 
-    private boolean isDynamicHudEnabled(TickEvaluation evaluation) {
-        PlayerHudState state = evaluation.state();
-
-        if (!state.hasDynamicHudEnabledCache()) {
-            state.cacheDynamicHudEnabled(
-                    hudVisibilityCoordinator.hasAnyActiveDynamicRules(
-                            evaluation.hudConfig(),
-                            evaluation.dynamicConfig()
-                    )
-            );
-        }
-
-        return state.isDynamicHudEnabledCached();
-    }
-
     private record TickEvaluation(
             PlayerHudState state,
             HudComponentsConfig hudConfig,
             DynamicHudConfig dynamicConfig,
-            PlayerTickContext tickContext
+            PlayerTickContext tickContext,
+            HudDetectionPlan plan
     ) {}
 }

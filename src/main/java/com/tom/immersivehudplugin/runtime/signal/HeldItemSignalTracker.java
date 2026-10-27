@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.HudDetectionPlan;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 import javax.annotation.Nullable;
@@ -25,24 +26,27 @@ public final class HeldItemSignalTracker {
     public void refreshFromInventory(
             PlayerHudState state,
             PlayerTickContext tickContext,
-            long now
+            long now,
+            HudDetectionPlan plan
     ) {
-        refreshHotbarSlot(state, tickContext, now);
+        if (plan.hotbar()) refreshHotbarSlot(state, tickContext, now, plan);
+        if (!plan.heldItem()) return;
 
         Item heldItem = getHeldItemFromInventory(tickContext);
 
         state.applyHeldItemState(
-                HeldItemState.isRangedWeapon(heldItem),
-                HeldItemState.isMeleeWeapon(heldItem),
-                HeldItemState.isConsumable(heldItem),
-                HeldItemState.isBuildingBlock(heldItem)
+                plan.weapons() && HeldItemState.isRangedWeapon(heldItem),
+                plan.weapons() && HeldItemState.isMeleeWeapon(heldItem),
+                plan.requires(HudTrigger.CONSUMABLE_USE) && HeldItemState.isConsumable(heldItem),
+                plan.requires(HudTrigger.HOLDING_BUILDING_BLOCK) && HeldItemState.isBuildingBlock(heldItem)
         );
     }
 
     private void refreshHotbarSlot(
             PlayerHudState state,
             PlayerTickContext tickContext,
-            long now
+            long now,
+            HudDetectionPlan plan
     ) {
         InventoryComponent.Hotbar hotbar =
                 tickContext.store().getComponent(
@@ -57,7 +61,9 @@ public final class HeldItemSignalTracker {
         boolean changed = state.heldItem.updateActiveHotbarSlot(activeSlot);
         if (!changed) return;
 
-        state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMs);
+        if (plan.requires(HudTrigger.HOTBAR_INPUT)) {
+            state.t.pulse(HudTrigger.HOTBAR_INPUT, now, state.hideDelayMs);
+        }
         state.t.clear(HudTrigger.CHARGING_WEAPON);
         state.t.clear(HudTrigger.BLOCKING_ATTACK);
     }
@@ -69,7 +75,8 @@ public final class HeldItemSignalTracker {
     public void updateInteractionSignals(
             PlayerHudState state,
             PlayerTickContext tickContext,
-            long now
+            long now,
+            HudDetectionPlan plan
     ) {
         InteractionManager interactionManager =
                 tickContext.store().getComponent(
@@ -96,9 +103,15 @@ public final class HeldItemSignalTracker {
             }
         }
 
-        if (chargingWeapon) state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMs);
-        if (consuming) state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMs);
-        if (blockingAttack) state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMs);
+        if (chargingWeapon && plan.requires(HudTrigger.CHARGING_WEAPON)) {
+            state.t.pulse(HudTrigger.CHARGING_WEAPON, now, state.hideDelayMs);
+        }
+        if (consuming && plan.requires(HudTrigger.CONSUMABLE_USE)) {
+            state.t.pulse(HudTrigger.CONSUMABLE_USE, now, state.hideDelayMs);
+        }
+        if (blockingAttack && plan.requires(HudTrigger.BLOCKING_ATTACK)) {
+            state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, state.hideDelayMs);
+        }
     }
 
     /**
@@ -128,7 +141,7 @@ public final class HeldItemSignalTracker {
             if (heldStack == null) return null;
 
             String itemId = heldStack.getItemId();
-            if (itemId == null || itemId.isBlank()) return null;
+            if (itemId.isBlank()) return null;
 
             return resolveItem(itemId);
 

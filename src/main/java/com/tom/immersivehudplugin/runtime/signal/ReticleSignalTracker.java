@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.util.TargetUtil;
 import com.tom.immersivehudplugin.config.GlobalConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.runtime.PlayerHudState;
+import com.tom.immersivehudplugin.runtime.HudDetectionPlan;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 
 import com.hypixel.hytale.server.core.universe.world.chunk.section.BlockSection;
@@ -26,12 +27,13 @@ public final class ReticleSignalTracker {
             PlayerTickContext tickContext,
             GlobalConfig global,
             long now,
-            int hideDelay
+            int hideDelay,
+            HudDetectionPlan plan
     ) {
         if (!shouldScanReticle(state, global, now)) return;
 
         float targetRange = reticleTargetRange(global);
-        ReticleScanResult scan = scanReticle(world, tickContext, targetRange);
+        ReticleScanResult scan = scanReticle(world, tickContext, targetRange, plan);
 
         if (scan.targetEntity()) state.t.pulse(HudTrigger.TARGET_ENTITY, now, hideDelay);
 
@@ -67,21 +69,22 @@ public final class ReticleSignalTracker {
     private ReticleScanResult scanReticle(
             World world,
             PlayerTickContext tickContext,
-            float targetRange
+            float targetRange,
+            HudDetectionPlan plan
     ) {
-        Ref<EntityStore> target = TargetUtil.getTargetEntity(
+        Ref<EntityStore> target = plan.requires(HudTrigger.TARGET_ENTITY) ? TargetUtil.getTargetEntity(
                 tickContext.ref(),
                 targetRange,
                 tickContext.store()
-        );
+        ) : null;
         boolean hasEntityTarget = target != null && target.isValid() && !target.equals(tickContext.ref());
 
         boolean lookingAtInteractable = false;
-        var blockPos = TargetUtil.getTargetBlock(
+        var blockPos = plan.requires(HudTrigger.INTERACTABLE_BLOCK) ? TargetUtil.getTargetBlock(
                 tickContext.ref(),
                 targetRange,
                 tickContext.store()
-        );
+        ) : null;
 
         if (blockPos != null) {
             BlockType blockType = getBlockType(world, blockPos);

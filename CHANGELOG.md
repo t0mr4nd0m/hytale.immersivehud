@@ -5,11 +5,12 @@
 **Features**
 * `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
 * `Balanced` profile now shows the reticle while holding a placeable block or decoration.
-* Detect ranged and melee weapons through their attack interactions, including modded weapons using behaviour-based classification.
-* Added descriptive tooltips to all trigger names in the configuration UI.
+* UI: Added descriptive tooltips to all trigger names in the configuration UI.
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
+* Detect ranged and melee weapons through their attack interactions, including modded weapons using behaviour-based classification.
+* Performance: Run only the HUD detectors required by active rules on hidden components, with a cached detection plan refreshed when configuration changes.
 * Configuration UI now pauses only private singleplayer sessions. Multiplayer sessions remain running, and closing the UI preserves pauses it did not initiate.
 * Update to Hytale API 0.8.0-pre.2.1
 

@@ -13,7 +13,6 @@ import java.util.Objects;
 
 public final class HudVisibilityCoordinator {
 
-    private static final List<HudComponent> DYNAMIC_ENTRIES = HudComponentRegistry.dynamicList();
     private static final List<HudComponent> ALL_ENTRIES = HudComponentRegistry.allList();
 
     private final HudRuleEvaluator hudRuleEvaluator;
@@ -25,22 +24,6 @@ public final class HudVisibilityCoordinator {
     ) {
         this.hudRuleEvaluator = Objects.requireNonNull(hudRuleEvaluator, "hudRuleEvaluator");
         this.hudDeltaApplier = Objects.requireNonNull(hudDeltaApplier, "hudDeltaApplier");
-    }
-
-    public boolean hasAnyActiveDynamicRules(
-            HudComponentsConfig hudConfig,
-            DynamicHudConfig dynamicConfig
-    ) {
-        for (HudComponent component : DYNAMIC_ENTRIES) {
-            if (!component.isHidden(hudConfig)) {
-                continue;
-            }
-
-            if (component.hasActiveRules(dynamicConfig)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public void ensureStaticHudBuilt(

@@ -7,13 +7,14 @@ import com.hypixel.hytale.server.core.entity.movement.MovementStatesComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.tom.immersivehudplugin.runtime.HudDetectionPlan;
 
 import javax.annotation.Nullable;
 
 public final class PlayerTickContextFactory {
 
     @Nullable
-    public PlayerTickContext build(PlayerRef playerRef) {
+    public PlayerTickContext build(PlayerRef playerRef, HudDetectionPlan plan) {
         try {
             Ref<EntityStore> ref = playerRef.getReference();
             if (ref == null || !ref.isValid()) {
@@ -27,8 +28,9 @@ public final class PlayerTickContextFactory {
                 return null;
             }
 
-            EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
-            MovementStatesComponent movement = store.getComponent(ref, MovementStatesComponent.getComponentType());
+            EntityStatMap stats = plan.bars() ? store.getComponent(ref, EntityStatMap.getComponentType()) : null;
+            MovementStatesComponent movement = plan.movement()
+                    ? store.getComponent(ref, MovementStatesComponent.getComponentType()) : null;
 
             return new PlayerTickContext(playerRef, ref, store, player, stats, movement);
 
