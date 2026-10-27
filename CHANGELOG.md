@@ -10,6 +10,7 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
+* Configuration UI now pauses only private singleplayer sessions. Multiplayer sessions remain running, and closing the UI preserves pauses it did not initiate.
 * Update to Hytale API 0.8.0-pre.2.1
 
 ## v1.2.8

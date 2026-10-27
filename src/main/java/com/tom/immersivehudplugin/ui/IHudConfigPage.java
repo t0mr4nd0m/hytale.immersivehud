@@ -60,7 +60,6 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
             @Nonnull Store<EntityStore> store
     ) {
         uiService.discard(playerRef);
-        uiService.resumeWorld(ref, store);
     }
 
     @Override

@@ -69,6 +69,14 @@ tasks.register('verifyWeaponClassification', JavaExec) {
 
 tasks.named('check') {
     dependsOn 'verifyWeaponClassification'
+    dependsOn 'verifyConfigPause'
+}
+
+tasks.register('verifyConfigPause', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.ui.HudConfigPauseControllerTest'
+    workingDir = layout.buildDirectory.get().asFile
 }
 
 tasks.named('test') {

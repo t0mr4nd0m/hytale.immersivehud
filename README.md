@@ -206,6 +206,8 @@ To configure ImmersiveHud behaviour you can edit manually the player config file
 
 Use command `/ihud config` to open in-game configuration UI to manage visibility, rules and profiles interactively.
 
+The configuration UI pauses private singleplayer games while open. Dedicated servers and games shared over LAN or with friends keep running. Closing the UI only releases a pause initiated by ImmersiveHUD.
+
 1. Select one of the available profiles to start customizing your experience
 <p style="text-align:center;"><img src="assets/001_iHUD_Config_Profiles.png" alt="Immersive HUD Config Profile"/></p>
 

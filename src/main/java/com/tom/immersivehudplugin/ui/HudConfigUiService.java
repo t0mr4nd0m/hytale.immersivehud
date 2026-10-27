@@ -3,6 +3,14 @@ package com.tom.immersivehudplugin.ui;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
+import com.hypixel.hytale.protocol.packets.serveraccess.Access;
+import com.hypixel.hytale.server.core.Constants;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
+import com.hypixel.hytale.server.core.modules.singleplayer.SingleplayerModule;
+import com.hypixel.hytale.server.core.modules.singleplayer.SingleplayerRequestAccessEvent;
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -23,6 +31,7 @@ public final class HudConfigUiService {
     private final HudRuntimeService hudRuntimeService;
 
     private final Map<UUID, HudConfigUiSession> sessions = new ConcurrentHashMap<>();
+    private final HudConfigPauseController pauseController = new HudConfigPauseController();
 
     public HudConfigUiService(
             @Nonnull PlayerConfigService playerConfigService,
@@ -32,20 +41,46 @@ public final class HudConfigUiService {
         this.hudRuntimeService = hudRuntimeService;
     }
 
+    public void start(@Nonnull JavaPlugin plugin) {
+        plugin.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
+                event -> discard(event.getPlayerRef()));
+        plugin.getEventRegistry().registerGlobal(PlayerReadyEvent.class, event -> {
+            if (Universe.get().getPlayerCount() > 1) pauseController.releaseAll();
+        });
+        plugin.getEventRegistry().register(SingleplayerRequestAccessEvent.class, event -> {
+            if (event.getAccess() != Access.Private) pauseController.releaseAll();
+        });
+    }
+
+    public void shutdown() {
+        sessions.clear();
+        pauseController.releaseAll();
+    }
+
     public void open(
             @Nonnull PlayerRef playerRef,
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store
     ) {
-        PlayerConfig playerCfg = playerConfigService.getPlayerConfig(playerRef);
-
-        sessions.put(playerRef.getUuid(), new HudConfigUiSession(playerCfg));
-
         Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) return;
 
-        if (player != null) {
+        if (sessions.containsKey(playerRef.getUuid())) {
+            closePage(ref, store);
+            discard(playerRef);
+        }
+
+        PlayerConfig playerCfg = playerConfigService.getPlayerConfig(playerRef);
+        sessions.put(playerRef.getUuid(), new HudConfigUiSession(playerCfg));
+        try {
             player.getPageManager().openCustomPage(ref, store, new IHudConfigPage(this, playerRef));
-            pauseWorld(player, true);
+            World world = player.getWorld();
+            if (world != null) {
+                pauseController.pause(playerRef.getUuid(), new WorldPauseTarget(world), canPause(playerRef));
+            }
+        } catch (RuntimeException exception) {
+            discard(playerRef);
+            throw exception;
         }
     }
 
@@ -56,6 +91,7 @@ public final class HudConfigUiService {
 
     public void discard(@Nonnull PlayerRef playerRef) {
         sessions.remove(playerRef.getUuid());
+        pauseController.release(playerRef.getUuid());
     }
 
     public boolean apply(@Nonnull PlayerRef playerRef) {
@@ -84,21 +120,23 @@ public final class HudConfigUiService {
         }
     }
 
-    private void pauseWorld(Player player, boolean paused) {
-
-        World world = player.getWorld();
-        if (world != null) {
-            world.setPaused(paused);
-        }
+    private boolean canPause(PlayerRef playerRef) {
+        if (!Constants.SINGLEPLAYER) return false;
+        SingleplayerModule singleplayer = SingleplayerModule.get();
+        return singleplayer != null && HudConfigPauseController.canPause(
+                true, SingleplayerModule.isOwner(playerRef), singleplayer.getAccess(),
+                singleplayer.getRequestedAccess(), Universe.get().getPlayerCount());
     }
 
-    public void resumeWorld(
-            @Nonnull Ref<EntityStore> ref,
-            @Nonnull Store<EntityStore> store
-    ) {
-        Player player = store.getComponent(ref, Player.getComponentType());
-        if (player != null) {
-            pauseWorld(player, false);
+    private record WorldPauseTarget(World world) implements HudConfigPauseController.PauseTarget {
+        @Override public boolean isPaused() { return world.isPaused(); }
+        @Override public void setPaused(boolean paused) { world.setPaused(paused); }
+
+        @Override
+        public void execute(@Nonnull Runnable action) {
+            if (!world.isAlive()) return;
+            if (world.isInThread()) action.run();
+            else world.execute(action);
         }
     }
 }

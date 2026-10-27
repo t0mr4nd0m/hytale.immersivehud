@@ -90,6 +90,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         this.hudRuntimeService = createHudRuntimeService();
         this.playerSessionService = createPlayerSessionService();
         this.hudConfigUiService = createHudConfigUiService();
+        hudConfigUiService.start(this);
 
         hudRuntimeService.start();
         playerSessionService.start();
@@ -100,6 +101,9 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private void shutdownRuntimeServices() {
+        if (hudConfigUiService != null) {
+            hudConfigUiService.shutdown();
+        }
         if (hudRuntimeService != null) {
             hudRuntimeService.shutdown();
             hudRuntimeService = null;
