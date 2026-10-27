@@ -124,6 +124,7 @@ final class HudComponentCatalog {
                                 HudTrigger.CONSUMABLE_USE,
                                 HudTrigger.TARGET_ENTITY,
                                 HudTrigger.INTERACTABLE_BLOCK,
+                                HudTrigger.HOLDING_BUILDING_BLOCK,
                                 HudTrigger.HOLDING_RANGED_WEAPON,
                                 HudTrigger.IN_COMBAT
                         ),
