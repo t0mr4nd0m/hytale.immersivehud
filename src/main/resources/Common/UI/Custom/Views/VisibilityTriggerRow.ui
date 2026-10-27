@@ -29,6 +29,7 @@ Group #VisibilityTriggerRow {
       Padding: (Right: 16);
       Text: "Trigger Label";
       Style: @RuleLabelStyle;
+      TextTooltipStyle: $C.@DefaultTextTooltipStyle;
     }
   }
 

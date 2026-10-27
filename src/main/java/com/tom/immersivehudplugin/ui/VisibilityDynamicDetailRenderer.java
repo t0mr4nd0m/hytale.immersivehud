@@ -97,6 +97,10 @@ final class VisibilityDynamicDetailRenderer {
                 labelSelector + ".TextSpans",
                 Message.raw(HudTrigger.displayNameUpper(trigger))
         );
+        commands.set(
+                labelSelector + ".TooltipText",
+                Message.translation("immersivehud.gui.trigger." + trigger.key() + ".tooltip")
+        );
 
         if (isThresholdRule(entry, trigger)) {
             updateThresholdRow(commands, session, entry, rowRoot);

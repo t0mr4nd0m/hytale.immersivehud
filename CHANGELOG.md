@@ -3,6 +3,7 @@
 ## v1.2.9
 
 **Features**
+* Added descriptive tooltips to all trigger names in the configuration UI.
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
