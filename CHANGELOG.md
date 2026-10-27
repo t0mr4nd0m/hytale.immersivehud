@@ -3,7 +3,8 @@
 ## v1.2.9
 
 **Features**
-* Balanced now shows the reticle while holding a placeable block or decoration.
+* `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
+* `Balanced` profile now shows the reticle while holding a placeable block or decoration.
 * Detect ranged and melee weapons through their attack interactions, including modded weapons using behaviour-based classification.
 * Added descriptive tooltips to all trigger names in the configuration UI.
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
