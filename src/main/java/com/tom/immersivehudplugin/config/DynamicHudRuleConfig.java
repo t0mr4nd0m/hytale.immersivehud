@@ -174,7 +174,7 @@ public final class DynamicHudRuleConfig {
             return DEFAULT_THRESHOLD;
         }
 
-        return Math.max(0f, Math.min(100f, value));
+        return Math.clamp(value, 0f, 100f);
     }
 
     private static EnumSet<HudTrigger> copyRules(@Nullable Set<HudTrigger> rules) {

@@ -8,7 +8,7 @@ import com.tom.immersivehudplugin.ui.HudConfigPresenter;
 public final class ProfilePresetsTest {
     private static int checks;
 
-    public static void main(String[] args) {
+    static void main() {
         for (Profile profile : Profile.values()) {
             if (profile == Profile.CUSTOM) continue;
             verifyIndependentProfile(profile);
@@ -35,8 +35,8 @@ public final class ProfilePresetsTest {
         ProfilePresets.applyTo(balanced, null);
         verify("null profile remains a no-op", balanced.getHudComponents() == hud && balanced.getDynamicHud() == dynamic);
         ProfilePresets.applyTo(null, Profile.BALANCED);
-        verify("multiple presenters recognize the same preset", new HudConfigPresenter().resolveCurrentProfile(hud, dynamic)
-                == new HudConfigPresenter().resolveCurrentProfile(hud, dynamic));
+        verify("Balanced remains recognized after no-op applications",
+                new HudConfigPresenter().resolveCurrentProfile(hud, dynamic) == Profile.BALANCED);
         System.out.println("Passed " + checks + " profile model regression checks.");
     }
 

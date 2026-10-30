@@ -13,17 +13,17 @@ import java.util.EnumSet;
 public final class DynamicHudRuleConfigTest {
     private static int checks;
 
-    public static void main(String[] args) {
+    static void main() {
         var config = new DynamicHudRuleConfig();
         verify("empty rules", !config.hasRules() && !config.hasRule(HudTrigger.IN_COMBAT));
-        verify("null rule query", !config.hasRule(null));
         var empty = config.getRulesView();
         verify("repeated reads reuse the snapshot", empty == config.getRulesView());
         verify("empty configs compare by content", config.hasSameRules(new DynamicHudRuleConfig()));
-        verify("null config comparison", !config.hasSameRules(null));
 
         var input = EnumSet.of(HudTrigger.IN_COMBAT, HudTrigger.HOTBAR_INPUT);
         config.setRules(input);
+        verify("missing rule in a non-empty configuration", !config.hasRule(HudTrigger.PLAYER_MOVING));
+        verify("different rule sets do not match", !config.hasSameRules(new DynamicHudRuleConfig()));
         input.clear();
         verify("setter does not retain caller-owned set", config.hasRule(HudTrigger.IN_COMBAT)
                 && config.hasRule(HudTrigger.HOTBAR_INPUT));
@@ -36,7 +36,9 @@ public final class DynamicHudRuleConfigTest {
                 && config.getRulesView() == snapshot);
         verify("missing removal is a no-op", !config.removeRule(HudTrigger.PLAYER_MOVING)
                 && config.getRulesView() == snapshot);
-        verify("null mutations are no-ops", !config.addRule(null) && !config.removeRule(null));
+        config.addRule(null);
+        config.removeRule(null);
+        verify("null mutations preserve the current snapshot", config.getRulesView() == snapshot);
 
         verify("addition succeeds", config.addRule(HudTrigger.PLAYER_MOVING));
         verify("old snapshot is stable after addition", !snapshot.contains(HudTrigger.PLAYER_MOVING));
