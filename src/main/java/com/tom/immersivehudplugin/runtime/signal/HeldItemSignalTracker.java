@@ -115,17 +115,10 @@ public final class HeldItemSignalTracker {
     }
 
     /**
-     * Clears weapon-related signals when the corresponding weapon type is no
-     * longer equipped.
+     * Cancels timed weapon actions when no weapon is equipped.
      */
-    public void cleanupWeaponSignals(PlayerHudState state) {
-        boolean hasMelee = state.heldItem.meleeWeaponInHand;
-        boolean hasRanged = state.heldItem.rangedWeaponInHand;
-        boolean hasWeapon = state.heldItem.hasAnyWeaponInHand();
-
-        if (!hasMelee) state.t.clear(HudTrigger.HOLDING_MELEE_WEAPON);
-        if (!hasRanged) state.t.clear(HudTrigger.HOLDING_RANGED_WEAPON);
-        if (!hasWeapon) {
+    public void cancelWeaponActionsIfUnequipped(PlayerHudState state) {
+        if (!state.heldItem.hasAnyWeaponInHand()) {
             state.t.clear(HudTrigger.CHARGING_WEAPON);
             state.t.clear(HudTrigger.BLOCKING_ATTACK);
         }

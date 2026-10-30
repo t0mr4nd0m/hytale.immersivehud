@@ -15,16 +15,16 @@ public final class HudTriggerContextFactory {
 
         for (HudTrigger trigger : plan.triggers()) {
             if (trigger.source() != HudTrigger.Source.SIGNAL) { continue; }
-            if (state.t.active(trigger, now)) { activeSignals.add(trigger); }
+            boolean active = switch (trigger) {
+                case HOLDING_RANGED_WEAPON -> state.heldItem.rangedWeaponInHand;
+                case HOLDING_MELEE_WEAPON -> state.heldItem.meleeWeaponInHand;
+                case HOLDING_BUILDING_BLOCK -> state.heldItem.buildingBlockInHand;
+                case CHARGING_WEAPON, BLOCKING_ATTACK ->
+                        state.heldItem.hasAnyWeaponInHand() && state.t.active(trigger, now);
+                default -> state.t.active(trigger, now);
+            };
+            if (active) activeSignals.add(trigger);
         }
-
-        addWeaponSignals(activeSignals, state, now);
-
-        if (state.heldItem.buildingBlockInHand) {
-            activeSignals.add(HudTrigger.HOLDING_BUILDING_BLOCK);
-        }
-
-        activeSignals.retainAll(plan.triggers());
 
         return new HudTriggerContext(
                 activeSignals,
@@ -35,25 +35,4 @@ public final class HudTriggerContextFactory {
         );
     }
 
-    private void addWeaponSignals(
-            EnumSet<HudTrigger> activeSignals,
-            PlayerHudState state,
-            long now
-    ) {
-        if (state.heldItem.hasAnyWeaponInHand() && state.t.active(HudTrigger.CHARGING_WEAPON, now)) {
-            activeSignals.add(HudTrigger.CHARGING_WEAPON);
-        }
-
-        if (state.heldItem.hasAnyWeaponInHand() && state.t.active(HudTrigger.BLOCKING_ATTACK, now)) {
-            activeSignals.add(HudTrigger.BLOCKING_ATTACK);
-        }
-
-        if (state.heldItem.rangedWeaponInHand) {
-            activeSignals.add(HudTrigger.HOLDING_RANGED_WEAPON);
-        }
-
-        if (state.heldItem.meleeWeaponInHand) {
-            activeSignals.add(HudTrigger.HOLDING_MELEE_WEAPON);
-        }
-    }
 }

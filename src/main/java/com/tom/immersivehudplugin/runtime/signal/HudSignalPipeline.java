@@ -46,7 +46,7 @@ public final class HudSignalPipeline {
         if (plan.reticle()) {
             reticleSignalTracker.updateReticleSignalsIfNeeded(state, world, tickContext, global, now, hideDelay, plan);
         }
-        if (plan.weapons()) heldItemSignalTracker.cleanupWeaponSignals(state);
+        if (plan.weapons()) heldItemSignalTracker.cancelWeaponActionsIfUnequipped(state);
         if (plan.requires(HudTrigger.IN_COMBAT)) {
             combatSignalTracker.updateCombatSignalIfNeeded(state, tickContext, global, now, hideDelay);
         }

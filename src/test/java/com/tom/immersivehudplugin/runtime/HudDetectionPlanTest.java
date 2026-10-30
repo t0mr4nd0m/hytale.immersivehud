@@ -117,7 +117,71 @@ public final class HudDetectionPlanTest {
                 plan.requires(HudTrigger.HOLDING_BUILDING_BLOCK) && !build(construction).enabled());
         state.reset(500);
         verify("player reset invalidates detector cache", state.dynamicHudCache.get() == null);
+        verifyHeldItemSignalSources();
         System.out.println("Passed " + checks + " detector selection regression checks.");
+    }
+
+    private static void verifyHeldItemSignalSources() {
+        HudDetectionPlan plan = build(only("reticle", HudTrigger.HOLDING_RANGED_WEAPON,
+                HudTrigger.HOLDING_MELEE_WEAPON, HudTrigger.HOLDING_BUILDING_BLOCK,
+                HudTrigger.CHARGING_WEAPON, HudTrigger.BLOCKING_ATTACK, HudTrigger.CONSUMABLE_USE));
+        var state = new PlayerHudState();
+        var factory = new HudTriggerContextFactory();
+        var tracker = new HeldItemSignalTracker();
+        long now = 10000;
+
+        state.t.pulse(HudTrigger.HOLDING_RANGED_WEAPON, now, 500);
+        state.t.pulse(HudTrigger.HOLDING_MELEE_WEAPON, now, 500);
+        state.t.pulse(HudTrigger.HOLDING_BUILDING_BLOCK, now, 500);
+        var context = factory.create(state, now, plan);
+        verify("holding triggers ignore timers", !context.active(HudTrigger.HOLDING_RANGED_WEAPON)
+                && !context.active(HudTrigger.HOLDING_MELEE_WEAPON)
+                && !context.active(HudTrigger.HOLDING_BUILDING_BLOCK));
+
+        state.t.clearAll();
+        state.applyHeldItemState(true, true, false, true);
+        context = factory.create(state, now, plan);
+        verify("holding triggers do not require timers", context.active(HudTrigger.HOLDING_RANGED_WEAPON)
+                && context.active(HudTrigger.HOLDING_MELEE_WEAPON)
+                && context.active(HudTrigger.HOLDING_BUILDING_BLOCK));
+        verify("holding a weapon does not imply an active action", !context.active(HudTrigger.CHARGING_WEAPON)
+                && !context.active(HudTrigger.BLOCKING_ATTACK));
+
+        state.t.pulse(HudTrigger.CHARGING_WEAPON, now, 500);
+        state.t.pulse(HudTrigger.BLOCKING_ATTACK, now, 500);
+        tracker.cancelWeaponActionsIfUnequipped(state);
+        context = factory.create(state, now, plan);
+        verify("equipped weapons retain timed actions", context.active(HudTrigger.CHARGING_WEAPON)
+                && context.active(HudTrigger.BLOCKING_ATTACK));
+        context = factory.create(state, now + 500, plan);
+        verify("expired actions do not hide held-item states", !context.active(HudTrigger.CHARGING_WEAPON)
+                && !context.active(HudTrigger.BLOCKING_ATTACK)
+                && context.active(HudTrigger.HOLDING_RANGED_WEAPON));
+
+        state.applyHeldItemState(false, true, false, false);
+        context = factory.create(state, now, plan);
+        verify("changing held type immediately changes holding triggers",
+                !context.active(HudTrigger.HOLDING_RANGED_WEAPON)
+                        && context.active(HudTrigger.HOLDING_MELEE_WEAPON)
+                        && !context.active(HudTrigger.HOLDING_BUILDING_BLOCK));
+
+        state.applyHeldItemState(false, false, false, false);
+        context = factory.create(state, now, plan);
+        verify("weapon actions require an equipped weapon even before cleanup",
+                !context.active(HudTrigger.CHARGING_WEAPON) && !context.active(HudTrigger.BLOCKING_ATTACK));
+        tracker.cancelWeaponActionsIfUnequipped(state);
+        verify("unequipping cancels weapon action timers", !state.t.active(HudTrigger.CHARGING_WEAPON, now)
+                && !state.t.active(HudTrigger.BLOCKING_ATTACK, now));
+        state.applyHeldItemState(true, false, false, false);
+        context = factory.create(state, now, plan);
+        verify("re-equipping does not reactivate cancelled actions", !context.active(HudTrigger.CHARGING_WEAPON)
+                && !context.active(HudTrigger.BLOCKING_ATTACK));
+
+        state.applyHeldItemState(false, false, false, false);
+        state.t.pulse(HudTrigger.CONSUMABLE_USE, now, 500);
+        context = factory.create(state, now, plan);
+        verify("consumable use keeps its timed persistence", context.active(HudTrigger.CONSUMABLE_USE)
+                && !factory.create(state, now + 500, plan).active(HudTrigger.CONSUMABLE_USE));
     }
 
     private static PlayerConfig only(String componentKey, HudTrigger... triggers) {
