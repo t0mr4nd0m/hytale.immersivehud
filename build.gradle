@@ -75,6 +75,14 @@ tasks.named('check') {
     dependsOn 'verifyProfileModels'
     dependsOn 'verifyConfigPersistence'
     dependsOn 'verifyHudTimers'
+    dependsOn 'verifyCombatScanning'
+}
+
+tasks.register('verifyCombatScanning', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.runtime.signal.CombatScanTest'
+    workingDir = layout.buildDirectory.get().asFile
 }
 
 tasks.register('verifyHudTimers', JavaExec) {
