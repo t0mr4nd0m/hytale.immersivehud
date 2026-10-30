@@ -44,7 +44,7 @@ public final class HudRuleEvaluator {
             DynamicHudRuleConfig ruleConfig,
             HudTriggerContext triggersContext
     ) {
-        for (HudTrigger trigger : ruleConfig.getRules()) {
+        for (HudTrigger trigger : ruleConfig.getRulesView()) {
             if (trigger.matches(ruleConfig, triggersContext)) {
                 return true;
             }

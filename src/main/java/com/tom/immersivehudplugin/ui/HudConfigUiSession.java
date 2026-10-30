@@ -83,7 +83,7 @@ public final class HudConfigUiSession {
             @Nonnull HudComponent entry,
             @Nonnull HudTrigger rule
     ) {
-        return getDynamicRuleConfig(entry).getRules().contains(rule);
+        return getDynamicRuleConfig(entry).hasRule(rule);
     }
 
     public void toggleRule(
@@ -98,7 +98,7 @@ public final class HudConfigUiSession {
 
         DynamicHudRuleConfig cfg = getDynamicRuleConfig(entry);
 
-        if (cfg.getRules().contains(rule)) {
+        if (cfg.hasRule(rule)) {
             cfg.removeRule(rule);
         } else {
             cfg.addRule(rule);
@@ -187,7 +187,7 @@ public final class HudConfigUiSession {
 
     @Nonnull
     public List<HudTrigger> getVisibleRulesInDisplayOrder(@Nonnull HudComponent entry) {
-        var rules = getDynamicRuleConfig(entry).getRules();
+        var rules = getDynamicRuleConfig(entry).getRulesView();
 
         return getBaseRulesInDisplayOrder(entry).stream()
                 .filter(trigger -> !showOnlyCheckedTriggers || rules.contains(trigger))

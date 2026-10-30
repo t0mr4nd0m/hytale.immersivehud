@@ -9,6 +9,8 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
+* Build immutable profile models once and reuse them for profile matching and applying independent configurations.
+* Avoid rule-set copies for read-only queries, iteration, and profile comparisons while preserving independent configuration copies.
 * Separate held-item trigger states from timed signals and remove redundant holding-trigger timer clean-up.
 * Detect ranged and melee weapons through their attack interactions, including modded weapons using behaviour-based classification.
 * Performance: Run only the HUD detectors required by active rules on hidden components, with a cached detection plan refreshed when configuration changes.

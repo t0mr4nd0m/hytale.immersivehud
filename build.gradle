@@ -71,6 +71,22 @@ tasks.named('check') {
     dependsOn 'verifyWeaponClassification'
     dependsOn 'verifyConfigPause'
     dependsOn 'verifyDetectorSelection'
+    dependsOn 'verifyRuleQueries'
+    dependsOn 'verifyProfileModels'
+}
+
+tasks.register('verifyProfileModels', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.profiles.ProfilePresetsTest'
+    workingDir = layout.buildDirectory.get().asFile
+}
+
+tasks.register('verifyRuleQueries', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.config.DynamicHudRuleConfigTest'
+    workingDir = layout.buildDirectory.get().asFile
 }
 
 tasks.register('verifyDetectorSelection', JavaExec) {

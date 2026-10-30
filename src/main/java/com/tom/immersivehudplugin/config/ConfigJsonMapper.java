@@ -183,7 +183,7 @@ public final class ConfigJsonMapper {
             DynamicHudRuleConfig loaded = fromJsonDynamicHudRuleConfig(sectionEl.getAsJsonObject());
             DynamicHudRuleConfig target = entry.requireDynamicRuleConfig(cfg);
 
-            target.setRules(loaded.getRules());
+            target.setRules(loaded.getRulesView());
             target.setThreshold(loaded.getThreshold());
         }
 

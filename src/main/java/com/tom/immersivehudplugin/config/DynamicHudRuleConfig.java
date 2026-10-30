@@ -4,7 +4,10 @@ import com.google.gson.annotations.SerializedName;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import java.util.EnumSet;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
+import javax.annotation.Nullable;
 
 public final class DynamicHudRuleConfig {
 
@@ -17,6 +20,7 @@ public final class DynamicHudRuleConfig {
     private Float threshold = DEFAULT_THRESHOLD;
 
     private transient EnumSet<HudTrigger> parsedRules;
+    private transient Set<HudTrigger> rulesView;
 
     public String[] getRuleNames() {
         return ruleNames != null ? ruleNames.clone() : new String[0];
@@ -31,48 +35,50 @@ public final class DynamicHudRuleConfig {
     }
 
     public EnumSet<HudTrigger> getRules() {
-        if (parsedRules == null) {
-            parsedRules = parseRuleNames(ruleNames);
-        }
-
-        return copyRules(parsedRules);
+        return copyRules(parsedRules());
     }
 
-    public void setRules(EnumSet<HudTrigger> rules) {
-        EnumSet<HudTrigger> safeRules = normalizeRules(rules);
+    /** Reusable read-only snapshot; later edits do not change previously returned snapshots. */
+    public Set<HudTrigger> getRulesView() {
+        parsedRules();
+        return rulesView;
+    }
 
-        this.ruleNames = toRuleNames(safeRules);
-        this.parsedRules = copyRules(safeRules);
+    public boolean hasRule(@Nullable HudTrigger rule) {
+        return rule != null && parsedRules().contains(rule);
+    }
+
+    public boolean hasSameRules(@Nullable DynamicHudRuleConfig other) {
+        return other != null && parsedRules().equals(other.parsedRules());
+    }
+
+    public void setRules(@Nullable Set<HudTrigger> rules) {
+        replaceRules(copyRules(rules));
+        this.ruleNames = toRuleNames(parsedRules);
     }
 
     public boolean addRule(HudTrigger rule) {
-        if (rule == null) {
+        if (rule == null || hasRule(rule)) {
             return false;
         }
 
         EnumSet<HudTrigger> rules = getRules();
-        boolean changed = rules.add(rule);
-
-        if (changed) {
-            setRules(rules);
-        }
-
-        return changed;
+        rules.add(rule);
+        replaceRules(rules);
+        ruleNames = toRuleNames(rules);
+        return true;
     }
 
     public boolean removeRule(HudTrigger rule) {
-        if (rule == null) {
+        if (!hasRule(rule)) {
             return false;
         }
 
         EnumSet<HudTrigger> rules = getRules();
-        boolean changed = rules.remove(rule);
-
-        if (changed) {
-            setRules(rules);
-        }
-
-        return changed;
+        rules.remove(rule);
+        replaceRules(rules);
+        ruleNames = toRuleNames(rules);
+        return true;
     }
 
     public boolean sanitize() {
@@ -86,7 +92,7 @@ public final class DynamicHudRuleConfig {
             changed = true;
         }
 
-        this.parsedRules = copyRules(normalizedRules);
+        replaceRules(normalizedRules);
 
         float sanitizedThreshold = sanitizeThreshold(threshold);
         if (threshold == null || Float.compare(threshold, sanitizedThreshold) != 0) {
@@ -101,16 +107,21 @@ public final class DynamicHudRuleConfig {
         DynamicHudRuleConfig copy = new DynamicHudRuleConfig();
         copy.ruleNames = getRuleNames();
         copy.threshold = getThreshold();
-        copy.parsedRules = copyRules(getRules());
+        copy.replaceRules(copyRules(parsedRules()));
         return copy;
     }
 
-    private static EnumSet<HudTrigger> normalizeRules(EnumSet<HudTrigger> rules) {
-        if (rules == null || rules.isEmpty()) {
-            return EnumSet.noneOf(HudTrigger.class);
+    private EnumSet<HudTrigger> parsedRules() {
+        if (parsedRules == null) {
+            replaceRules(parseRuleNames(ruleNames));
         }
+        return parsedRules;
+    }
 
-        return copyRules(rules);
+    // Takes ownership of a fresh set. Published sets are never mutated in place.
+    private void replaceRules(EnumSet<HudTrigger> rules) {
+        this.parsedRules = rules;
+        this.rulesView = Collections.unmodifiableSet(rules);
     }
 
     private static EnumSet<HudTrigger> parseRuleNames(String[] values) {
@@ -166,13 +177,13 @@ public final class DynamicHudRuleConfig {
         return Math.max(0f, Math.min(100f, value));
     }
 
-    private static EnumSet<HudTrigger> copyRules(EnumSet<HudTrigger> rules) {
+    private static EnumSet<HudTrigger> copyRules(@Nullable Set<HudTrigger> rules) {
         return rules == null || rules.isEmpty()
                 ? EnumSet.noneOf(HudTrigger.class)
                 : EnumSet.copyOf(rules);
     }
 
     public boolean hasRules() {
-        return !getRules().isEmpty();
+        return !parsedRules().isEmpty();
     }
 }

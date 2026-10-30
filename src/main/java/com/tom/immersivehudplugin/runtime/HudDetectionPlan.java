@@ -23,7 +23,7 @@ public final class HudDetectionPlan {
         EnumSet<HudTrigger> triggers = EnumSet.noneOf(HudTrigger.class);
         for (var component : HudComponentRegistry.dynamicList()) {
             if (component.isHidden(hud)) {
-                triggers.addAll(component.requireDynamicRuleConfig(dynamic).getRules());
+                triggers.addAll(component.requireDynamicRuleConfig(dynamic).getRulesView());
             }
         }
         return new HudDetectionPlan(triggers);
