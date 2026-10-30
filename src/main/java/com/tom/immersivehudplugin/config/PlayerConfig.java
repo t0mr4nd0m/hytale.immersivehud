@@ -47,6 +47,10 @@ public final class PlayerConfig {
         return changed;
     }
 
+    public PlayerConfig copy() {
+        return fromDefaults(hudComponents, dynamicHud);
+    }
+
     public static PlayerConfig fromDefaults(
             HudComponentsConfig defaultHud,
             DynamicHudConfig defaultDynamic

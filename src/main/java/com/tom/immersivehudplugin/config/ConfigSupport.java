@@ -8,9 +8,13 @@ import com.tom.immersivehudplugin.ImmersiveHudPlugin;
 
 import java.io.Reader;
 import java.io.Writer;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
@@ -37,14 +41,37 @@ public final class ConfigSupport {
         }
     }
 
-    public void writeJson(Path path, JsonElement json) throws Exception {
-        Path parent = path.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
-        }
+    public void writeJson(Path path, JsonElement json) throws IOException {
+        writeAtomically(path, writer -> gson.toJson(json, writer));
+    }
 
-        try (Writer writer = Files.newBufferedWriter(path)) {
-            gson.toJson(json, writer);
+    @FunctionalInterface
+    interface WriteAction {
+        void write(Writer writer) throws IOException;
+    }
+
+    static void writeAtomically(Path path, WriteAction action) throws IOException {
+        Path target = path.toAbsolutePath().normalize();
+        Path parent = target.getParent();
+        if (parent == null) throw new IOException("Configuration path must name a file: " + target);
+        Files.createDirectories(parent);
+        Path temporary = Files.createTempFile(parent, ".ihud-" + target.getFileName() + "-", ".tmp");
+        try {
+            try (Writer writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
+                action.write(writer);
+            }
+            try (FileChannel channel = FileChannel.open(temporary, StandardOpenOption.WRITE)) {
+                channel.force(true);
+            }
+            // Do not truncate the destination if atomic replacement is unsupported.
+            Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException | RuntimeException | Error failure) {
+            try {
+                Files.deleteIfExists(temporary);
+            } catch (IOException | RuntimeException cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+            throw failure;
         }
     }
 
