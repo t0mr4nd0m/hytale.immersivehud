@@ -74,6 +74,14 @@ tasks.named('check') {
     dependsOn 'verifyRuleQueries'
     dependsOn 'verifyProfileModels'
     dependsOn 'verifyConfigPersistence'
+    dependsOn 'verifyHudTimers'
+}
+
+tasks.register('verifyHudTimers', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.runtime.HudTimersTest'
+    workingDir = layout.buildDirectory.get().asFile
 }
 
 tasks.register('verifyConfigPersistence', JavaExec) {

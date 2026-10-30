@@ -9,7 +9,9 @@ public final class HudTimers {
     private final AtomicLongArray untilMs = new AtomicLongArray(HudTrigger.values().length);
 
     public void pulse(HudTrigger signal, long now, long durationMs) {
-        long newUntil = now + Math.max(0L, durationMs);
+        // Detectors and context evaluation share the same timestamp. A zero-delay
+        // pulse must survive that evaluation, but expire before the next update.
+        long newUntil = now + Math.max(1L, durationMs);
         int idx = signal.ordinal();
 
         while (true) {

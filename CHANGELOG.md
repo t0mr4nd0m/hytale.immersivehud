@@ -9,6 +9,7 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
+* Fix zero hide delay so timed triggers remain visible during the current HUD evaluation without persisting into the next update. Combat also honors zero delay instead of applying its minimum retention window.
 * Serialize player configuration saves using independent snapshots and revision tracking. Failed disconnect saves remain pending and are included in shutdown flushes.
 * Write configuration JSON through temporary files and atomic replacement to preserve the previous file if saving fails.
 * Build immutable profile models once and reuse them for profile matching and applying independent configurations.

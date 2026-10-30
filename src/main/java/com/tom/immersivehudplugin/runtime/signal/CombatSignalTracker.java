@@ -46,15 +46,15 @@ public final class CombatSignalTracker {
             long now,
             int hideDelay
     ) {
-        if (!shouldScanCombat(state, global, now)) {
+        // Zero-delay signals have no retention to bridge a skipped HUD update.
+        if (hideDelay > 0 && !shouldScanCombat(state, global, now)) {
             return;
         }
 
         state.lastCombatScanMs = now;
 
         int scanInterval = combatScanIntervalMs(global);
-        int combatHideDelay =
-                Math.max(hideDelay, scanInterval * 2);
+        int combatHideDelay = hideDelay <= 0 ? 0 : Math.max(hideDelay, scanInterval * 2);
 
         boolean inCombat =
                 combatSignalScanner.scanNpcCombat(

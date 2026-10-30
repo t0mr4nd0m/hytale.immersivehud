@@ -30,7 +30,8 @@ public final class ReticleSignalTracker {
             int hideDelay,
             HudDetectionPlan plan
     ) {
-        if (!shouldScanReticle(state, global, now)) return;
+        // Zero-delay signals have no retention to bridge a skipped HUD update.
+        if (hideDelay > 0 && !shouldScanReticle(state, global, now)) return;
 
         float targetRange = reticleTargetRange(global);
         ReticleScanResult scan = scanReticle(world, tickContext, targetRange, plan);
