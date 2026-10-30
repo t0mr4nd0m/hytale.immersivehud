@@ -73,6 +73,14 @@ tasks.named('check') {
     dependsOn 'verifyDetectorSelection'
     dependsOn 'verifyRuleQueries'
     dependsOn 'verifyProfileModels'
+    dependsOn 'verifyConfigPersistence'
+}
+
+tasks.register('verifyConfigPersistence', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tom.immersivehudplugin.config.ConfigPersistenceTest'
+    workingDir = layout.buildDirectory.get().asFile
 }
 
 tasks.register('verifyProfileModels', JavaExec) {

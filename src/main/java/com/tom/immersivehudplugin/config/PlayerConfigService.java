@@ -25,11 +25,7 @@ public final class PlayerConfigService {
     }
 
     public PlayerConfig getOrLoadPlayerConfig(UUID uuid) {
-        PlayerConfig cached = playerConfigStore.getCached(uuid);
-        if (cached != null) {
-            return cached;
-        }
-
+        // Reconnecting also cancels a deferred unload left by a failed disconnect save.
         return playerConfigStore.loadOrCreate(uuid, getGlobalConfig());
     }
 
@@ -46,20 +42,15 @@ public final class PlayerConfigService {
         playerConfigStore.saveAndUnload(playerRef.getUuid());
     }
 
-    public void save(UUID uuid) {
-        playerConfigStore.save(uuid);
+    public void flush() {
+        playerConfigStore.flush();
     }
 
     public void updatePlayerConfig(PlayerRef playerRef, Consumer<PlayerConfig> mutator) {
         if (playerRef == null) { return; }
 
         UUID uuid = playerRef.getUuid();
-        PlayerConfig config = getOrLoadPlayerConfig(uuid);
-
-        mutator.accept(config);
-
-        playerConfigStore.markDirty(uuid);
-        playerConfigStore.saveAsync(uuid);
+        playerConfigStore.update(uuid, getGlobalConfig(), mutator);
     }
 
     private GlobalConfig getGlobalConfig() {

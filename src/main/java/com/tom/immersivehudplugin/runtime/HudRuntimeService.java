@@ -97,7 +97,7 @@ public final class HudRuntimeService {
 
         if (task != null) task.cancel(false);
 
-        playerState.keySet().forEach(playerConfigService::save);
+        playerConfigService.flush();
         playerState.clear();
     }
 

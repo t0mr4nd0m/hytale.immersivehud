@@ -9,6 +9,8 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
+* Serialize player configuration saves using independent snapshots and revision tracking. Failed disconnect saves remain pending and are included in shutdown flushes.
+* Write configuration JSON through temporary files and atomic replacement to preserve the previous file if saving fails.
 * Build immutable profile models once and reuse them for profile matching and applying independent configurations.
 * Avoid rule-set copies for read-only queries, iteration, and profile comparisons while preserving independent configuration copies.
 * Separate held-item trigger states from timed signals and remove redundant holding-trigger timer clean-up.
