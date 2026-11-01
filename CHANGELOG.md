@@ -9,6 +9,7 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
 
 **Technical Changes**
+* Preserve the translated Apply and Cancel button labels instead of overriding them with fixed English text.
 * Make component catalogue rules immutable while keeping applied player configurations independently editable.
 * Query Hytale's NPC spatial index for nearby combat candidates instead of scanning all NPC entities. Reuse one look snapshot per scan for field-of-view and line-of-sight checks.
 * Fix zero hide delay so timed triggers remain visible during the current HUD evaluation without persisting into the next update. Combat also honours zero delay instead of applying its minimum retention window.

@@ -259,9 +259,6 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
 
         commands.set("#ViewProfilesBtn.Disabled", profilesSelected);
         commands.set("#ViewVisibilityBtn.Disabled", visibilitySelected);
-
-        commands.set("#ApplyButton.Text", "APPLY");
-        commands.set("#CancelButton.Text", "CANCEL");
     }
 
     private void bindChromeEvents(@Nonnull UIEventBuilder events) {
