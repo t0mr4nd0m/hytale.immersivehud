@@ -191,6 +191,14 @@ public final class HudDetectionPlanTest {
     private static void verifyBuildingItems() {
         HeldItemState.isBuildingBlock(null, true);
         verify("empty hand cannot build", true);
+        var charcoal = new BuildingTestItem(true, false);
+        charcoal.types("Ingredient");
+        verify("charcoal block metadata does not enable construction", !HeldItemState.isBuildingBlock(charcoal, false));
+        verify("crouching does not enable ingredients", !HeldItemState.isBuildingBlock(charcoal, true));
+        charcoal.types("Resource", " ingredient ");
+        verify("ingredient exclusion checks every type", !HeldItemState.isBuildingBlock(charcoal, true));
+        charcoal.types("Block");
+        verify("other tagged blocks remain available", HeldItemState.isBuildingBlock(charcoal, false));
         for (boolean placeable : new boolean[]{false, true}) {
             for (boolean consumable : new boolean[]{false, true}) {
                 var item = new BuildingTestItem(placeable, consumable);
@@ -214,6 +222,11 @@ public final class HudDetectionPlanTest {
         }
 
         @Override public boolean isConsumable() { return consumable; }
+
+        private void types(String... types) {
+            data = new com.hypixel.hytale.assetstore.AssetExtraInfo.Data(Item.class, "testBuildingItem", null);
+            data.putTags(java.util.Map.of("Type", types));
+        }
     }
 
     private static PlayerConfig only(String componentKey, HudTrigger... triggers) {

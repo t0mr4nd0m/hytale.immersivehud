@@ -124,21 +124,18 @@ public final class ProfilePresets {
         dyn.getMana().setRules(EnumSet.of(HudTrigger.IN_COMBAT));
         dyn.getStamina().setRules(noRules());
         dyn.getOxygen().setRules(noRules());
-
         dyn.getCompass().setRules(EnumSet.of(
                 HudTrigger.PLAYER_CROUCHING,
                 HudTrigger.PLAYER_MOUNTING,
                 HudTrigger.PLAYER_FLYING,
                 HudTrigger.PLAYER_GLIDING,
-                HudTrigger.IN_COMBAT
-        ));
+                HudTrigger.IN_COMBAT));
         dyn.getReticle().setRules(EnumSet.of(
-                HudTrigger.CHARGING_WEAPON,
-                HudTrigger.CONSUMABLE_USE,
                 HudTrigger.TARGET_ENTITY,
+                HudTrigger.HOLDING_BUILDING_BLOCK,
+                HudTrigger.CHARGING_WEAPON,
                 HudTrigger.HOLDING_RANGED_WEAPON,
-                HudTrigger.IN_COMBAT
-        ));
+                HudTrigger.IN_COMBAT));
         dyn.getHotbar().setRules(EnumSet.of(HudTrigger.IN_COMBAT));
     }
 

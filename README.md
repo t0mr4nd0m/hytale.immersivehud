@@ -135,39 +135,38 @@ HUD components supported by ImmersiveHUD
 
 Rules to define the visibility behaviour of dynamic HUD components
 
-| Rule                     | Trigger condition                                    |
-|--------------------------|------------------------------------------------------|
-| `HOTBAR_INPUT`           | Player changes hotbar selection                      |
-| `CONSUMABLE_USE`         | Player is consuming food or potion                   |
-| `TARGET_ENTITY`          | Player is targeting an entity                        |
-| `INTERACTABLE_BLOCK`     | Player is looking at interactable blocks             |
-| `HOLDING_BUILDING_BLOCK` | Player is holding a placeable item or building block |
-| `PLAYER_MOVING`          | Player is moving                                     |
-| `PLAYER_WALKING`         | Player is walking                                    |
-| `PLAYER_RUNNING`         | Player is running                                    |
-| `PLAYER_SPRINTING`       | Player is sprinting                                  |
-| `PLAYER_MOUNTING`        | Player is mounting                                   |
-| `PLAYER_FLYING`          | Player is flying                                     |
-| `PLAYER_GLIDING`         | Player is gliding                                    |
-| `PLAYER_JUMPING`         | Player is jumping                                    |
-| `PLAYER_CROUCHING`       | Player is crouching                                  |
-| `PLAYER_CLIMBING`        | Player is climbing                                   |
-| `PLAYER_IN_FLUID`        | Player is in fluid                                   |
-| `PLAYER_ON_GROUND`       | Player is on ground                                  |
-| `PLAYER_FALLING`         | Player is falling                                    |
-| `PLAYER_SITTING`         | Player is sitting                                    |
-| `PLAYER_ROLLING`         | Player is rolling                                    |
-| `CHARGING_WEAPON`        | Player is aiming or charging a weapon                |
-| `HOLDING_MELEE_WEAPON`   | Player is holding a melee weapon (1)                 |
-| `HOLDING_RANGED_WEAPON`  | Player is holding a ranged weapon (1)                |
-| `BLOCKING_ATTACK`        | Player is using a weapon to block an attack          |
-| `IN_COMBAT`              | Player is engaged in combat with an hostile mob      |
-| `HEALTH_NOT_FULL`        | Health bar is not full                               |
-| `STAMINA_NOT_FULL`       | Stamina bar is not full                              |
-| `MANA_NOT_FULL`          | Mana bar is not full                                 |
-| `OXYGEN_NOT_FULL`        | Oxygen bar is not full                               |
-
-(1) Weapon detection inspects attack interactions, including chained actions and item interaction variables, to recognize modded projectile and melee weapons without relying on weapon families or specific interaction names. Hybrid weapons can match both holding triggers. Custom attacks implemented entirely in plugin code or ambiguous raycast attacks may not be recognized. Classification is cached and refreshed when item or interaction assets are reloaded.
+| Rule                     | Trigger condition                                                  |
+|--------------------------|--------------------------------------------------------------------|
+| `HOTBAR_INPUT`           | Player changes hotbar selection                                    |
+| `CONSUMABLE_USE`         | Player is consuming food or potion                                 |
+| `TARGET_ENTITY`          | Player is targeting an entity                                      |
+| `INTERACTABLE_BLOCK`     | Player is looking at interactable blocks                           |
+| `HOLDING_BUILDING_BLOCK` | Player is holding a placeable item or building block               |
+| `PLAYER_MOVING`          | Player is moving                                                   |
+| `PLAYER_WALKING`         | Player is walking                                                  |
+| `PLAYER_RUNNING`         | Player is running                                                  |
+| `PLAYER_SPRINTING`       | Player is sprinting                                                |
+| `PLAYER_MOUNTING`        | Player is mounting                                                 |
+| `PLAYER_FLYING`          | Player is flying                                                   |
+| `PLAYER_GLIDING`         | Player is gliding                                                  |
+| `PLAYER_JUMPING`         | Player is jumping                                                  |
+| `PLAYER_CROUCHING`       | Player is crouching                                                |
+| `PLAYER_CLIMBING`        | Player is climbing                                                 |
+| `PLAYER_IN_FLUID`        | Player is in fluid                                                 |
+| `PLAYER_ON_GROUND`       | Player is on ground                                                |
+| `PLAYER_FALLING`         | Player is falling                                                  |
+| `PLAYER_SITTING`         | Player is sitting                                                  |
+| `PLAYER_ROLLING`         | Player is rolling                                                  |
+| `CHARGING_WEAPON`        | Player is aiming or charging a weapon                              |
+| `HOLDING_BUILDING_BLOCK` | Player is holding a building block or placeable item and crouching |
+| `HOLDING_MELEE_WEAPON`   | Player is holding a melee weapon                                   |
+| `HOLDING_RANGED_WEAPON`  | Player is holding a ranged weapon                                  |
+| `BLOCKING_ATTACK`        | Player is using a weapon to block an attack                        |
+| `IN_COMBAT`              | Player is engaged in combat with an hostile mob                    |
+| `HEALTH_NOT_FULL`        | Health bar is not full                                             |
+| `STAMINA_NOT_FULL`       | Stamina bar is not full                                            |
+| `MANA_NOT_FULL`          | Mana bar is not full                                               |
+| `OXYGEN_NOT_FULL`        | Oxygen bar is not full                                             |
 
 ---
 
@@ -191,7 +190,7 @@ You can switch between them instantly.
 
 | Profile     | Description                                       |
 |-------------|---------------------------------------------------|
-| `Balanced`  | Shows HUD components when relevant, including the reticle while holding placeable blocks or decorations |
+| `Balanced`  | Shows HUD components when relevant                |
 | `Immersive` | Minimal HUD, maximum immersion                    |
 | `Vanilla`   | HUD always visible (vanilla-like)                 |
 | `Custom`    | Custom profile defined by player                  |

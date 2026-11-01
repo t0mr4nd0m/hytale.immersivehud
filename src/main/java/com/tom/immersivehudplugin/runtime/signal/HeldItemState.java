@@ -27,7 +27,18 @@ public final class HeldItemState {
     }
 
     public static boolean isBuildingBlock(Item item, boolean crouching) {
-        return item != null && item.hasBlockType() && (!item.isConsumable() || crouching);
+        return item != null && item.hasBlockType() && !isIngredient(item)
+                && (!item.isConsumable() || crouching);
+    }
+
+    private static boolean isIngredient(Item item) {
+        if (item.getData() == null) return false;
+        String[] types = item.getData().getRawTags().get("Type");
+        if (types == null) return false;
+        for (String type : types) {
+            if (type != null && "Ingredient".equalsIgnoreCase(type.trim())) return true;
+        }
+        return false;
     }
 
     public static String getItemType(Item item) {
