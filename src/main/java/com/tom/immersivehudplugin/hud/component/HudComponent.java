@@ -6,7 +6,9 @@ import com.tom.immersivehudplugin.config.HudComponentsConfig;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Set;
 import java.util.function.Function;
 
 public record HudComponent(
@@ -18,13 +20,13 @@ public record HudComponent(
         HudComponentRegistry.BoolSetter<HudComponentsConfig> staticSetter,
         @Nullable Function<DynamicHudConfig, DynamicHudRuleConfig> dynamicGetter,
         boolean defaultHidden,
-        EnumSet<HudTrigger> allowedRules,
-        EnumSet<HudTrigger> defaultRules,
+        Set<HudTrigger> allowedRules,
+        Set<HudTrigger> defaultRules,
         @Nullable Float defaultThreshold
 ) {
     public HudComponent {
-        allowedRules = copyRules(allowedRules);
-        defaultRules = copyRules(defaultRules);
+        allowedRules = immutableRules(allowedRules);
+        defaultRules = immutableRules(defaultRules);
 
         if (!allowedRules.containsAll(defaultRules)) {
             throw new IllegalArgumentException(
@@ -109,9 +111,9 @@ public record HudComponent(
         return rules != null && rules.hasRules();
     }
 
-    private static EnumSet<HudTrigger> copyRules(@Nullable EnumSet<HudTrigger> rules) {
+    private static Set<HudTrigger> immutableRules(@Nullable Set<HudTrigger> rules) {
         return rules == null || rules.isEmpty()
-                ? EnumSet.noneOf(HudTrigger.class)
-                : EnumSet.copyOf(rules);
+                ? Set.of()
+                : Collections.unmodifiableSet(EnumSet.copyOf(rules));
     }
 }

@@ -2,6 +2,7 @@ package com.tom.immersivehudplugin.config;
 
 import com.google.gson.JsonParser;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
+import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.profiles.Profile;
 import com.tom.immersivehudplugin.profiles.ProfilePresets;
@@ -85,6 +86,26 @@ public final class DynamicHudRuleConfigTest {
         session.toggleRule(reticle, HudTrigger.HOLDING_BUILDING_BLOCK);
         verify("reverted draft matches Balanced", presenter.resolveCurrentProfile(session.getDraftHudComponents(),
                 session.getDraftDynamicHud()) == Profile.BALANCED);
+        var allowedInput = EnumSet.of(HudTrigger.IN_COMBAT, HudTrigger.HOLDING_BUILDING_BLOCK);
+        var defaultInput = EnumSet.of(HudTrigger.IN_COMBAT);
+        var isolated = new HudComponent(reticle.key(), reticle.label(), reticle.group(), reticle.hudComponent(),
+                reticle.staticGetter(), reticle.staticSetter(), reticle.dynamicGetter(), reticle.defaultHidden(),
+                allowedInput, defaultInput, null);
+        allowedInput.clear();
+        defaultInput.clear();
+        verify("catalog allowed rules are detached from constructor input", isolated.supportsRule(HudTrigger.IN_COMBAT)
+                && isolated.supportsRule(HudTrigger.HOLDING_BUILDING_BLOCK));
+        verify("catalog default rules are detached from constructor input", isolated.defaultRules().equals(java.util.Set.of(HudTrigger.IN_COMBAT)));
+        var editable = new DynamicHudRuleConfig();
+        editable.setRules(isolated.defaultRules());
+        editable.removeRule(HudTrigger.IN_COMBAT);
+        editable.addRule(HudTrigger.HOLDING_BUILDING_BLOCK);
+        verify("player rules stay editable without changing catalog defaults", editable.hasRule(HudTrigger.HOLDING_BUILDING_BLOCK)
+                && !editable.hasRule(HudTrigger.IN_COMBAT) && isolated.defaultRules().contains(HudTrigger.IN_COMBAT)
+                && !isolated.defaultRules().contains(HudTrigger.HOLDING_BUILDING_BLOCK));
+        player.getDynamicHud().getReticle().removeRule(HudTrigger.HOLDING_BUILDING_BLOCK);
+        verify("registry defaults survive player edits", reticle.defaultRules().contains(HudTrigger.HOLDING_BUILDING_BLOCK)
+                && HudComponentRegistry.buildDefaultDynamicHud().getReticle().hasRule(HudTrigger.HOLDING_BUILDING_BLOCK));
         System.out.println("Passed " + checks + " rule query regression checks.");
     }
 
