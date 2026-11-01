@@ -26,8 +26,8 @@ public final class HeldItemState {
         return item != null && item.isConsumable();
     }
 
-    public static boolean isBuildingBlock(Item item) {
-        return item != null && item.hasBlockType();
+    public static boolean isBuildingBlock(Item item, boolean crouching) {
+        return item != null && item.hasBlockType() && (!item.isConsumable() || crouching);
     }
 
     public static String getItemType(Item item) {

@@ -33,6 +33,9 @@ public final class HudDetectionPlan {
     public boolean requires(HudTrigger trigger) { return triggers.contains(trigger); }
     public boolean enabled() { return !triggers.isEmpty(); }
     public boolean movement() { return movement; }
+    public boolean movementState() {
+        return movement || requires(HudTrigger.HOLDING_BUILDING_BLOCK);
+    }
     public boolean reticle() {
         return requires(HudTrigger.TARGET_ENTITY) || requires(HudTrigger.INTERACTABLE_BLOCK);
     }

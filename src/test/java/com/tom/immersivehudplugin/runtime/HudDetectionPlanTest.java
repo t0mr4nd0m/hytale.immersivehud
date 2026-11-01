@@ -11,6 +11,8 @@ import com.tom.immersivehudplugin.runtime.context.HudTriggerContextFactory;
 import com.tom.immersivehudplugin.runtime.context.PlayerTickContext;
 import com.tom.immersivehudplugin.runtime.signal.CombatSignalTracker;
 import com.tom.immersivehudplugin.runtime.signal.HeldItemSignalTracker;
+import com.tom.immersivehudplugin.runtime.signal.HeldItemState;
+import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.tom.immersivehudplugin.runtime.signal.HudSignalPipeline;
 import com.tom.immersivehudplugin.runtime.signal.MovementSignalTracker;
 import com.tom.immersivehudplugin.runtime.signal.ReticleSignalTracker;
@@ -43,7 +45,8 @@ public final class HudDetectionPlanTest {
                 && state.manaBar.percent() == 25 && !state.staminaBar.isValid());
 
         plan = build(only("reticle", HudTrigger.HOLDING_BUILDING_BLOCK));
-        verify("construction only needs held item", plan.heldItem() && !plan.weapons()
+        verify("construction reads crouching without enabling movement signals", plan.heldItem()
+                && plan.movementState() && !plan.movement() && !plan.weapons()
                 && !plan.hotbar() && !plan.interactions() && !plan.reticle() && !plan.bars());
         plan = build(only("hotbar", HudTrigger.HOTBAR_INPUT));
         verify("slot changes do not need item classification", plan.hotbar() && !plan.heldItem()
@@ -118,6 +121,7 @@ public final class HudDetectionPlanTest {
         state.reset(500);
         verify("player reset invalidates detector cache", state.dynamicHudCache.get() == null);
         verifyHeldItemSignalSources();
+        verifyBuildingItems();
         System.out.println("Passed " + checks + " detector selection regression checks.");
     }
 
@@ -182,6 +186,34 @@ public final class HudDetectionPlanTest {
         context = factory.create(state, now, plan);
         verify("consumable use keeps its timed persistence", context.active(HudTrigger.CONSUMABLE_USE)
                 && !factory.create(state, now + 500, plan).active(HudTrigger.CONSUMABLE_USE));
+    }
+
+    private static void verifyBuildingItems() {
+        HeldItemState.isBuildingBlock(null, true);
+        verify("empty hand cannot build", true);
+        for (boolean placeable : new boolean[]{false, true}) {
+            for (boolean consumable : new boolean[]{false, true}) {
+                var item = new BuildingTestItem(placeable, consumable);
+                verify("standing placement: " + placeable + "/" + consumable,
+                        HeldItemState.isBuildingBlock(item, false) == (placeable && !consumable));
+                verify("crouched placement: " + placeable + "/" + consumable,
+                        HeldItemState.isBuildingBlock(item, true) == placeable);
+                verify("standing again clears consumable placement: " + placeable + "/" + consumable,
+                        HeldItemState.isBuildingBlock(item, false) == (placeable && !consumable));
+            }
+        }
+    }
+
+    private static final class BuildingTestItem extends Item {
+        private final boolean consumable;
+
+        private BuildingTestItem(boolean placeable, boolean consumable) {
+            super("testBuildingItem");
+            if (placeable) blockId = "testBlock";
+            this.consumable = consumable;
+        }
+
+        @Override public boolean isConsumable() { return consumable; }
     }
 
     private static PlayerConfig only(String componentKey, HudTrigger... triggers) {

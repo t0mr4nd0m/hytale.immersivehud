@@ -29,7 +29,7 @@ public final class PlayerTickContextFactory {
             }
 
             EntityStatMap stats = plan.bars() ? store.getComponent(ref, EntityStatMap.getComponentType()) : null;
-            MovementStatesComponent movement = plan.movement()
+            MovementStatesComponent movement = plan.movementState()
                     ? store.getComponent(ref, MovementStatesComponent.getComponentType()) : null;
 
             return new PlayerTickContext(playerRef, ref, store, player, stats, movement);

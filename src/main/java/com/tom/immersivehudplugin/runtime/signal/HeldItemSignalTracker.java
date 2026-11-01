@@ -33,12 +33,15 @@ public final class HeldItemSignalTracker {
         if (!plan.heldItem()) return;
 
         Item heldItem = getHeldItemFromInventory(tickContext);
+        var movement = tickContext.movement();
+        var movementStates = movement != null ? movement.getMovementStates() : null;
+        boolean crouching = movementStates != null && movementStates.crouching;
 
         state.applyHeldItemState(
                 plan.weapons() && HeldItemState.isRangedWeapon(heldItem),
                 plan.weapons() && HeldItemState.isMeleeWeapon(heldItem),
                 plan.requires(HudTrigger.CONSUMABLE_USE) && HeldItemState.isConsumable(heldItem),
-                plan.requires(HudTrigger.HOLDING_BUILDING_BLOCK) && HeldItemState.isBuildingBlock(heldItem)
+                plan.requires(HudTrigger.HOLDING_BUILDING_BLOCK) && HeldItemState.isBuildingBlock(heldItem, crouching)
         );
     }
 
