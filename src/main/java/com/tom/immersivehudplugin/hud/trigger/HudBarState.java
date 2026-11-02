@@ -15,7 +15,7 @@ public final class HudBarState {
     }
 
     public float ratio() {
-        return isValid() ? Math.max(0f, Math.min(1f, current / max)) : 1f;
+        return isValid() ? Math.clamp(current / max, 0f, 1f) : 1f;
     }
 
     public float percent() {

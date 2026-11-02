@@ -129,12 +129,11 @@ public final class HudRuntimeService {
         GlobalConfig global = getGlobalConfig();
 
         int hideDelay = hideDelayMs(global);
-        int initialGrace = initialHudGraceMs(global);
 
         PlayerHudState state = stateFor(playerRef.getUuid());
 
         state.reset(hideDelay);
-        state.startInitialHudVisibleGrace(nowMs(), initialGrace);
+        state.startInitialHudVisibleGrace(nowMs(), hideDelay);
     }
 
     public void onPlayerDisconnect(@Nullable PlayerRef playerRef) {
@@ -261,10 +260,6 @@ public final class HudRuntimeService {
 
     private int hideDelayMs(GlobalConfig config) {
         return config != null ? config.getHideDelayMs() : GlobalConfig.HIDE_DELAY_MS;
-    }
-
-    private int initialHudGraceMs(GlobalConfig config) {
-        return config != null ? config.getInitialHudGraceMs() : GlobalConfig.INITIAL_HUD_GRACE_MS;
     }
 
     private int intervalMs(GlobalConfig config) {

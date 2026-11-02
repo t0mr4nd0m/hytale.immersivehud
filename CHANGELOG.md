@@ -9,6 +9,11 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
 
 **Technical Changes**
+* Unify the initial HUD visibility wait and trigger hide delay under `HideDelayMs`. Remove `InitialHudGraceMs`; older configuration files remain compatible and the obsolete field is omitted on the next save.
+* Limit `ReticleTargetRange` to values greater than 0 and up to 24, matching `CombatScanRange`; out-of-range values reset to the default of 8.
+* Accept `IntervalMs` values from 200 to 1000 milliseconds, inclusive.
+* Simplify numeric configuration validation to use range limits and retain bar threshold clamping to 0–100.
+* Document all global configuration parameters, limits, and defaults. Clarify that server HUD defaults initialize new players without changing existing saved configurations, and update the project structure and component defaults in the README.
 * Preserve the translated Apply and Cancel button labels instead of overriding them with fixed English text.
 * Make component catalogue rules immutable while keeping applied player configurations independently editable.
 * Query Hytale's NPC spatial index for nearby combat candidates instead of scanning all NPC entities. Reuse one look snapshot per scan for field-of-view and line-of-sight checks.

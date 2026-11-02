@@ -17,7 +17,6 @@ public final class ConfigSchemaValidator {
         if (hasAndNotString(obj, "ConfigVersion")) return false;
         if (hasAndNotNumber(obj, "IntervalMs")) return false;
         if (hasAndNotNumber(obj, "HideDelayMs")) return false;
-        if (hasAndNotNumber(obj, "InitialHudGraceMs")) return false;
         if (hasAndNotNumber(obj, "ReticleTargetRange")) return false;
         if (hasAndNotNumber(obj, "CombatScanRange")) return false;
         if (hasAndNotNumber(obj, "PlayerCombatHorizontalFovDegrees")) return false;

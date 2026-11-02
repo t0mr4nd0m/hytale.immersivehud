@@ -170,7 +170,7 @@ public final class DynamicHudRuleConfig {
     }
 
     private static float sanitizeThreshold(Float value) {
-        if (value == null || Float.isNaN(value) || Float.isInfinite(value)) {
+        if (value == null) {
             return DEFAULT_THRESHOLD;
         }
 

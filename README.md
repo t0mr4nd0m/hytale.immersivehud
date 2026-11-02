@@ -97,15 +97,15 @@ HUD components supported by ImmersiveHUD
 
 | Component                                        | Group   | Type     | Default state | Default rules                                                                                   | Default Threshold |
 |--------------------------------------------------|---------|----------|---------------|-------------------------------------------------------------------------------------------------|-------------------|
-| <span style="color:orange">hotbar</span>         | Core    | Dynamic  | Hidden        | `HOTBAR_INPUT`                                                                                  | —                 |
-| <span style="color:orange">compass</span>        | Core    | Dynamic  | Hidden        | `PLAYER_MOVING`                                                                                 | —                 |
+| <span style="color:orange">hotbar</span>         | Core    | Dynamic  | Hidden        | `HOTBAR_INPUT` `IN_COMBAT` | —                 |
+| <span style="color:orange">compass</span>        | Core    | Dynamic  | Hidden        | `PLAYER_MOVING` `IN_COMBAT` | —                 |
 | <span style="color:orange">reticle</span>        | Core    | Dynamic  | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_BUILDING_BLOCK` `HOLDING_RANGED_WEAPON` `IN_COMBAT` | —                 |
-| <span style="color:orange">health</span> 📊      | Bars    | Dynamic  | Hidden        | `HEALTH_NOT_FULL`                                                                               | 100               |
-| <span style="color:orange">stamina</span> 📊     | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL`                                                                              | 100               |
-| <span style="color:orange">mana</span> 📊        | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL`                                                                                 | 100               |
+| <span style="color:orange">health</span> 📊      | Bars    | Dynamic  | Hidden        | `HEALTH_NOT_FULL` `IN_COMBAT` | 100               |
+| <span style="color:orange">stamina</span> 📊     | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL` `IN_COMBAT` | 100               |
+| <span style="color:orange">mana</span> 📊        | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL` `IN_COMBAT` | 100               |
 | <span style="color:orange">oxygen</span> 📊      | Bars    | Dynamic  | Hidden        | `OXYGEN_NOT_FULL`                                                                               | 100               |
-| <span style="color:orange">statusicons</span> ⚠️| UI      | Dynamic  | Visible       | `HOTBAR_INPUT`                                                                                  | —                 |
-| <span style="color:orange">ammo</span>           | UI      | Dynamic  | Visible       | `HOLDING_RANGED_WEAPON`                                                                         | —                 |
+| <span style="color:orange">statusicons</span> ⚠️| UI      | Dynamic  | Hidden        | `HOTBAR_INPUT` `IN_COMBAT` | —                 |
+| <span style="color:orange">ammo</span>           | UI      | Dynamic  | Hidden        | `HOLDING_RANGED_WEAPON` `IN_COMBAT` | —                 |
 | inputbindings                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
 | abilities ✨                                     | UI      | Static   | Hidden        | —                                                                                               | —                 |
 | notifications                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
@@ -230,7 +230,23 @@ ImmersiveHud uses two configuration layers:
 
 The global configuration file is created automatically when the mod is first loaded.
 
-This file defines default settings for all players.
+Server administrators can use this file to configure HUD detection and timing. `DefaultHudComponents` and `DefaultDynamicHud` define the initial HUD configuration for new players; changing them does not affect players who already have a saved configuration.
+
+| Parameter | Description | Min | Max | Default |
+| --- | --- | --- | --- | --- |
+| `ConfigVersion` | ImmersiveHud mod version; updated automatically. | - | - | Installed mod version |
+| `IntervalMs` | Time between HUD updates, in milliseconds. | `200` | `1000` | `250` |
+| `HideDelayMs` | Initial wait before applying HUD visibility after the player becomes ready, and time a trigger keeps components visible after its condition ends, in milliseconds. Combat detection may extend trigger retention to bridge scans. | `0` | `3000` | `2000` |
+| `ReticleTargetRange` | Maximum distance for detecting targeted entities and interactable blocks. | `1` | `24` | `8` |
+| `CombatScanRange` | Maximum distance for detecting hostile NPCs during combat scans. | `1` | `24` | `8` |
+| `PlayerCombatHorizontalFovDegrees` | Full horizontal field of view used to detect visible hostile NPCs, in degrees. Attacking NPCs targeting the player can be detected outside it. | `90` | `120` | `90` |
+| `PlayerCombatVerticalFovDegrees` | Full vertical field of view used to detect visible hostile NPCs, in degrees. Attacking NPCs targeting the player can be detected outside it. | `45` | `70` | `70` |
+| `LosNpcTargetHeight` | Height above the NPC position used as the target for combat line-of-sight checks. | `1` | `3` | `1` |
+| `LosTargetEpsilon` | Distance subtracted from the line-of-sight ray length to avoid testing beyond the NPC target point. | `0` | `1` | `0.15` |
+| `DefaultHudComponents` | Initial component visibility settings for new players. | - | - | Component catalog defaults (Balanced profile) |
+| `DefaultDynamicHud` | Initial dynamic rules and bar thresholds for new players. | - | - | Component catalog defaults (Balanced profile) |
+
+Numeric values outside the listed ranges are reset to their defaults when the configuration is loaded.
 
 Configuration file path:
 
@@ -244,10 +260,9 @@ Example:
 
 ```json
 {
-  "ConfigVersion": "1.2.7",
+  "ConfigVersion": "1.2.9",
   "IntervalMs": 250,
   "HideDelayMs": 2000,
-  "InitialHudGraceMs": 2000,
   "ReticleTargetRange": 8.0,
   "CombatScanRange": 8.0,
   "PlayerCombatHorizontalFovDegrees": 90.0,
@@ -255,41 +270,43 @@ Example:
   "LosNpcTargetHeight": 1.0,
   "LosTargetEpsilon": 0.15,
   "DefaultHudComponents": {
-    "HideHealth": true,
-    "HideStamina": true,
-    "HideMana": true,
-    "HideOxygen": false,
     "HideCompass": true,
     "HideHotbar": true,
     "HideReticle": true,
+    "HideHealth": true,
+    "HideStamina": true,
+    "HideMana": true,
+    "HideOxygen": true,
+    "HideStatusicons": true,
+    "HideAmmo": true,
     "HideAbilities": true,
-    "HideInputBindings": true,
+    "HideInputbindings": true,
     "HideNotifications": true,
-    "HideStatusIcons": false,
     "HideSpeedometer": false,
-    "HideAmmoIndicator": false,
-    "HideUtilitySlotSelector": false,
+    "HideUtilityslotselector": false,
     "HideChat": false,
     "HideRequests": false,
-    "HideKillFeed": false,
-    "HidePlayerList": false,
-    "HideEventTitle": false,
-    "HideObjectivePanel": false,
-    "HidePortalPanel": false,
+    "HideKillfeed": false,
+    "HidePlayerlist": false,
+    "HideEventtitle": false,
+    "HideObjectivepanel": false,
+    "HidePortalpanel": false,
     "HideSleep": false,
-    "HideBlockVariantSelector": false,
-    "HideBuilderToolsLegend": false,
-    "HideBuilderToolsMaterialSlotSelector": false
+    "HideBlockvariantselector": false,
+    "HideBuildertoolslegend": false,
+    "HideBuildertoolsmaterialslotselector": false
   },
   "DefaultDynamicHud": {
     "Compass": {
       "Rules": [
-        "PLAYER_MOVING"
+        "PLAYER_MOVING",
+        "IN_COMBAT"
       ]
     },
     "Hotbar": {
       "Rules": [
-        "HOTBAR_INPUT"
+        "HOTBAR_INPUT",
+        "IN_COMBAT"
       ]
     },
     "Reticle": {
@@ -297,24 +314,29 @@ Example:
         "CONSUMABLE_USE",
         "TARGET_ENTITY",
         "INTERACTABLE_BLOCK",
+        "HOLDING_BUILDING_BLOCK",
         "CHARGING_WEAPON",
-        "HOLDING_RANGED_WEAPON"
+        "HOLDING_RANGED_WEAPON",
+        "IN_COMBAT"
       ]
     },
     "Health": {
       "Rules": [
+        "IN_COMBAT",
         "HEALTH_NOT_FULL"
       ],
       "Threshold": 100.0
     },
     "Stamina": {
       "Rules": [
+        "IN_COMBAT",
         "STAMINA_NOT_FULL"
       ],
       "Threshold": 100.0
     },
     "Mana": {
       "Rules": [
+        "IN_COMBAT",
         "MANA_NOT_FULL"
       ],
       "Threshold": 100.0
@@ -327,11 +349,15 @@ Example:
     },
     "Statusicons": {
       "Rules": [
-        "HOTBAR_INPUT"
+        "HOTBAR_INPUT",
+        "IN_COMBAT"
       ]
     },
     "Ammo": {
-      "Rules": []
+      "Rules": [
+        "HOLDING_RANGED_WEAPON",
+        "IN_COMBAT"
+      ]
     }
   }
 }
@@ -340,7 +366,7 @@ Example:
 
 ### Player Configuration File - `<playerUuid>.json`
 
-A player configuration file is created automatically when the player first modifies HUD settings.
+A player configuration file is created automatically when the player first joins with the mod enabled, using the server defaults.
 
 Player configuration file path:
 
@@ -483,105 +509,118 @@ The build produces a shaded mod jar named:
 
 ## 📁 Project Structure
 
-```terminaloutput
-src/main/java/com/tom/immersivehudplugin
+```text
+src/main/java/com/tom/immersivehudplugin/
+├── commands/
+│   ├── ConfigCmd.java
+│   └── IHudCommands.java
+├── config/
+│   ├── ConfigJsonMapper.java
+│   ├── ConfigSchemaValidator.java
+│   ├── ConfigSupport.java
+│   ├── DynamicHudConfig.java
+│   ├── DynamicHudRuleConfig.java
+│   ├── GlobalConfig.java
+│   ├── GlobalConfigStore.java
+│   ├── HudComponentsConfig.java
+│   ├── PlayerConfig.java
+│   ├── PlayerConfigService.java
+│   └── PlayerConfigStore.java
+├── hud/
+│   ├── component/
+│   │   ├── HudComponent.java
+│   │   ├── HudComponentCatalog.java
+│   │   └── HudComponentRegistry.java
+│   └── trigger/
+│       ├── HudBarState.java
+│       ├── HudTrigger.java
+│       └── HudTriggerContext.java
+├── profiles/
+│   ├── Profile.java
+│   └── ProfilePresets.java
+├── runtime/
+│   ├── context/
+│   │   ├── HudBarStateUpdater.java
+│   │   ├── HudTriggerContextFactory.java
+│   │   ├── PlayerTickContext.java
+│   │   └── PlayerTickContextFactory.java
+│   ├── signal/
+│   │   ├── CombatScanView.java
+│   │   ├── CombatSignalScanner.java
+│   │   ├── CombatSignalTracker.java
+│   │   ├── HeldItemSignalTracker.java
+│   │   ├── HeldItemState.java
+│   │   ├── HudSignalPipeline.java
+│   │   ├── MovementSignalTracker.java
+│   │   ├── ReticleSignalTracker.java
+│   │   └── WeaponBehaviorClassifier.java
+│   ├── visibility/
+│   │   ├── HudDeltaApplier.java
+│   │   ├── HudRuleEvaluator.java
+│   │   └── HudVisibilityCoordinator.java
+│   ├── DynamicHudCache.java
+│   ├── HudDetectionPlan.java
+│   ├── HudRuntimeService.java
+│   ├── HudTickProcessor.java
+│   ├── HudTimers.java
+│   ├── PlayerHeldItemState.java
+│   ├── PlayerHudState.java
+│   └── PlayerSessionService.java
+├── ui/
+│   ├── HudConfigPauseController.java
+│   ├── HudConfigPresenter.java
+│   ├── HudConfigProfilesRenderer.java
+│   ├── HudConfigUiService.java
+│   ├── HudConfigUiSession.java
+│   ├── HudConfigView.java
+│   ├── HudConfigVisibilityRenderer.java
+│   ├── IHudConfigPage.java
+│   ├── VisibilityComponentSelectorRenderer.java
+│   ├── VisibilityDynamicDetailRenderer.java
+│   └── VisibilityStaticDetailRenderer.java
+└── ImmersiveHudPlugin.java
 
-ImmersiveHudPlugin.java
+src/main/resources/
+├── Common/
+│   └── UI/
+│       └── Custom/
+│           ├── Assets/  # UI icons and images
+│           ├── Views/
+│           │   ├── ProfileRow.ui
+│           │   ├── ProfilesView.ui
+│           │   ├── VisibilityComponentButton.ui
+│           │   ├── VisibilityStaticHeader.ui
+│           │   ├── VisibilityStaticRow.ui
+│           │   ├── VisibilityTriggerRow.ui
+│           │   └── VisibilityView.ui
+│           └── IHudConfigPage.ui
+├── Server/
+│   └── Languages/
+│       └── en-US/
+│           └── immersivehud.lang
+├── icon-256.png
+└── manifest.json
 
-  commands/
-     IHudCommands.java
-     ConfigCmd.java
-  config/
-     ConfigJsonMapper.java
-     ConfigSchemaValidator.java
-     ConfigSupport.java
-     DynamicHudConfig.java
-     DynamicHudRuleConfig.java
-     GlobalConfig.java
-     GlobalConfigStore.java
-     HudComponentsConfig.java
-     PlayerConfig.java
-     PlayerConfigService.java
-     PlayerConfigStore.java
-     
-  hud/
-     component/
-        HudComponent.java
-        HudComponentCatalog.java
-        HudComponentRegistry.java
-     trigger/
-        HudBarState.java
-        HudTrigger.java
-        HudTriggerContext.java
-        
-  profiles/
-     Profile.java
-     ProfilePresets.java
-  
-  runtime/
-     DynamicHudCache.java
-     HudRuntimeService.java
-     HudTickProcessor.java
-     HudTimers.java
-     PlayerHeldItemState.java
-     PlayerHudState.java
-     PlayerLifecycleService.java
-     context/
-        HudStateUpdater.java
-        HudTriggerContextFactory.java
-        PlayerTickContext.java
-        PLayerTickContextFactory.java
-     signal/
-        CombatSignalScanner.java
-        CombatSignalTracker.java
-        HeldItemSignalTracker.java
-        HeldItemState.java
-        HudSignalPipeline.java
-        MovementSignalTracker.java
-        ReticleSignalTracker.java
-     visibility/
-        HudDeltaApplier.java
-        HudRuleEvaluator.java
-        HudVisibilityCoordinator.java
-        
-  ui/
-     HudConfigPresenter.java
-     HudConfigProfilesRenderer.java
-     HudConfigUiService.java
-     HudConfigUiSession.java
-     HudConfigView.java
-     HudConfigVisibilityRenderer.java
-     HudConfigPage.java
-     VisibilityComponentSelectorRenderer
-     VisibilityDynamicDetailRenderer
-     VisibilityStaticDetailRenderer
-   
-src/main/resources/Common/UI/Custom/
-
-  IHudConfigPage.ui
-  
-  Assets/
-    
-  Views/
-    ProfileRow.ui
-    ProfilesView.ui
-    VisibilityComponentButton.ui
-    VisibilityStaticHeader.ui
-    VisibilityStaticRow.ui
-    VisibilityTriggerRow.ui
-    VisibilityView.ui
-
-src/main/resources/Server/Languages/
-
-  en-US/
-    immersivehud.lang
+src/test/java/com/tom/immersivehudplugin/
+├── config/
+│   ├── ConfigPersistenceTest.java
+│   └── DynamicHudRuleConfigTest.java
+├── profiles/
+│   └── ProfilePresetsTest.java
+├── runtime/
+│   ├── signal/
+│   │   ├── CombatScanTest.java
+│   │   └── WeaponBehaviorClassifierTest.java
+│   ├── HudDetectionPlanTest.java
+│   └── HudTimersTest.java
+└── ui/
+    └── HudConfigPauseControllerTest.java
 ```
 
 ---
 
 ## 🐞 Known Issues
 
-- ~~[Input Bindings do not hide completely](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/7)~~ Fixed in Hytale 0.6.0
 - [Status Icons cannot be hidden](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/8)
 - [Network Quality icon cannot be hidden](https://github.com/t0mr4nd0m/hytale.immersivehud/issues/9)
 
@@ -592,14 +631,9 @@ Check them in GitHub to look for workarounds or fixes.
 ## 🚧 Roadmap
 
 Possible future improvements:
-- ~~GUI configuration menu~~
-- ~~Additional dynamic triggers:~~
-  - ~~PLAYER_FLYING~~
-  - ~~PLAYER_GLIDING~~
-  - ~~IN_COMBAT~~
-- Import / export custom config profiles
 - Support for future Hytale Hud components
 - Support for Hud components from other mods (IHUD API)
+- Import / export custom config profiles
 
 ---
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,9 @@ public final class ConfigPersistenceTest {
     static void main() throws Exception {
         Path root = Files.createTempDirectory(Path.of(".").toAbsolutePath(), "ihud-persistence-");
         try {
+            verifyUnifiedHideDelay();
+            verifyReticleRangeValidation();
+            verifyJsonNumericOverflow();
             verifyAtomicFiles(root.resolve("atomic"));
             verifySnapshotsAndCoalescing(root.resolve("coalescing"));
             verifyConcurrentSaves(root.resolve("concurrent"));
@@ -42,6 +46,63 @@ public final class ConfigPersistenceTest {
         }
     }
 
+    private static void verifyUnifiedHideDelay() {
+        for (int delay : new int[]{0, 750, 3000}) {
+            var json = JsonParser.parseString("{\"HideDelayMs\":" + delay
+                    + ",\"InitialHudGraceMs\":1234}").getAsJsonObject();
+            verify("legacy configuration remains valid", ConfigSchemaValidator.isValidGlobalConfig(json));
+            GlobalConfig config = ConfigJsonMapper.fromJsonGlobal(json);
+            config.sanitize();
+            verify("legacy initial delay does not override hide delay", config.getHideDelayMs() == delay);
+            var state = new com.tom.immersivehudplugin.runtime.PlayerHudState();
+            state.startInitialHudVisibleGrace(10000, config.getHideDelayMs());
+            verify("initial grace uses hide delay", state.isInitialHudVisibleGraceActive(10000) == (delay > 0));
+            verify("initial grace expires at hide delay", !state.isInitialHudVisibleGraceActive(10000 + delay));
+            if (delay > 0) verify("initial grace lasts until hide delay",
+                    state.isInitialHudVisibleGraceActive(10000 + delay - 1));
+            var saved = ConfigJsonMapper.toJson(config);
+            verify("saved configuration only contains unified delay",
+                    !saved.has("InitialHudGraceMs") && saved.get("HideDelayMs").getAsInt() == delay);
+        }
+    }
+
+    private static void verifyReticleRangeValidation() {
+        for (float value : new float[]{0f, -1f, Math.nextUp(24f),
+                Float.MAX_VALUE}) {
+            GlobalConfig config = new GlobalConfig();
+            config.setReticleTargetRange(value);
+            verify("invalid reticle range is reported: " + value, config.sanitize());
+            verify("invalid reticle range resets to default: " + value,
+                    config.getReticleTargetRange() == GlobalConfig.RETICLE_TARGET_RANGE);
+            verify("corrected reticle range is stable: " + value, !config.sanitize());
+        }
+        for (float value : new float[]{0.5f, GlobalConfig.RETICLE_TARGET_RANGE, 24f}) {
+            GlobalConfig config = new GlobalConfig();
+            config.setReticleTargetRange(value);
+            verify("valid reticle range is unchanged: " + value,
+                    !config.sanitize() && config.getReticleTargetRange() == value);
+        }
+        // A valid JSON number can overflow when converted to a float.
+        GlobalConfig overflow = ConfigJsonMapper.fromJsonGlobal(
+                JsonParser.parseString("{\"ReticleTargetRange\":1e100}").getAsJsonObject());
+        verify("JSON numeric overflow is corrected", overflow.sanitize()
+                && overflow.getReticleTargetRange() == GlobalConfig.RETICLE_TARGET_RANGE);
+        GlobalConfig restored = ConfigJsonMapper.fromJsonGlobal(ConfigJsonMapper.toJson(overflow));
+        verify("corrected reticle range survives serialization", !restored.sanitize()
+                && restored.getReticleTargetRange() == GlobalConfig.RETICLE_TARGET_RANGE);
+    }
+
+    private static void verifyJsonNumericOverflow() {
+        String[] keys = {"ReticleTargetRange", "CombatScanRange", "PlayerCombatHorizontalFovDegrees",
+                "PlayerCombatVerticalFovDegrees", "LosNpcTargetHeight", "LosTargetEpsilon"};
+        var defaults = ConfigJsonMapper.toJson(new GlobalConfig());
+        for (String key : keys) {
+            GlobalConfig overflow = ConfigJsonMapper.fromJsonGlobal(
+                    JsonParser.parseString("{\"" + key + "\":1e1000}").getAsJsonObject());
+            verify(key + " corrects JSON overflow", overflow.sanitize()
+                    && ConfigJsonMapper.toJson(overflow).get(key).equals(defaults.get(key)));
+        }
+    }
     private static void verifyAtomicFiles(Path directory) throws Exception {
         Files.createDirectories(directory);
         Path file = directory.resolve("config.json");
@@ -141,8 +202,9 @@ public final class ConfigPersistenceTest {
             try {
                 await(entered);
                 fixture.update(50f);
-                verify("world-thread edits are not blocked by disk I/O", fixture.store.getCached(fixture.id)
-                        .getDynamicHud().getHealth().getThreshold() == 50f);
+                PlayerConfig updated = fixture.store.getCached(fixture.id);
+                verify("world-thread edits are not blocked by disk I/O", updated != null
+                        && updated.getDynamicHud().getHealth().getThreshold() == 50f);
                 fixture.store.update(other, fixture.global, config -> config.getDynamicHud().getHealth().setThreshold(77f));
                 verify("other players can save independently", workers.submit(() -> fixture.store.save(other)).get(5, TimeUnit.SECONDS));
                 verify("other player's file is complete", threshold(JsonParser.parseString(Files.readString(fixture.store.pathFor(other)))) == 77f);
@@ -210,8 +272,9 @@ public final class ConfigPersistenceTest {
         verify("failed async save is reported without a retry loop", fixture.failures.size() == 1 && tasks.size() == 0);
         verify("failure preserves last good file", fixture.readThreshold() == 100f);
         verify("failed disconnect reports failure", !fixture.store.saveAndUnload(fixture.id));
-        verify("failed disconnect retains unsaved configuration", fixture.store.getCached(fixture.id)
-                .getDynamicHud().getHealth().getThreshold() == 35f);
+        PlayerConfig pending = fixture.store.getCached(fixture.id);
+        verify("failed disconnect retains unsaved configuration", pending != null
+                && pending.getDynamicHud().getHealth().getThreshold() == 35f);
         fixture.behavior = ConfigPersistenceTest::write;
         fixture.store.flush();
         verify("shutdown flush retries disconnected dirty players", fixture.readThreshold() == 35f);
@@ -262,7 +325,7 @@ public final class ConfigPersistenceTest {
 
     private static final class ManualExecutor implements Executor {
         private final Queue<Runnable> tasks = new ConcurrentLinkedQueue<>();
-        @Override public void execute(Runnable task) { tasks.add(task); }
+        @Override public void execute(@Nonnull Runnable task) { tasks.add(task); }
         int size() { return tasks.size(); }
         void runOne() {
             Runnable task = tasks.poll();
