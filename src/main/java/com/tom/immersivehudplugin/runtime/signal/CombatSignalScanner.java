@@ -85,14 +85,10 @@ public final class CombatSignalScanner {
 
         if (!hostile) return false;
 
-        boolean lockedTarget = hasLockedTarget(npcRef, playerRef, store);
-        boolean desiredTarget = hasDesiredTarget(role, playerRef);
-        boolean targetingPlayer = lockedTarget || desiredTarget;
-        boolean performingAttack = isNpcPerformingAttack(npcRef, store);
-        boolean executingAttack = isExecutingAttack(npcRef, store);
-        boolean attackingPlayer = targetingPlayer && (performingAttack || executingAttack);
-
-        if (attackingPlayer) return true;
+        boolean targetingPlayer = hasLockedTarget(npcRef, playerRef, store) || hasDesiredTarget(role, playerRef);
+        if (targetingPlayer && (isNpcPerformingAttack(npcRef, store) || isExecutingAttack(npcRef, store))) {
+            return true;
+        }
 
         CombatScanView view = context.view();
         return view.insideFov(npcTransform.getPosition()) && hasLineOfSightToNpc(store, npcTransform, view);

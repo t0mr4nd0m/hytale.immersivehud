@@ -17,6 +17,7 @@
 * Preserve the translated Apply and Cancel button labels instead of overriding them with fixed English text.
 * Make component catalogue rules immutable while keeping applied player configurations independently editable.
 * Query Hytale's NPC spatial index for nearby combat candidates instead of scanning all NPC entities. Reuse one look snapshot per scan for field-of-view and line-of-sight checks.
+* Short-circuit combat target and attack-state queries: skip desired-target lookup when the locked target is the player, and check attack states only as needed when the NPC targets the player, preserving existing detection behaviour.
 * Fix zero hide delay so timed triggers remain visible during the current HUD evaluation without persisting into the next update. Combat also honours zero delay instead of applying its minimum retention window.
 * Serialize player configuration saves using independent snapshots and revision tracking. Failed disconnect saves remain pending and are included in shutdown flushes.
 * Write configuration JSON through temporary files and atomic replacement to preserve the previous file if saving fails.
