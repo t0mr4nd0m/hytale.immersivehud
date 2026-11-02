@@ -25,6 +25,7 @@
 * Avoid rule-set copies for read-only queries, iteration, and profile comparisons while preserving independent configuration copies.
 * Separate held-item trigger states from timed signals and remove redundant holding-trigger timer clean-up.
 * Detect ranged and melee weapons through their attack interactions, including modded weapons using behaviour-based classification.
+* Reuse a single held-item weapon classification per HUD update for both ranged and melee signals, avoiding duplicate synchronized cache lookups and skipping classification when no active rules require weapon detection.
 * Performance: Run only the HUD detectors required by active rules on hidden components, with a cached detection plan refreshed when configuration changes.
 * Configuration UI now pauses only private singleplayer sessions. Multiplayer sessions remain running, and closing the UI preserves pauses it did not initiate.
 * Update to Hytale API 0.8.0-pre.3
