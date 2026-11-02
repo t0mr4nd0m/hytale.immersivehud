@@ -60,7 +60,7 @@ Get <span style="color:orange">ImmersiveHUD</span> running in under a minute:
 
 ---
 
-💡 Tip: Use command `/ihud config` to customize your HUD configuration.
+💡 Tip: Use command `/ihud config` or press crouching and map (CTRL + M by default) to customize your HUD configuration.
 
 ---
 
@@ -230,11 +230,15 @@ ImmersiveHud uses two configuration layers:
 
 The global configuration file is created automatically when the mod is first loaded.
 
-Server administrators can use this file to configure HUD detection and timing. `DefaultHudComponents` and `DefaultDynamicHud` define the initial HUD configuration for new players; changing them does not affect players who already have a saved configuration.
+Server administrators can use this file to configure HUD detection, timing, and the configuration shortcut. 
+`DefaultHudComponents` and `DefaultDynamicHud` define the initial HUD configuration for new players; changing them does not affect players who already have a saved configuration.
 
 | Parameter | Description | Min | Max | Default |
 | --- | --- | --- | --- | --- |
 | `ConfigVersion` | ImmersiveHud mod version; updated automatically. | - | - | Installed mod version |
+| `configShortcut.enabled` | Enable the configuration shortcut for all players. Set to `false` to disable it. | - | - | `true` |
+| `configShortcut.modifier` | Required modifier action. Currently only `CROUCH` is supported. | - | - | `CROUCH` |
+| `configShortcut.action` | Action used with crouch: `OPEN_MAP` or `OPEN_POCKET_CRAFTING`. | - | - | `OPEN_MAP` |
 | `IntervalMs` | Time between HUD updates, in milliseconds. | `200` | `1000` | `250` |
 | `HideDelayMs` | Initial wait before applying HUD visibility after the player becomes ready, and time a trigger keeps components visible after its condition ends, in milliseconds. Combat detection may extend trigger retention to bridge scans. | `0` | `3000` | `2000` |
 | `ReticleTargetRange` | Maximum distance for detecting targeted entities and interactable blocks. | `1` | `24` | `8` |
@@ -261,6 +265,11 @@ Example:
 ```json
 {
   "ConfigVersion": "1.2.9",
+  "configShortcut": {
+    "enabled": true,
+    "modifier": "CROUCH",
+    "action": "OPEN_MAP"
+  },
   "IntervalMs": 250,
   "HideDelayMs": 2000,
   "ReticleTargetRange": 8.0,

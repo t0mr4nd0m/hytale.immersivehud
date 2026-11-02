@@ -15,6 +15,11 @@ public final class GlobalConfig {
     public static final double LOS_TARGET_EPSILON = 0.15d;
 
     private String configVersion = "";
+    private ConfigShortcut configShortcut = new ConfigShortcut();
+
+    public ConfigShortcut getConfigShortcut() { return configShortcut; }
+
+    public void setConfigShortcut(ConfigShortcut shortcut) { this.configShortcut = shortcut; }
     private int intervalMs = INTERVAL_MS;
     private int hideDelayMs = HIDE_DELAY_MS;
 
@@ -128,6 +133,8 @@ public final class GlobalConfig {
 
     public boolean sanitize() {
         boolean changed = false;
+
+        changed |= configShortcut.sanitize();
 
         if (intervalMs < 200 || intervalMs > 1000) {
             intervalMs = INTERVAL_MS;

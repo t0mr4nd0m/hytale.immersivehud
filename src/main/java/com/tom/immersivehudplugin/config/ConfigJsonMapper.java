@@ -34,6 +34,7 @@ public final class ConfigJsonMapper {
         JsonObject root = new JsonObject();
 
         root.addProperty(CONFIG_VERSION, cfg.getConfigVersion());
+        root.add("configShortcut", cfg.getConfigShortcut().toJson());
         root.addProperty(INTERVAL_MS, cfg.getIntervalMs());
         root.addProperty(HIDE_DELAY_MS, cfg.getHideDelayMs());
         root.addProperty(RETICLE_TARGET_RANGE, cfg.getReticleTargetRange());
@@ -50,6 +51,7 @@ public final class ConfigJsonMapper {
 
     public static GlobalConfig fromJsonGlobal(JsonObject root) {
         GlobalConfig cfg = new GlobalConfig();
+        cfg.setConfigShortcut(ConfigShortcut.fromJson(root == null ? null : root.get("configShortcut")));
 
         if (root == null) {
             return cfg;

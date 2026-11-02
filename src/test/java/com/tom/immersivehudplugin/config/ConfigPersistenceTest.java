@@ -31,6 +31,7 @@ public final class ConfigPersistenceTest {
         Path root = Files.createTempDirectory(Path.of(".").toAbsolutePath(), "ihud-persistence-");
         try {
             verifyUnifiedHideDelay();
+            verifyConfigShortcut();
             verifyReticleRangeValidation();
             verifyJsonNumericOverflow();
             verifyAtomicFiles(root.resolve("atomic"));
@@ -46,6 +47,111 @@ public final class ConfigPersistenceTest {
         }
     }
 
+    private static void verifyConfigShortcut() {
+        GlobalConfig legacy = ConfigJsonMapper.fromJsonGlobal(
+                JsonParser.parseString("{\"HideDelayMs\":750}").getAsJsonObject());
+        verify("legacy config gains persisted shortcut defaults", legacy.sanitize());
+        verify("default shortcut requires crouching", legacy.getConfigShortcut().matches(true)
+                && !legacy.getConfigShortcut().matches(false));
+        verify("migration preserves existing settings", legacy.getHideDelayMs() == 750);
+        verify("shortcut migration is stable", !legacy.sanitize());
+        verify("default action remains map", legacy.getConfigShortcut().getAction().equals("OPEN_MAP"));
+
+        for (boolean enabled : new boolean[]{true, false}) {
+            var json = ConfigJsonMapper.toJson(new GlobalConfig());
+            json.getAsJsonObject("configShortcut").addProperty("enabled", enabled);
+            json.getAsJsonObject("configShortcut").addProperty("action", "OPEN_POCKET_CRAFTING");
+            GlobalConfig loaded = ConfigJsonMapper.fromJsonGlobal(json);
+            verify("pocket crafting action is accepted", !loaded.sanitize());
+            verify("pocket crafting action persists", ConfigJsonMapper.toJson(loaded).equals(json));
+            verify("pocket crafting honors crouch and enabled", !loaded.getConfigShortcut().matches(false)
+                    && loaded.getConfigShortcut().matches(true) == enabled);
+        }
+        verifyShortcutPackets();
+        verifyShortcutInputState();
+
+        for (boolean enabled : new boolean[]{true, false}) {
+            var json = ConfigJsonMapper.toJson(new GlobalConfig());
+            json.getAsJsonObject("configShortcut").addProperty("enabled", enabled);
+            GlobalConfig loaded = ConfigJsonMapper.fromJsonGlobal(json);
+            verify("valid shortcut is unchanged", !loaded.sanitize());
+            verify("shortcut persists exactly", ConfigJsonMapper.toJson(loaded).equals(json));
+            verify("shortcut requires crouch", !loaded.getConfigShortcut().matches(false));
+            verify("shortcut honors enable setting", loaded.getConfigShortcut().matches(true) == enabled);
+            var minimalJson = json.deepCopy();
+            minimalJson.getAsJsonObject("configShortcut").remove("modifier");
+            minimalJson.getAsJsonObject("configShortcut").remove("action");
+            GlobalConfig minimal = ConfigJsonMapper.fromJsonGlobal(minimalJson);
+            verify("missing bindings are restored", minimal.sanitize());
+            verify("restoring bindings preserves enabled", ConfigJsonMapper.toJson(minimal).equals(json));
+            for (String modifier : new String[]{"SPRINT", "NONE"}) {
+                var oldJson = json.deepCopy();
+                oldJson.getAsJsonObject("configShortcut").addProperty("modifier", modifier);
+                oldJson.getAsJsonObject("configShortcut").addProperty("action", "OPEN_MAP");
+                GlobalConfig migrated = ConfigJsonMapper.fromJsonGlobal(oldJson);
+                verify("unsupported bindings trigger migration", migrated.sanitize());
+                verify("migration restores supported bindings and preserves enabled",
+                        ConfigJsonMapper.toJson(migrated).equals(json));
+                verify("migrated shortcut requires crouch", !migrated.getConfigShortcut().matches(false)
+                        && migrated.getConfigShortcut().matches(true) == enabled);
+                verify("migrated config is stable", !migrated.sanitize());
+            }
+        }
+        for (String value : new String[]{"null", "17", "{}", "{\"enabled\":\"false\"}",
+                "{\"enabled\":true,\"modifier\":false,\"action\":[]}",
+                "{\"enabled\":true,\"modifier\":\"CROUCH\",\"action\":\"CHANGE_VIEW\"}"}) {
+            var json = JsonParser.parseString("{\"HideDelayMs\":750,\"configShortcut\":" + value + "}")
+                    .getAsJsonObject();
+            verify("invalid shortcut does not invalidate global config", ConfigSchemaValidator.isValidGlobalConfig(json));
+            GlobalConfig loaded = ConfigJsonMapper.fromJsonGlobal(json);
+            verify("invalid shortcut is repaired", loaded.sanitize());
+            verify("invalid shortcut preserves other settings", loaded.getHideDelayMs() == 750);
+            verify("invalid shortcut recovers enabled default", loaded.getConfigShortcut().matches(true)
+                    && !loaded.getConfigShortcut().matches(false));
+            GlobalConfig restored = ConfigJsonMapper.fromJsonGlobal(ConfigJsonMapper.toJson(loaded));
+            verify("repaired shortcut round trips", !restored.sanitize());
+        }
+    }
+
+    private static void verifyShortcutPackets() {
+        verify("map opening is recognized", "OPEN_MAP".equals(
+                com.tom.immersivehudplugin.ui.HudConfigMapShortcut.actionForPacket(
+                        new com.hypixel.hytale.protocol.packets.worldmap.UpdateWorldMapVisible(true))));
+        verify("map closing is ignored", com.tom.immersivehudplugin.ui.HudConfigMapShortcut.actionForPacket(
+                new com.hypixel.hytale.protocol.packets.worldmap.UpdateWorldMapVisible(false)) == null);
+        for (var type : com.hypixel.hytale.protocol.packets.window.WindowType.values()) {
+            String action = com.tom.immersivehudplugin.ui.HudConfigMapShortcut.actionForPacket(
+                    new com.hypixel.hytale.protocol.packets.window.ClientOpenWindow(type));
+            verify("only pocket crafting windows are recognized: " + type,
+                    type == com.hypixel.hytale.protocol.packets.window.WindowType.PocketCrafting
+                            ? "OPEN_POCKET_CRAFTING".equals(action) : action == null);
+        }
+        verify("unrelated packets are ignored", com.tom.immersivehudplugin.ui.HudConfigMapShortcut.actionForPacket(
+                new com.hypixel.hytale.protocol.packets.interface_.ChatMessage()) == null);
+    }
+
+    private static void verifyShortcutInputState() {
+        var input = new com.tom.immersivehudplugin.ui.HudShortcutInputState();
+        UUID player = UUID.randomUUID();
+        UUID otherPlayer = UUID.randomUUID();
+        UUID world = UUID.randomUUID();
+        UUID otherWorld = UUID.randomUUID();
+        verify("unknown input cannot trigger shortcut", !input.isCrouching(player, world));
+        input.update(player, world, true);
+        verify("crouch press is available before movement tick", input.isCrouching(player, world));
+        verify("input belongs to the player", !input.isCrouching(otherPlayer, world));
+        verify("input does not leak across worlds", !input.isCrouching(player, otherWorld));
+        input.update(player, world, false);
+        verify("crouch release clears shortcut before movement tick", !input.isCrouching(player, world));
+        input.update(player, otherWorld, true);
+        verify("new world input replaces old world input", input.isCrouching(player, otherWorld)
+                && !input.isCrouching(player, world));
+        input.remove(player);
+        verify("disconnect clears shortcut input", !input.isCrouching(player, otherWorld));
+        input.update(player, world, true);
+        input.clear();
+        verify("shutdown clears shortcut input", !input.isCrouching(player, world));
+    }
     private static void verifyUnifiedHideDelay() {
         for (int delay : new int[]{0, 750, 3000}) {
             var json = JsonParser.parseString("{\"HideDelayMs\":" + delay

@@ -35,7 +35,13 @@ public final class GlobalConfigStore {
                 ConfigSchemaValidator::isValidGlobalConfig,
                 ConfigJsonMapper::fromJsonGlobal,
                 cfg -> {
+                    boolean shortcutChanged = cfg.getConfigShortcut().sanitize();
+                    if (shortcutChanged) {
+                        plugin.getLogger().at(Level.WARNING).log(
+                                "Missing or invalid configShortcut values; using defaults for those fields.");
+                    }
                     boolean changed = cfg.sanitize();
+                    changed |= shortcutChanged;
                     changed |= migrateIfNeeded(cfg);
                     return changed;
                 },

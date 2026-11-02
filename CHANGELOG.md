@@ -3,6 +3,8 @@
 ## v1.2.9
 
 **Features**
+* Added a configuration shortcut with two actions: `CROUCH + OPEN_MAP` (default) and `CROUCH + OPEN_POCKET_CRAFTING`. The shortcut follows each player's in-game bindings; using the selected action without crouching preserves its normal behavior.
+* Configure the shortcut in global `config.json` through `"configShortcut": { "enabled": true, "modifier": "CROUCH", "action": "OPEN_MAP" }`. Set `action` to `OPEN_POCKET_CRAFTING` to use the inventory/crafting window, or `enabled` to `false` to disable the shortcut. `CROUCH` is the only supported modifier. Restart the server or reload the single-player world after editing; `/ihud config` remains available.
 * `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
 * `Balanced` profile now shows the reticle while holding a placeable block or decoration.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.

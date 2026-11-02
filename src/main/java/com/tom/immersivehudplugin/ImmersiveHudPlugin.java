@@ -25,6 +25,7 @@ import com.tom.immersivehudplugin.runtime.visibility.HudDeltaApplier;
 import com.tom.immersivehudplugin.runtime.visibility.HudRuleEvaluator;
 import com.tom.immersivehudplugin.runtime.visibility.HudVisibilityCoordinator;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
+import com.tom.immersivehudplugin.ui.HudConfigMapShortcut;
 
 import java.util.logging.Level;
 
@@ -37,6 +38,7 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     private PlayerSessionService playerSessionService;
     private HudRuntimeService hudRuntimeService;
     private HudConfigUiService hudConfigUiService;
+    private HudConfigMapShortcut hudConfigMapShortcut;
 
     public ImmersiveHudPlugin(JavaPluginInit init) {
         super(init);
@@ -91,6 +93,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         this.playerSessionService = createPlayerSessionService();
         this.hudConfigUiService = createHudConfigUiService();
         hudConfigUiService.start(this);
+        this.hudConfigMapShortcut = new HudConfigMapShortcut(hudConfigUiService, this::getGlobalConfig);
+        hudConfigMapShortcut.start(this);
 
         hudRuntimeService.start();
         playerSessionService.start();
@@ -101,6 +105,10 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
     }
 
     private void shutdownRuntimeServices() {
+        if (hudConfigMapShortcut != null) {
+            hudConfigMapShortcut.shutdown();
+            hudConfigMapShortcut = null;
+        }
         if (hudConfigUiService != null) {
             hudConfigUiService.shutdown();
         }
