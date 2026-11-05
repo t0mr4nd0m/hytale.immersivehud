@@ -11,6 +11,7 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
 
 **Technical Changes**
+* Update to Hytale API 0.8.0-pre.4
 * Unify the initial HUD visibility wait and trigger hide delay under `HideDelayMs`. Remove `InitialHudGraceMs`; older configuration files remain compatible and the obsolete field is omitted on the next save.
 * Limit `ReticleTargetRange` to values greater than 0 and up to 24, matching `CombatScanRange`; out-of-range values reset to the default of 8.
 * Accept `IntervalMs` values from 200 to 1000 milliseconds, inclusive.
@@ -30,7 +31,6 @@
 * Reuse a single held-item weapon classification per HUD update for both ranged and melee signals, avoiding duplicate synchronized cache lookups and skipping classification when no active rules require weapon detection.
 * Performance: Run only the HUD detectors required by active rules on hidden components, with a cached detection plan refreshed when configuration changes.
 * Configuration UI now pauses only private singleplayer sessions. Multiplayer sessions remain running, and closing the UI preserves pauses it did not initiate.
-* Update to Hytale API 0.8.0-pre.3
 
 ## v1.2.8
 
