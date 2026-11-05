@@ -3,13 +3,13 @@
 ## v1.2.9
 
 **Features**
-* Added a configuration shortcut with two actions: `CROUCH + OPEN_MAP` (default) and `CROUCH + OPEN_POCKET_CRAFTING`. The shortcut follows each player's in-game bindings; using the selected action without crouching preserves its normal behavior.
-* Configure the shortcut in global `config.json` through `"configShortcut": { "enabled": true, "modifier": "CROUCH", "action": "OPEN_MAP" }`. Set `action` to `OPEN_POCKET_CRAFTING` to use the inventory/crafting window, or `enabled` to `false` to disable the shortcut. `CROUCH` is the only supported modifier. Restart the server or reload the single-player world after editing; `/ihud config` remains available.
+* Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
 * `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
 * `Balanced` profile now shows the reticle while holding a placeable block or decoration.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.
 * UI: Renamed the configuration tabs from `Profile` and `Visibility` to `Profiles` and `Customize`, and enabled descriptive tooltips on both tab buttons.
-* Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
+* Added Spanish (Spain, `es-ES`) translations for commands, configuration UI, profiles, and tooltips.
+* Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Using the selected action without crouching preserves its normal behavior.
 
 **Technical Changes**
 * Update to Hytale API 0.8.0-pre.4

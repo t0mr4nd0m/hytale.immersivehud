@@ -27,7 +27,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 - Built-in config profiles (balanced, immersive, vanilla)
 - Per-player configuration
 - Lightweight and performance-friendly
-- Custom config UI
+- Custom config UI, available in English and Spanish
 
 ---
 
@@ -612,7 +612,9 @@ src/main/resources/
 │           └── IHudConfigPage.ui
 ├── Server/
 │   └── Languages/
-│       └── en-US/
+│       ├── en-US/
+│       │   └── immersivehud.lang
+│       └── es-ES/
 │           └── immersivehud.lang
 ├── icon-256.png
 └── manifest.json
