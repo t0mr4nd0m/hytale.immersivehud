@@ -1,0 +1,80 @@
+# Commands #
+cmd.ihud="Команды мода ImmersiveHud."
+cmd.config="Открывает интерфейс настройки ImmersiveHud."
+
+# Config UI #
+gui.title="Настройка Immersive HUD"
+
+gui.profile.button="Профили"
+gui.profile.button.tooltip="Выберите профиль, чтобы сразу применить готовые настройки HUD.\nПрофили предлагают готовые конфигурации для разных стилей игры."
+
+gui.visibility.button="Настроить"
+gui.visibility.button.tooltip="Настройте, какие элементы HUD отображаются и когда они появляются."
+
+gui.apply.button="Применить"
+gui.cancel.button="Отмена"
+
+# Profile UI #
+gui.profile.balanced="Сбалансированный"
+gui.profile.balanced.description="Сбалансированный игровой опыт. [РЕКОМЕНДУЕТСЯ]\nЭлементы HUD появляются только тогда, когда они нужны во время игры."
+
+gui.profile.immersive="Погружение"
+gui.profile.immersive.description="Минимум HUD, максимум погружения. [ДЛЯ ОПЫТНЫХ]\nБольшинство элементов скрыты, и лишь некоторые появляются в ключевые моменты игры."
+
+gui.profile.vanilla="Оригинальный"
+gui.profile.vanilla.description="Оригинальный интерфейс Hytale.\nВсе элементы HUD видны постоянно."
+
+gui.profile.custom="Свой"
+gui.profile.custom.description="Ваши собственные настройки HUD.\nВы изменили видимость HUD за пределами готовых профилей."
+
+# Visibility UI #
+gui.visibility.static.components.button.tooltip="Статические компоненты"
+
+gui.toggle.visibility.button.tooltip="Переключить видимость"
+
+gui.triggers="ТРИГГЕРЫ ({active}/{total})"
+gui.uncheck.all.button.tooltip="Отключить все триггеры"
+gui.filter.button.tooltip="Показать активные триггеры"
+gui.triggers.checkbox.tooltip="Отметьте, чтобы применить триггер"
+
+# Trigger descriptions (shown when hovering over a trigger name) #
+gui.trigger.hotbar_input.tooltip="Показывает этот элемент HUD при смене выбранной ячейки панели быстрого доступа."
+gui.trigger.consumable_use.tooltip="Показывает этот элемент HUD во время использования еды, зелий и других расходуемых предметов."
+gui.trigger.target_entity.tooltip="Показывает этот элемент HUD при наведении на сущность в пределах дальности обнаружения."
+gui.trigger.interactable_block.tooltip="Показывает этот элемент HUD, когда вы смотрите на блок, с которым можно взаимодействовать, например дверь или сундук."
+gui.trigger.holding_building_block.tooltip="Показывает этот элемент HUD, когда вы держите блок или украшение, которое можно разместить. Для размещаемых расходуемых предметов нужно присесть."
+gui.trigger.player_moving.tooltip="Показывает этот элемент HUD во время движения, включая ходьбу, бег, плавание, полёт и прыжки."
+gui.trigger.player_walking.tooltip="Показывает этот элемент HUD во время ходьбы."
+gui.trigger.player_running.tooltip="Показывает этот элемент HUD во время бега."
+gui.trigger.player_sprinting.tooltip="Показывает этот элемент HUD во время спринта."
+gui.trigger.player_mounting.tooltip="Показывает этот элемент HUD, когда игра сообщает, что вы едете верхом."
+gui.trigger.player_swimming.tooltip="Показывает этот элемент HUD во время плавания."
+gui.trigger.player_flying.tooltip="Показывает этот элемент HUD во время полёта."
+gui.trigger.player_gliding.tooltip="Показывает этот элемент HUD во время планирования."
+gui.trigger.player_jumping.tooltip="Показывает этот элемент HUD во время прыжка."
+gui.trigger.player_crouching.tooltip="Показывает этот элемент HUD, когда вы присели."
+gui.trigger.player_climbing.tooltip="Показывает этот элемент HUD во время лазания."
+gui.trigger.player_falling.tooltip="Показывает этот элемент HUD во время падения."
+gui.trigger.player_rolling.tooltip="Показывает этот элемент HUD во время переката."
+gui.trigger.player_idle.tooltip="Показывает этот элемент HUD, когда игра сообщает, что вы бездействуете."
+gui.trigger.player_sitting.tooltip="Показывает этот элемент HUD, когда вы сидите."
+gui.trigger.player_sleeping.tooltip="Показывает этот элемент HUD во время сна."
+gui.trigger.player_in_fluid.tooltip="Показывает этот элемент HUD, когда вы находитесь в воде или другой жидкости, даже если не плывёте."
+gui.trigger.player_on_ground.tooltip="Показывает этот элемент HUD, когда вы находитесь на земле."
+gui.trigger.charging_weapon.tooltip="Показывает этот элемент HUD во время основного действия оружия, например атаки или подготовки удара. Простое удержание оружия его не активирует."
+gui.trigger.holding_ranged_weapon.tooltip="Показывает этот элемент HUD, когда вы держите оружие дальнего боя. Целиться или атаковать необязательно."
+gui.trigger.holding_melee_weapon.tooltip="Показывает этот элемент HUD, когда вы держите оружие ближнего боя. Атаковать необязательно."
+gui.trigger.blocking_attack.tooltip="Показывает этот элемент HUD во время дополнительного действия оружия, например блокирования. Входящая атака не требуется."
+gui.trigger.in_combat.tooltip="Показывает этот элемент HUD при обнаружении враждебного NPC впереди или когда NPC атакует вас."
+gui.trigger.health_not_full.tooltip="Показывает этот элемент HUD, когда здоровье ниже процента, заданного ползунком."
+gui.trigger.stamina_not_full.tooltip="Показывает этот элемент HUD, когда выносливость ниже процента, заданного ползунком."
+gui.trigger.mana_not_full.tooltip="Показывает этот элемент HUD, когда мана ниже процента, заданного ползунком."
+gui.trigger.oxygen_not_full.tooltip="Показывает этот элемент HUD, когда кислород ниже процента, заданного ползунком."
+
+gui.threshold="НИЖЕ"
+
+msg.visibility.disabled.triggers="Триггеры отключены, пока компонент настроен как ВИДИМЫЙ"
+msg.visibility.no.triggers="Нет активных триггеров. Этот компонент будет скрыт постоянно"
+
+gui.component.state.hidden="скрыт"
+gui.component.state.visible="виден"

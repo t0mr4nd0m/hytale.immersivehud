@@ -1,0 +1,80 @@
+# Commands #
+cmd.ihud="ImmersiveHud 模组命令。"
+cmd.config="打开 ImmersiveHud 配置界面。"
+
+# Config UI #
+gui.title="Immersive HUD 设置"
+
+gui.profile.button="配置方案"
+gui.profile.button.tooltip="选择一个方案，即可立即应用预设的 HUD 配置。\n配置方案提供适合不同游玩风格的预设设置。"
+
+gui.visibility.button="自定义"
+gui.visibility.button.tooltip="自定义显示哪些 HUD 元素以及它们的显示时机。"
+
+gui.apply.button="应用"
+gui.cancel.button="取消"
+
+# Profile UI #
+gui.profile.balanced="均衡"
+gui.profile.balanced.description="均衡的游戏体验。[推荐]\nHUD 元素仅在游戏中需要时显示。"
+
+gui.profile.immersive="沉浸"
+gui.profile.immersive.description="精简 HUD，尽享沉浸体验。[进阶]\n大多数元素保持隐藏，仅部分元素会在游戏的关键时刻显示。"
+
+gui.profile.vanilla="原版"
+gui.profile.vanilla.description="Hytale 原版 HUD 体验。\n所有 HUD 元素始终显示。"
+
+gui.profile.custom="自定义"
+gui.profile.custom.description="你的个性化 HUD 配置。\n你已在预设方案的基础上调整了 HUD 的显示设置。"
+
+# Visibility UI #
+gui.visibility.static.components.button.tooltip="静态组件"
+
+gui.toggle.visibility.button.tooltip="切换显示状态"
+
+gui.triggers="触发条件 ({active}/{total})"
+gui.uncheck.all.button.tooltip="取消勾选所有触发条件"
+gui.filter.button.tooltip="筛选已启用的触发条件"
+gui.triggers.checkbox.tooltip="勾选以应用此触发条件"
+
+# Trigger descriptions (shown when hovering over a trigger name) #
+gui.trigger.hotbar_input.tooltip="切换快捷栏中选中的槽位时，显示此 HUD 元素。"
+gui.trigger.consumable_use.tooltip="使用食物、药水或其他消耗品时，显示此 HUD 元素。"
+gui.trigger.target_entity.tooltip="瞄准探测范围内的实体时，显示此 HUD 元素。"
+gui.trigger.interactable_block.tooltip="看向可交互的方块（如门或箱子）时，显示此 HUD 元素。"
+gui.trigger.holding_building_block.tooltip="手持可放置的方块或装饰物时，显示此 HUD 元素。手持可放置的消耗品时，需要蹲下才能触发。"
+gui.trigger.player_moving.tooltip="移动时显示此 HUD 元素，包括行走、奔跑、游泳、飞行和跳跃。"
+gui.trigger.player_walking.tooltip="行走时，显示此 HUD 元素。"
+gui.trigger.player_running.tooltip="奔跑时，显示此 HUD 元素。"
+gui.trigger.player_sprinting.tooltip="疾跑时，显示此 HUD 元素。"
+gui.trigger.player_mounting.tooltip="游戏判定你处于骑乘状态时，显示此 HUD 元素。"
+gui.trigger.player_swimming.tooltip="游泳时，显示此 HUD 元素。"
+gui.trigger.player_flying.tooltip="飞行时，显示此 HUD 元素。"
+gui.trigger.player_gliding.tooltip="滑翔时，显示此 HUD 元素。"
+gui.trigger.player_jumping.tooltip="跳跃时，显示此 HUD 元素。"
+gui.trigger.player_crouching.tooltip="蹲下时，显示此 HUD 元素。"
+gui.trigger.player_climbing.tooltip="攀爬时，显示此 HUD 元素。"
+gui.trigger.player_falling.tooltip="下落时，显示此 HUD 元素。"
+gui.trigger.player_rolling.tooltip="翻滚时，显示此 HUD 元素。"
+gui.trigger.player_idle.tooltip="游戏判定你处于空闲状态时，显示此 HUD 元素。"
+gui.trigger.player_sitting.tooltip="坐下时，显示此 HUD 元素。"
+gui.trigger.player_sleeping.tooltip="睡觉时，显示此 HUD 元素。"
+gui.trigger.player_in_fluid.tooltip="处于水或其他流体中时，显示此 HUD 元素，即使没有游泳也会显示。"
+gui.trigger.player_on_ground.tooltip="站在地面上时，显示此 HUD 元素。"
+gui.trigger.charging_weapon.tooltip="执行武器主要动作（如攻击或蓄力）时，显示此 HUD 元素。仅手持武器不会触发。"
+gui.trigger.holding_ranged_weapon.tooltip="手持远程武器时，显示此 HUD 元素，无需瞄准或攻击。"
+gui.trigger.holding_melee_weapon.tooltip="手持近战武器时，显示此 HUD 元素，无需攻击。"
+gui.trigger.blocking_attack.tooltip="执行武器次要动作（如格挡）时，显示此 HUD 元素，无需受到攻击。"
+gui.trigger.in_combat.tooltip="在前方探测到敌对 NPC 或有 NPC 正在攻击你时，显示此 HUD 元素。"
+gui.trigger.health_not_full.tooltip="生命值低于滑块设定的百分比时，显示此 HUD 元素。"
+gui.trigger.stamina_not_full.tooltip="耐力低于滑块设定的百分比时，显示此 HUD 元素。"
+gui.trigger.mana_not_full.tooltip="法力低于滑块设定的百分比时，显示此 HUD 元素。"
+gui.trigger.oxygen_not_full.tooltip="氧气低于滑块设定的百分比时，显示此 HUD 元素。"
+
+gui.threshold="低于"
+
+msg.visibility.disabled.triggers="组件设为显示时，触发条件将被禁用"
+msg.visibility.no.triggers="没有已启用的触发条件。此组件将始终隐藏"
+
+gui.component.state.hidden="隐藏"
+gui.component.state.visible="显示"

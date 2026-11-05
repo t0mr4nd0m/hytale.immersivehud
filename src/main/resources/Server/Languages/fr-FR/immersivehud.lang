@@ -1,0 +1,80 @@
+# Commands #
+cmd.ihud="Commandes du mod ImmersiveHud."
+cmd.config="Ouvre l’interface de configuration d’ImmersiveHud."
+
+# Config UI #
+gui.title="Configuration d’Immersive HUD"
+
+gui.profile.button="Profils"
+gui.profile.button.tooltip="Choisissez un profil pour appliquer instantanément une configuration du HUD.\nLes profils proposent des configurations prédéfinies adaptées à différents styles de jeu."
+
+gui.visibility.button="Personnaliser"
+gui.visibility.button.tooltip="Personnalisez les éléments du HUD affichés et les conditions de leur apparition."
+
+gui.apply.button="Appliquer"
+gui.cancel.button="Annuler"
+
+# Profile UI #
+gui.profile.balanced="Équilibré"
+gui.profile.balanced.description="Une expérience équilibrée. [RECOMMANDÉ]\nLes éléments du HUD apparaissent uniquement lorsqu’ils sont utiles pendant la partie."
+
+gui.profile.immersive="Immersif"
+gui.profile.immersive.description="Un HUD minimal pour une immersion maximale. [AVANCÉ]\nLa plupart des éléments restent masqués et seuls certains apparaissent aux moments clés de la partie."
+
+gui.profile.vanilla="Original"
+gui.profile.vanilla.description="L’expérience originale du HUD de Hytale.\nTous les éléments du HUD restent visibles en permanence."
+
+gui.profile.custom="Personnalisé"
+gui.profile.custom.description="Votre configuration personnalisée du HUD.\nVous avez modifié la visibilité du HUD au-delà des profils prédéfinis."
+
+# Visibility UI #
+gui.visibility.static.components.button.tooltip="Composants statiques"
+
+gui.toggle.visibility.button.tooltip="Changer la visibilité"
+
+gui.triggers="DÉCLENCHEURS ({active}/{total})"
+gui.uncheck.all.button.tooltip="Décocher tous les déclencheurs"
+gui.filter.button.tooltip="Filtrer les déclencheurs actifs"
+gui.triggers.checkbox.tooltip="Cochez pour appliquer le déclencheur"
+
+# Trigger descriptions (shown when hovering over a trigger name) #
+gui.trigger.hotbar_input.tooltip="Affiche cet élément du HUD lorsque vous changez l’emplacement sélectionné dans la barre d’accès rapide."
+gui.trigger.consumable_use.tooltip="Affiche cet élément du HUD lorsque vous utilisez de la nourriture, des potions ou d’autres consommables."
+gui.trigger.target_entity.tooltip="Affiche cet élément du HUD lorsque vous visez une entité à portée de détection."
+gui.trigger.interactable_block.tooltip="Affiche cet élément du HUD lorsque vous regardez un bloc avec lequel vous pouvez interagir, comme une porte ou un coffre."
+gui.trigger.holding_building_block.tooltip="Affiche cet élément du HUD lorsque vous tenez un bloc ou une décoration à placer. Les consommables à placer nécessitent de s’accroupir."
+gui.trigger.player_moving.tooltip="Affiche cet élément du HUD pendant vos déplacements, y compris en marchant, en courant, en nageant, en volant et en sautant."
+gui.trigger.player_walking.tooltip="Affiche cet élément du HUD lorsque vous marchez."
+gui.trigger.player_running.tooltip="Affiche cet élément du HUD lorsque vous courez."
+gui.trigger.player_sprinting.tooltip="Affiche cet élément du HUD lorsque vous sprintez."
+gui.trigger.player_mounting.tooltip="Affiche cet élément du HUD lorsque le jeu indique que vous êtes sur une monture."
+gui.trigger.player_swimming.tooltip="Affiche cet élément du HUD lorsque vous nagez."
+gui.trigger.player_flying.tooltip="Affiche cet élément du HUD lorsque vous volez."
+gui.trigger.player_gliding.tooltip="Affiche cet élément du HUD lorsque vous planez."
+gui.trigger.player_jumping.tooltip="Affiche cet élément du HUD lorsque vous sautez."
+gui.trigger.player_crouching.tooltip="Affiche cet élément du HUD lorsque vous êtes accroupi."
+gui.trigger.player_climbing.tooltip="Affiche cet élément du HUD lorsque vous grimpez."
+gui.trigger.player_falling.tooltip="Affiche cet élément du HUD lorsque vous tombez."
+gui.trigger.player_rolling.tooltip="Affiche cet élément du HUD lorsque vous faites une roulade."
+gui.trigger.player_idle.tooltip="Affiche cet élément du HUD lorsque le jeu indique que vous êtes inactif."
+gui.trigger.player_sitting.tooltip="Affiche cet élément du HUD lorsque vous êtes assis."
+gui.trigger.player_sleeping.tooltip="Affiche cet élément du HUD lorsque vous dormez."
+gui.trigger.player_in_fluid.tooltip="Affiche cet élément du HUD lorsque vous êtes dans l’eau ou un autre fluide, même sans nager."
+gui.trigger.player_on_ground.tooltip="Affiche cet élément du HUD lorsque vous êtes au sol."
+gui.trigger.charging_weapon.tooltip="Affiche cet élément du HUD pendant une action principale de l’arme, comme une attaque ou une charge. Tenir une arme ne suffit pas à l’activer."
+gui.trigger.holding_ranged_weapon.tooltip="Affiche cet élément du HUD lorsque vous tenez une arme à distance. Il n’est pas nécessaire de viser ou d’attaquer."
+gui.trigger.holding_melee_weapon.tooltip="Affiche cet élément du HUD lorsque vous tenez une arme de mêlée. Il n’est pas nécessaire d’attaquer."
+gui.trigger.blocking_attack.tooltip="Affiche cet élément du HUD pendant une action secondaire de l’arme, comme un blocage. Il n’est pas nécessaire de subir une attaque."
+gui.trigger.in_combat.tooltip="Affiche cet élément du HUD lorsqu’un PNJ hostile est détecté devant vous ou qu’un PNJ vous attaque."
+gui.trigger.health_not_full.tooltip="Affiche cet élément du HUD lorsque la santé est inférieure au pourcentage défini par le curseur."
+gui.trigger.stamina_not_full.tooltip="Affiche cet élément du HUD lorsque l’endurance est inférieure au pourcentage défini par le curseur."
+gui.trigger.mana_not_full.tooltip="Affiche cet élément du HUD lorsque le mana est inférieur au pourcentage défini par le curseur."
+gui.trigger.oxygen_not_full.tooltip="Affiche cet élément du HUD lorsque l’oxygène est inférieur au pourcentage défini par le curseur."
+
+gui.threshold="EN DESSOUS DE"
+
+msg.visibility.disabled.triggers="Les déclencheurs sont désactivés lorsque le composant est réglé sur VISIBLE"
+msg.visibility.no.triggers="Aucun déclencheur actif. Ce composant restera masqué en permanence"
+
+gui.component.state.hidden="masqué"
+gui.component.state.visible="visible"

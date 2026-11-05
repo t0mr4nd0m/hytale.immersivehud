@@ -27,7 +27,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 - Built-in config profiles (balanced, immersive, vanilla)
 - Per-player configuration
 - Lightweight and performance-friendly
-- Custom config UI, available in English and Spanish
+- Custom config UI, available in English, Spanish, French, Brazilian Portuguese, Russian, Turkish, Ukrainian, and Simplified Chinese
 
 ---
 
@@ -614,7 +614,19 @@ src/main/resources/
 │   └── Languages/
 │       ├── en-US/
 │       │   └── immersivehud.lang
-│       └── es-ES/
+│       ├── es-ES/
+│       │   └── immersivehud.lang
+│       ├── fr-FR/
+│       │   └── immersivehud.lang
+│       ├── pt-BR/
+│       │   └── immersivehud.lang
+│       ├── ru-RU/
+│       │   └── immersivehud.lang
+│       ├── tr-TR/
+│       │   └── immersivehud.lang
+│       ├── uk-UA/
+│       │   └── immersivehud.lang
+│       └── zh-CN/
 │           └── immersivehud.lang
 ├── icon-256.png
 └── manifest.json

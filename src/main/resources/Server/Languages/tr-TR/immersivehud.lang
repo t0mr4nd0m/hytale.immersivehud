@@ -1,0 +1,80 @@
+# Commands #
+cmd.ihud="ImmersiveHud mod komutları."
+cmd.config="ImmersiveHud yapılandırma arayüzünü açar."
+
+# Config UI #
+gui.title="Immersive HUD Ayarları"
+
+gui.profile.button="Profiller"
+gui.profile.button.tooltip="Hazır bir HUD yapılandırmasını anında uygulamak için bir profil seçin.\nProfiller, farklı oyun tarzlarına uygun önceden tanımlanmış ayarlar sunar."
+
+gui.visibility.button="Özelleştir"
+gui.visibility.button.tooltip="Hangi HUD öğelerinin görüneceğini ve ne zaman gösterileceğini özelleştirin."
+
+gui.apply.button="Uygula"
+gui.cancel.button="İptal"
+
+# Profile UI #
+gui.profile.balanced="Dengeli"
+gui.profile.balanced.description="Dengeli bir deneyim. [ÖNERİLEN]\nHUD öğeleri yalnızca oyun sırasında gerekli olduklarında görünür."
+
+gui.profile.immersive="Sürükleyici"
+gui.profile.immersive.description="En az HUD, en yüksek sürükleyicilik. [GELİŞMİŞ]\nÇoğu öğe gizli kalır ve yalnızca bazıları oyunun önemli anlarında görünür."
+
+gui.profile.vanilla="Orijinal"
+gui.profile.vanilla.description="Hytale'ın orijinal HUD deneyimi.\nTüm HUD öğeleri her zaman görünür kalır."
+
+gui.profile.custom="Özel"
+gui.profile.custom.description="Kişiselleştirilmiş HUD yapılandırmanız.\nHUD görünürlüğünü hazır profillerin ötesinde özelleştirdiniz."
+
+# Visibility UI #
+gui.visibility.static.components.button.tooltip="Statik bileşenler"
+
+gui.toggle.visibility.button.tooltip="Görünürlüğü değiştir"
+
+gui.triggers="TETİKLEYİCİLER ({active}/{total})"
+gui.uncheck.all.button.tooltip="Tüm tetikleyicilerin işaretini kaldır"
+gui.filter.button.tooltip="Etkin tetikleyicileri filtrele"
+gui.triggers.checkbox.tooltip="Tetikleyiciyi uygulamak için işaretleyin"
+
+# Trigger descriptions (shown when hovering over a trigger name) #
+gui.trigger.hotbar_input.tooltip="Hızlı erişim çubuğunda seçili yuvayı değiştirdiğinizde bu HUD öğesini gösterir."
+gui.trigger.consumable_use.tooltip="Yiyecek, iksir veya diğer tüketilebilir eşyaları kullanırken bu HUD öğesini gösterir."
+gui.trigger.target_entity.tooltip="Algılama menzili içindeki bir varlığa nişan aldığınızda bu HUD öğesini gösterir."
+gui.trigger.interactable_block.tooltip="Kapı veya sandık gibi etkileşime girebileceğiniz bir bloğa baktığınızda bu HUD öğesini gösterir."
+gui.trigger.holding_building_block.tooltip="Yerleştirilebilir bir blok veya dekorasyon tutarken bu HUD öğesini gösterir. Yerleştirilebilir tüketim eşyaları için çömelmek gerekir."
+gui.trigger.player_moving.tooltip="Yürüme, koşma, yüzme, uçma ve zıplama dahil olmak üzere hareket sırasında bu HUD öğesini gösterir."
+gui.trigger.player_walking.tooltip="Yürürken bu HUD öğesini gösterir."
+gui.trigger.player_running.tooltip="Koşarken bu HUD öğesini gösterir."
+gui.trigger.player_sprinting.tooltip="Depar atarken bu HUD öğesini gösterir."
+gui.trigger.player_mounting.tooltip="Oyun bir bineğe binmiş olduğunuzu bildirdiğinde bu HUD öğesini gösterir."
+gui.trigger.player_swimming.tooltip="Yüzerken bu HUD öğesini gösterir."
+gui.trigger.player_flying.tooltip="Uçarken bu HUD öğesini gösterir."
+gui.trigger.player_gliding.tooltip="Süzülürken bu HUD öğesini gösterir."
+gui.trigger.player_jumping.tooltip="Zıplarken bu HUD öğesini gösterir."
+gui.trigger.player_crouching.tooltip="Çömelirken bu HUD öğesini gösterir."
+gui.trigger.player_climbing.tooltip="Tırmanırken bu HUD öğesini gösterir."
+gui.trigger.player_falling.tooltip="Düşerken bu HUD öğesini gösterir."
+gui.trigger.player_rolling.tooltip="Yuvarlanırken bu HUD öğesini gösterir."
+gui.trigger.player_idle.tooltip="Oyun hareketsiz olduğunuzu bildirdiğinde bu HUD öğesini gösterir."
+gui.trigger.player_sitting.tooltip="Otururken bu HUD öğesini gösterir."
+gui.trigger.player_sleeping.tooltip="Uyurken bu HUD öğesini gösterir."
+gui.trigger.player_in_fluid.tooltip="Yüzmüyor olsanız bile su veya başka bir sıvı içindeyken bu HUD öğesini gösterir."
+gui.trigger.player_on_ground.tooltip="Yerdeyken bu HUD öğesini gösterir."
+gui.trigger.charging_weapon.tooltip="Saldırma veya saldırıyı şarj etme gibi birincil silah eylemi sırasında bu HUD öğesini gösterir. Yalnızca silah tutmak bunu etkinleştirmez."
+gui.trigger.holding_ranged_weapon.tooltip="Menzilli bir silah tutarken bu HUD öğesini gösterir. Nişan almanız veya saldırmanız gerekmez."
+gui.trigger.holding_melee_weapon.tooltip="Yakın dövüş silahı tutarken bu HUD öğesini gösterir. Saldırmanız gerekmez."
+gui.trigger.blocking_attack.tooltip="Bloklama gibi ikincil silah eylemi sırasında bu HUD öğesini gösterir. Size saldırılıyor olması gerekmez."
+gui.trigger.in_combat.tooltip="Önünüzde düşman bir NPC algılandığında veya bir NPC size saldırdığında bu HUD öğesini gösterir."
+gui.trigger.health_not_full.tooltip="Sağlık, kaydırıcıyla ayarlanan yüzdenin altındayken bu HUD öğesini gösterir."
+gui.trigger.stamina_not_full.tooltip="Dayanıklılık, kaydırıcıyla ayarlanan yüzdenin altındayken bu HUD öğesini gösterir."
+gui.trigger.mana_not_full.tooltip="Mana, kaydırıcıyla ayarlanan yüzdenin altındayken bu HUD öğesini gösterir."
+gui.trigger.oxygen_not_full.tooltip="Oksijen, kaydırıcıyla ayarlanan yüzdenin altındayken bu HUD öğesini gösterir."
+
+gui.threshold="ALTINDA"
+
+msg.visibility.disabled.triggers="Bileşen GÖRÜNÜR olarak ayarlandığında tetikleyiciler devre dışıdır"
+msg.visibility.no.triggers="Etkin tetikleyici yok. Bu bileşen her zaman gizli kalır"
+
+gui.component.state.hidden="gizli"
+gui.component.state.visible="görünür"
