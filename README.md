@@ -15,7 +15,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 ![GitHub last commit](https://img.shields.io/github/last-commit/T0mR4nD0m/hytale.immersivehud)
 ![GitHub repo size](https://img.shields.io/github/repo-size/T0mR4nD0m/hytale.immersivehud)
 ![Java](https://img.shields.io/badge/java-25-orange)
-![Build](https://img.shields.io/badge/build-gradle-green)
+![Build](https://img.shields.io/badge/build-maven-green)
 ![License](https://img.shields.io/github/license/T0mR4nD0m/hytale.immersivehud)
 
 ---
@@ -505,14 +505,21 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
 ## 🔧 Building
 
 Requirements:
-- Java toolchain compatible with the project
+- JDK 25
+- Maven 3.9+
 - Access to Hytale Maven repositories
 
 Build the project using:
-> ./gradlew build
+> mvn clean verify
+
+Run the eight standalone regression suites with `mvn test`.
+Plugin version and Hytale build are configured in `pom.xml`.
+Maven filters `manifest.json` when copying resources.
+Asset-pack settings are configured directly in `src/main/resources/manifest.json`. 
+Import `pom.xml` to open the project in your IDE.
 
 The build produces a shaded mod jar named:
-> ImmersiveHud.jar
+> target/ImmersiveHud-1.2.9.jar
 
 ---
 
