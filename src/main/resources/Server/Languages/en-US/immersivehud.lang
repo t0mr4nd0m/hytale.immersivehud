@@ -5,11 +5,11 @@ cmd.config="Open the ImmersiveHud configuration UI."
 # Config UI #
 gui.title="Immersive Hud Config"
 
-gui.profile.button="Profile"
+gui.profile.button="Profiles"
 gui.profile.button.tooltip="Choose a profile to instantly apply a preset HUD experience.\nProfiles provide predefined configurations tailored for different playstyles."
 
-gui.visibility.button="Visibility"
-gui.visibility.button.tooltip="Lorem Ipsum"
+gui.visibility.button="Customize"
+gui.visibility.button.tooltip="Customize which HUD elements appear and when they are shown."
 
 gui.apply.button="Apply"
 gui.cancel.button="Cancel"

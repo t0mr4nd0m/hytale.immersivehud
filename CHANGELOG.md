@@ -8,6 +8,7 @@
 * `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
 * `Balanced` profile now shows the reticle while holding a placeable block or decoration.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.
+* UI: Renamed the configuration tabs from `Profile` and `Visibility` to `Profiles` and `Customize`, and enabled descriptive tooltips on both tab buttons.
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
 
 **Technical Changes**

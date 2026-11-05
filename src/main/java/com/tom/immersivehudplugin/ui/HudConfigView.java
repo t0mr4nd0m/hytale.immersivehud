@@ -2,7 +2,7 @@ package com.tom.immersivehudplugin.ui;
 
 public enum HudConfigView {
     PROFILES ("Profiles"),
-    VISIBILITY("Visibility");
+    VISIBILITY("Customize");
 
     private final String label;
 

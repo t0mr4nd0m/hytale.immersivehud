@@ -37,8 +37,8 @@ $C.@PageOverlay {
                 $C.@TextButton #ViewProfilesBtn {
                     Text: %immersivehud.gui.profile.button;
                     Style: @NavButtonStyle;
-                    //TooltipText: %immersivehud.gui.profile.button.tooltip;
-                    //TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+                    TooltipText: %immersivehud.gui.profile.button.tooltip;
+                    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
                     Disabled: false;
                 }
 
@@ -47,8 +47,8 @@ $C.@PageOverlay {
                 $C.@TextButton #ViewVisibilityBtn {
                     Text: %immersivehud.gui.visibility.button;
                     Style: @NavButtonStyle;
-                    //TooltipText: %immersivehud.gui.visibility.button.tooltip;
-                    //TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+                    TooltipText: %immersivehud.gui.visibility.button.tooltip;
+                    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
                     Disabled: false;
                 }
             }

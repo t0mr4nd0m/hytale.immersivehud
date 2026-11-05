@@ -207,13 +207,13 @@ Use command `/ihud config` to open in-game configuration UI to manage visibility
 
 The configuration UI pauses private singleplayer games while open. Dedicated servers and games shared over LAN or with friends keep running. Closing the UI only releases a pause initiated by ImmersiveHUD.
 
-1. Select one of the available profiles to start customizing your experience
-<p style="text-align:center;"><img src="assets/001_iHUD_Config_Profiles.png" alt="Immersive HUD Config Profile"/></p>
+1. Open the **PROFILES** tab and select one of the available profiles to start customizing your experience.
+<p style="text-align:center;"><img src="assets/001_iHUD_Config_Profiles.png" alt="Immersive HUD Config Profiles"/></p>
 
-2. Configure the visibility and rules to hide or show the different HUD elements
-<p style="text-align:center;"><img src="assets/002_iHUD_Config_Visibility_dynamic_component.png" alt="Immersive HUD Config Visibility Dynamic component"/></p>
+2. Open the **CUSTOMIZE** tab to choose which HUD elements appear and configure the rules that determine when they are shown.
+<p style="text-align:center;"><img src="assets/002_iHUD_Config_Visibility_dynamic_component.png" alt="Immersive HUD Config Customize Dynamic component"/></p>
 
-<p style="text-align:center;"><img src="assets/003_iHUD_Config_Visibility_static_components.png" alt="Immersive HUD Config Visibility Static components"/></p>
+<p style="text-align:center;"><img src="assets/003_iHUD_Config_Visibility_static_components.png" alt="Immersive HUD Config Customize Static components"/></p>
 
 3. Finally, press **APPLY** to save and activate your configuration and start enjoying your new Immersive HUD experience.
 
