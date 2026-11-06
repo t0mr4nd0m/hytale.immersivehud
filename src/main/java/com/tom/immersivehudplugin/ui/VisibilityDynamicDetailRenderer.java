@@ -95,7 +95,7 @@ final class VisibilityDynamicDetailRenderer {
         commands.set(checkBoxSelector + ".Value", enabled);
         commands.set(
                 labelSelector + ".TextSpans",
-                Message.raw(HudTrigger.displayNameUpper(trigger))
+                Message.translation("immersivehud.gui.trigger." + trigger.key() + ".label")
         );
         commands.set(
                 labelSelector + ".TooltipText",
