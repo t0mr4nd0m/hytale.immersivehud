@@ -51,8 +51,8 @@ public final class ConfigPersistenceTest {
         GlobalConfig legacy = ConfigJsonMapper.fromJsonGlobal(
                 JsonParser.parseString("{\"HideDelayMs\":750}").getAsJsonObject());
         verify("legacy config gains persisted shortcut defaults", legacy.sanitize());
-        verify("default shortcut requires crouching", legacy.getConfigShortcut().matches(true)
-                && !legacy.getConfigShortcut().matches(false));
+        verify("default shortcut is disabled", !legacy.getConfigShortcut().isEnabled()
+                && !legacy.getConfigShortcut().matches(true));
         verify("migration preserves existing settings", legacy.getHideDelayMs() == 750);
         verify("shortcut migration is stable", !legacy.sanitize());
         verify("default action remains map", legacy.getConfigShortcut().getAction().equals("OPEN_MAP"));
@@ -106,7 +106,10 @@ public final class ConfigPersistenceTest {
             GlobalConfig loaded = ConfigJsonMapper.fromJsonGlobal(json);
             verify("invalid shortcut is repaired", loaded.sanitize());
             verify("invalid shortcut preserves other settings", loaded.getHideDelayMs() == 750);
-            verify("invalid shortcut recovers enabled default", loaded.getConfigShortcut().matches(true)
+            boolean explicitlyEnabled = json.get("configShortcut").isJsonObject()
+                    && new com.google.gson.JsonPrimitive(true).equals(json.getAsJsonObject("configShortcut").get("enabled"));
+            verify("shortcut repair preserves explicit opt-in and defaults to disabled",
+                    loaded.getConfigShortcut().matches(true) == explicitlyEnabled
                     && !loaded.getConfigShortcut().matches(false));
             GlobalConfig restored = ConfigJsonMapper.fromJsonGlobal(ConfigJsonMapper.toJson(loaded));
             verify("repaired shortcut round trips", !restored.sanitize());

@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 /** Global shortcut expressed as game actions, independent of physical key bindings. */
 public final class ConfigShortcut {
-    private boolean enabled = true;
+    private boolean enabled = false;
     private String modifier = "CROUCH";
     private String action = "OPEN_MAP";
     private boolean needsRepair;

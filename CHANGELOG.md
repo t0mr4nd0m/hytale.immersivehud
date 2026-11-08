@@ -9,7 +9,7 @@
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.
 * UI: Renamed the configuration tabs from `Profile` and `Visibility` to `Profiles` and `Customize`, and enabled descriptive tooltips on both tab buttons.
 * Added Spanish (Spain, `es-ES`), French (`fr-FR`), Brazilian Portuguese (`pt-BR`), Russian (`ru-RU`), Turkish (`tr-TR`), Ukrainian (`uk-UA`), and Simplified Chinese (`zh-CN`) translations for commands, configuration UI, profiles, and tooltips.
-* Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Using the selected action without crouching preserves its normal behavior.
+* Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Enable it with `configShortcut.enabled: true` in the global configuration. Using the selected action without crouching preserves its normal behavior.
 
 **Technical Changes**
 * Update to Hytale API 0.8.0-pre.4
