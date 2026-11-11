@@ -6,7 +6,7 @@
 * Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
 
 **Technical Changes**
-* Update to Hytale API 0.8.0-pre.2.1
+* Update to Hytale API 0.7.7
 
 ## v1.2.8
 

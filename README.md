@@ -15,7 +15,7 @@ By T0m.R4nD0m / [t0mr4nd0m@gmail.com](mailto:t0mr4nd0m@gmail.com)
 ![GitHub last commit](https://img.shields.io/github/last-commit/T0mR4nD0m/hytale.immersivehud)
 ![GitHub repo size](https://img.shields.io/github/repo-size/T0mR4nD0m/hytale.immersivehud)
 ![Java](https://img.shields.io/badge/java-25-orange)
-![Build](https://img.shields.io/badge/build-gradle-green)
+![Build](https://img.shields.io/badge/build-maven-green)
 ![License](https://img.shields.io/github/license/T0mR4nD0m/hytale.immersivehud)
 
 ---
@@ -95,33 +95,33 @@ Examples:
 
 HUD components supported by ImmersiveHUD
 
-| Component                                        | Group   | Type     | Default state | Default rules                                                                                   | Default Threshold |
-|--------------------------------------------------|---------|----------|---------------|-------------------------------------------------------------------------------------------------|-------------------|
-| <span style="color:orange">hotbar</span>         | Core    | Dynamic  | Hidden        | `HOTBAR_INPUT`                                                                                  | —                 |
-| <span style="color:orange">compass</span>        | Core    | Dynamic  | Hidden        | `PLAYER_MOVING`                                                                                 | —                 |
-| <span style="color:orange">reticle</span>        | Core    | Dynamic  | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` | —                 |
-| <span style="color:orange">health</span> 📊      | Bars    | Dynamic  | Hidden        | `HEALTH_NOT_FULL`                                                                               | 100               |
-| <span style="color:orange">stamina</span> 📊     | Bars    | Dynamic  | Hidden        | `STAMINA_NOT_FULL`                                                                              | 100               |
-| <span style="color:orange">mana</span> 📊        | Bars    | Dynamic  | Hidden        | `MANA_NOT_FULL`                                                                                 | 100               |
-| <span style="color:orange">oxygen</span> 📊      | Bars    | Dynamic  | Hidden        | `OXYGEN_NOT_FULL`                                                                               | 100               |
-| <span style="color:orange">statusicons</span> ⚠️| UI      | Dynamic  | Visible       | `HOTBAR_INPUT`                                                                                  | —                 |
-| <span style="color:orange">ammo</span>           | UI      | Dynamic  | Visible       | `HOLDING_RANGED_WEAPON`                                                                         | —                 |
-| inputbindings                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
-| abilities ✨                                     | UI      | Static   | Hidden        | —                                                                                               | —                 |
-| notifications                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
-| speedometer                                      | UI      | Static   | Visible       | —                                                                                               | —                 |
-| utilityslotselector                              | UI      | Static   | Visible       | —                                                                                               | —                 |
-| chat                                             | Social  | Static   | Visible       | —                                                                                               | —                 |
-| requests                                         | Social  | Static   | Visible       | —                                                                                               | —                 |
-| killfeed                                         | Social  | Static   | Visible       | —                                                                                               | —                 |
-| playerlist                                       | Social  | Static   | Visible       | —                                                                                               | —                 |
-| eventtitle                                       | Panels  | Static   | Visible       | —                                                                                               | —                 |
-| objectivepanel                                   | Panels  | Static   | Visible       | —                                                                                               | —                 |
-| portalpanel                                      | Panels  | Static   | Visible       | —                                                                                               | —                 |
-| sleep                                            | Panels  | Static   | Visible       | —                                                                                               | —                 |
-| blockvariantselector                             | Builder | Static   | Visible       | —                                                                                               | —                 |
-| buildertoolslegend                               | Builder | Static   | Visible       | —                                                                                               | —                 |
-| buildertoolsmaterialslotselector                 | Builder | Static   | Visible       | —                                                                                               | —                 |
+| Component                                        | Group   | Type    | Default state | Default rules                                                                                   | Default Threshold |
+|--------------------------------------------------|---------|---------|---------------|-------------------------------------------------------------------------------------------------|-------------------|
+| <span style="color:orange">hotbar</span>         | Core    | Dynamic | Hidden        | `HOTBAR_INPUT`                                                                                  | —                 |
+| <span style="color:orange">compass</span>        | Core    | Dynamic | Hidden        | `PLAYER_MOVING`                                                                                 | —                 |
+| <span style="color:orange">reticle</span>        | Core    | Dynamic | Hidden        | `CHARGING_WEAPON` `CONSUMABLE_USE` `TARGET_ENTITY` `INTERACTABLE_BLOCK` `HOLDING_RANGED_WEAPON` | —                 |
+| <span style="color:orange">health</span> 📊      | Bars    | Dynamic | Hidden        | `HEALTH_NOT_FULL`                                                                               | 100               |
+| <span style="color:orange">stamina</span> 📊     | Bars    | Dynamic | Hidden        | `STAMINA_NOT_FULL`                                                                              | 100               |
+| <span style="color:orange">mana</span> 📊        | Bars    | Dynamic | Hidden        | `MANA_NOT_FULL`                                                                                 | 100               |
+| <span style="color:orange">oxygen</span> 📊      | Bars    | Dynamic | Hidden        | `OXYGEN_NOT_FULL`                                                                               | 100               |
+| <span style="color:orange">statusicons</span> ⚠️ | UI      | Dynamic | Visible       | `HOTBAR_INPUT`                                                                                  | —                 |
+| <span style="color:orange">ammo</span>           | UI      | Dynamic | Visible       | `HOLDING_RANGED_WEAPON`                                                                         | —                 |
+| inputbindings                                    | UI      | Static  | Hidden        | —                                                                                               | —                 |
+| abilities ✨                                     | UI      | Static  | Hidden        | —                                                                                               | —                 |
+| notifications                                    | UI      | Static  | Hidden        | —                                                                                               | —                 |
+| speedometer                                      | UI      | Static  | Visible       | —                                                                                               | —                 |
+| utilityslotselector                              | UI      | Static  | Visible       | —                                                                                               | —                 |
+| chat                                             | Social  | Static  | Visible       | —                                                                                               | —                 |
+| requests                                         | Social  | Static  | Visible       | —                                                                                               | —                 |
+| killfeed                                         | Social  | Static  | Visible       | —                                                                                               | —                 |
+| playerlist                                       | Social  | Static  | Visible       | —                                                                                               | —                 |
+| eventtitle                                       | Panels  | Static  | Visible       | —                                                                                               | —                 |
+| objectivepanel                                   | Panels  | Static  | Visible       | —                                                                                               | —                 |
+| portalpanel                                      | Panels  | Static  | Visible       | —                                                                                               | —                 |
+| sleep                                            | Panels  | Static  | Visible       | —                                                                                               | —                 |
+| blockvariantselector                             | Builder | Static  | Visible       | —                                                                                               | —                 |
+| buildertoolslegend                               | Builder | Static  | Visible       | —                                                                                               | —                 |
+| buildertoolsmaterialslotselector                 | Builder | Static  | Visible       | —                                                                                               | —                 |
 
 ✨ New hud component
 
@@ -467,14 +467,14 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
 ## 🔧 Building
 
 Requirements:
-- Java toolchain compatible with the project
-- Access to Hytale Maven repositories
+- JDK 25 and Apache Maven 3.9+
+- Access to the Hytale release Maven repository
 
 Build the project using:
-> ./gradlew build
+> mvn clean package
 
 The build produces a shaded mod jar named:
-> ImmersiveHud.jar
+> `target/ImmersiveHud-1.2.9.jar`
 
 ---
 
