@@ -3,7 +3,8 @@
 ## v1.3.0
 
 **Features**
-* `HOLDING_BUILDING_BLOCK` shows the reticle while holding a placeable blocks and while holding placeable item but only when crouching.
+* Automatically open ImmersiveHud Config for new players.
+* `HOLDING_BUILDING_BLOCK` shows the reticle not only while holding a placeable blocks but while holding placeable item and crouching.
 * `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
 * `Balanced` profile now shows the reticle while holding a placeable block or decoration.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.

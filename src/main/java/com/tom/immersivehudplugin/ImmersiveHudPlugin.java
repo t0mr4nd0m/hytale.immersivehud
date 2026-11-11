@@ -90,8 +90,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
 
         this.playerConfigService = createPlayerConfigService();
         this.hudRuntimeService = createHudRuntimeService();
-        this.playerSessionService = createPlayerSessionService();
         this.hudConfigUiService = createHudConfigUiService();
+        this.playerSessionService = createPlayerSessionService();
         hudConfigUiService.start(this);
         this.hudConfigMapShortcut = new HudConfigMapShortcut(hudConfigUiService, this::getGlobalConfig);
         hudConfigMapShortcut.start(this);
@@ -160,7 +160,8 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
         return new PlayerSessionService(
                 this,
                 playerConfigService,
-                hudRuntimeService
+                hudRuntimeService,
+                hudConfigUiService
         );
     }
 

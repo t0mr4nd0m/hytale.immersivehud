@@ -9,26 +9,29 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
+import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.logging.Level;
 
 public final class PlayerSessionService {
 
     private final JavaPlugin plugin;
     private final PlayerConfigService playerConfigService;
     private final HudRuntimeService hudRuntimeService;
+    private final HudConfigUiService hudConfigUiService;
 
     private boolean playerEventsRegistered;
 
     public PlayerSessionService(
             JavaPlugin plugin,
             PlayerConfigService playerConfigService,
-            HudRuntimeService hudRuntimeService
+            HudRuntimeService hudRuntimeService,
+            HudConfigUiService hudConfigUiService
     ) {
         this.plugin = plugin;
         this.playerConfigService = playerConfigService;
         this.hudRuntimeService = hudRuntimeService;
+        this.hudConfigUiService = hudConfigUiService;
     }
 
     public void start() {
@@ -42,23 +45,26 @@ public final class PlayerSessionService {
     }
 
     private void onPlayerReady(PlayerReadyEvent event) {
-        PlayerRef playerRef = resolvePlayerRef(event.getPlayer());
+        Player player = event.getPlayer();
+        Ref<EntityStore> ref = player.getReference();
+        if (ref == null || !ref.isValid()) return;
+
+        Store<EntityStore> store = ref.getStore();
+        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
         if (playerRef == null) {
             return;
         }
 
-        playerConfigService.getOrLoadPlayerConfig(playerRef.getUuid());
+        boolean newPlayer = playerConfigService.preparePlayerSession(playerRef);
         hudRuntimeService.onPlayerReady(playerRef);
-    }
-
-    @Nullable
-    private PlayerRef resolvePlayerRef(@Nonnull Player player) {
-        Ref<EntityStore> ref = player.getReference();
-
-        if (ref == null || !ref.isValid()) { return null; }
-        Store<EntityStore> store = ref.getStore();
-
-        return store.getComponent(ref, PlayerRef.getComponentType());
+        if (newPlayer) {
+            try {
+                hudConfigUiService.open(playerRef, ref, store);
+            } catch (RuntimeException exception) {
+                plugin.getLogger().at(Level.WARNING).withCause(exception)
+                        .log("Failed to open initial HUD configuration for " + playerRef.getUuid());
+            }
+        }
     }
 
     private void onPlayerDisconnect(PlayerDisconnectEvent event) {

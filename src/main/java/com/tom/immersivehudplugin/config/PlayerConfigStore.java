@@ -32,7 +32,7 @@ public final class PlayerConfigStore {
         this(plugin.getDataDirectory().resolve("players"),
                 (uuid, global) -> support.loadOrCreate(
                         plugin.getDataDirectory().resolve("players").resolve(uuid + ".json"),
-                        () -> PlayerConfig.fromDefaults(global.getDefaultHudComponents(), global.getDefaultDynamicHud()),
+                        global::createPlayerConfig,
                         ConfigSchemaValidator::isValidPlayerConfig, ConfigJsonMapper::fromJsonPlayer,
                         PlayerConfig::sanitize, "player config does not match expected schema"),
                 support::writeJson,
@@ -68,7 +68,7 @@ public final class PlayerConfigStore {
             Entry entry = cache.computeIfAbsent(uuid, key -> {
                 var loaded = loader.apply(key, global);
                 created[0] = true;
-                return new Entry(loaded.config(), loaded.changed());
+                return new Entry(loaded);
             });
             PlayerConfig config;
             boolean pending;
@@ -103,6 +103,16 @@ public final class PlayerConfigStore {
             }
             saveAsync(uuid);
             return;
+        }
+    }
+
+    boolean consumeNewPlayer(UUID uuid) {
+        Entry entry = cache.get(uuid);
+        if (entry == null) return false;
+        synchronized (entry.stateLock) {
+            if (cache.get(uuid) != entry || !entry.newPlayer) return false;
+            entry.newPlayer = false;
+            return true;
         }
     }
 
@@ -192,10 +202,12 @@ public final class PlayerConfigStore {
         private long savedRevision;
         private boolean saveQueued;
         private boolean unloadRequested;
+        private boolean newPlayer;
 
-        private Entry(PlayerConfig config, boolean pending) {
-            this.config = config;
-            this.revision = pending ? 1 : 0;
+        private Entry(ConfigSupport.LoadResult<PlayerConfig> loaded) {
+            this.config = loaded.config();
+            this.revision = loaded.changed() ? 1 : 0;
+            this.newPlayer = loaded.created();
         }
     }
 }

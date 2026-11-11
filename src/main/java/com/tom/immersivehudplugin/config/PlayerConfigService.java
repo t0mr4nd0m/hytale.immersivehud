@@ -34,6 +34,12 @@ public final class PlayerConfigService {
         return playerConfigStore.getCached(uuid);
     }
 
+    public boolean preparePlayerSession(PlayerRef playerRef) {
+        UUID uuid = playerRef.getUuid();
+        getOrLoadPlayerConfig(uuid);
+        return playerConfigStore.consumeNewPlayer(uuid);
+    }
+
     public void saveAndUnload(@Nullable PlayerRef playerRef) {
         if (playerRef == null) {
             return;
