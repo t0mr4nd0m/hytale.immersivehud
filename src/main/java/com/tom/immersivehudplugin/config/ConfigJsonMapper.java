@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
+import com.tom.immersivehudplugin.profiles.Profile;
 
 import java.util.EnumSet;
 
@@ -22,6 +23,7 @@ public final class ConfigJsonMapper {
     private static final String PLAYER_COMBAT_VERTICAL_FOV_DEGREES = "PlayerCombatVerticalFovDegrees";
     private static final String LOS_NPC_TARGET_HEIGHT = "LosNpcTargetHeight";
     private static final String LOS_TARGET_EPSILON = "LosTargetEpsilon";
+    private static final String DEFAULT_PROFILE = "DefaultProfile";
     private static final String DEFAULT_HUD_COMPONENTS = "DefaultHudComponents";
     private static final String DEFAULT_DYNAMIC_HUD = "DefaultDynamicHud";
     private static final String HUD_COMPONENTS = "HudComponents";
@@ -43,8 +45,11 @@ public final class ConfigJsonMapper {
         root.addProperty(PLAYER_COMBAT_VERTICAL_FOV_DEGREES, cfg.getPlayerCombatVerticalFovDegrees());
         root.addProperty(LOS_NPC_TARGET_HEIGHT, cfg.getLosNpcTargetHeight());
         root.addProperty(LOS_TARGET_EPSILON, cfg.getLosTargetEpsilon());
-        root.add(DEFAULT_HUD_COMPONENTS, toJson(cfg.getDefaultHudComponents()));
-        root.add(DEFAULT_DYNAMIC_HUD, toJson(cfg.getDefaultDynamicHud()));
+        root.addProperty(DEFAULT_PROFILE, cfg.getDefaultProfile().name());
+        if (cfg.getDefaultProfile() == Profile.CUSTOM) {
+            root.add(DEFAULT_HUD_COMPONENTS, toJson(cfg.getDefaultHudComponents()));
+            root.add(DEFAULT_DYNAMIC_HUD, toJson(cfg.getDefaultDynamicHud()));
+        }
 
         return root;
     }
@@ -85,6 +90,11 @@ public final class ConfigJsonMapper {
             cfg.setLosTargetEpsilon(root.get(LOS_TARGET_EPSILON).getAsDouble());
         }
 
+        cfg.setDefaultProfile(readDefaultProfile(root));
+        if (cfg.getDefaultProfile() != Profile.CUSTOM) {
+            return cfg;
+        }
+
         JsonObject hudObj = getObject(root, DEFAULT_HUD_COMPONENTS);
         if (hudObj != null) {
             cfg.setDefaultHudComponents(fromJsonHudComponents(hudObj));
@@ -96,6 +106,12 @@ public final class ConfigJsonMapper {
         }
 
         return cfg;
+    }
+
+    static Profile readDefaultProfile(JsonObject root) {
+        return isString(root, DEFAULT_PROFILE)
+                ? Profile.fromString(root.get(DEFAULT_PROFILE).getAsString())
+                : null;
     }
 
     public static JsonObject toJson(PlayerConfig cfg) {

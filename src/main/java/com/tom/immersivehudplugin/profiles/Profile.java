@@ -1,5 +1,7 @@
 package com.tom.immersivehudplugin.profiles;
 
+import java.util.Locale;
+
 public enum Profile {
     BALANCED (
             "immersivehud.gui.profile.balanced",
@@ -36,7 +38,7 @@ public enum Profile {
         }
 
         try {
-            return Profile.valueOf(s.trim().toUpperCase());
+            return Profile.valueOf(s.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {
             return null;
         }

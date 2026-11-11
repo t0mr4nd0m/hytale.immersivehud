@@ -149,7 +149,7 @@ public final class ConfigSupport {
             T fallback = defaultFactory.get();
             sanitizer.test(fallback);
 
-            return new LoadResult<>(fallback, true, true);
+            return new LoadResult<>(fallback, true, false);
         }
     }
 

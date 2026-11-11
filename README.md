@@ -230,8 +230,7 @@ ImmersiveHud uses two configuration layers:
 
 The global configuration file is created automatically when the mod is first loaded.
 
-Server administrators can use this file to configure HUD detection, timing, and the configuration shortcut. 
-`DefaultHudComponents` and `DefaultDynamicHud` define the initial HUD configuration for new players; changing them does not affect players who already have a saved configuration.
+Server administrators can configure HUD detection, timing, the configuration shortcut, and the initial HUD for new players. ImmersiveHud writes the two custom sections when saving with `CUSTOM`.
 
 | Parameter | Description | Min | Max | Default |
 | --- | --- | --- | --- | --- |
@@ -247,8 +246,9 @@ Server administrators can use this file to configure HUD detection, timing, and 
 | `PlayerCombatVerticalFovDegrees` | Full vertical field of view used to detect visible hostile NPCs, in degrees. Attacking NPCs targeting the player can be detected outside it. | `45` | `70` | `70` |
 | `LosNpcTargetHeight` | Height above the NPC position used as the target for combat line-of-sight checks. | `1` | `3` | `1` |
 | `LosTargetEpsilon` | Distance subtracted from the line-of-sight ray length to avoid testing beyond the NPC target point. | `0` | `1` | `0.15` |
-| `DefaultHudComponents` | Initial component visibility settings for new players. | - | - | Component catalog defaults (Balanced profile) |
-| `DefaultDynamicHud` | Initial dynamic rules and bar thresholds for new players. | - | - | Component catalog defaults (Balanced profile) |
+| `DefaultProfile` | Initial profile for new players. `BALANCED`, `IMMERSIVE`, and `VANILLA` apply the selected preset. `CUSTOM` uses the two sections below. | - | - | `VANILLA` |
+| `DefaultHudComponents` | Initial component visibility with `CUSTOM`. | - | - | Component catalog defaults (Balanced profile) |
+| `DefaultDynamicHud` | Initial dynamic rules and bar thresholds with `CUSTOM`. | - | - | Component catalog defaults (Balanced profile) |
 
 Numeric values outside the listed ranges are reset to their defaults when the configuration is loaded.
 
@@ -260,7 +260,7 @@ Configuration file path:
 
 > **macOS**: ~/Library/Application Support/Hytale/UserData/Saves/<world>/mods/TR_ImmersiveHud/config.json
 
-Example:
+Example with the default profile (`VANILLA`).
 
 ```json
 {
@@ -278,6 +278,29 @@ Example:
   "PlayerCombatVerticalFovDegrees": 70.0,
   "LosNpcTargetHeight": 1.0,
   "LosTargetEpsilon": 0.15,
+  "DefaultProfile": "VANILLA"
+}
+```
+
+Example with `CUSTOM`, using the visibility settings and rules below.
+
+```json
+{
+  "ConfigVersion": "1.2.9",
+  "configShortcut": {
+    "enabled": false,
+    "modifier": "CROUCH",
+    "action": "OPEN_MAP"
+  },
+  "IntervalMs": 250,
+  "HideDelayMs": 2000,
+  "ReticleTargetRange": 8.0,
+  "CombatScanRange": 8.0,
+  "PlayerCombatHorizontalFovDegrees": 90.0,
+  "PlayerCombatVerticalFovDegrees": 70.0,
+  "LosNpcTargetHeight": 1.0,
+  "LosTargetEpsilon": 0.15,
+  "DefaultProfile": "CUSTOM",
   "DefaultHudComponents": {
     "HideCompass": true,
     "HideHotbar": true,

@@ -2,6 +2,7 @@ package com.tom.immersivehudplugin.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.tom.immersivehudplugin.profiles.Profile;
 
 public final class ConfigSchemaValidator {
 
@@ -23,8 +24,11 @@ public final class ConfigSchemaValidator {
         if (hasAndNotNumber(obj, "PlayerCombatVerticalFovDegrees")) return false;
         if (hasAndNotNumber(obj, "LosNpcTargetHeight")) return false;
         if (hasAndNotNumber(obj, "LosTargetEpsilon")) return false;
-        if (hasAndNotObject(obj, "DefaultHudComponents")) return false;
-        if (hasAndNotObject(obj, "DefaultDynamicHud")) return false;
+        Profile profile = ConfigJsonMapper.readDefaultProfile(obj);
+        if (profile == null || profile == Profile.CUSTOM) {
+            if (hasAndNotObject(obj, "DefaultHudComponents")) return false;
+            if (hasAndNotObject(obj, "DefaultDynamicHud")) return false;
+        }
 
         return true;
     }

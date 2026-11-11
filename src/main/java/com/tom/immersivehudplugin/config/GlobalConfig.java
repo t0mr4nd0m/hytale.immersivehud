@@ -2,6 +2,9 @@ package com.tom.immersivehudplugin.config;
 
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 
+import com.tom.immersivehudplugin.profiles.Profile;
+import com.tom.immersivehudplugin.profiles.ProfilePresets;
+
 public final class GlobalConfig {
 
     public static final int INTERVAL_MS = 250;
@@ -14,6 +17,7 @@ public final class GlobalConfig {
     public static final double LOS_NPC_TARGET_HEIGHT = 1.0d;
     public static final double LOS_TARGET_EPSILON = 0.15d;
 
+    private Profile defaultProfile = Profile.VANILLA;
     private String configVersion = "";
     private ConfigShortcut configShortcut = new ConfigShortcut();
 
@@ -32,6 +36,25 @@ public final class GlobalConfig {
 
     private HudComponentsConfig defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
     private DynamicHudConfig defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
+
+    public Profile getDefaultProfile() {
+        return defaultProfile == null ? Profile.CUSTOM : defaultProfile;
+    }
+
+    public void setDefaultProfile(Profile defaultProfile) {
+        this.defaultProfile = defaultProfile;
+    }
+
+    PlayerConfig createPlayerConfig() {
+        Profile profile = getDefaultProfile();
+        if (profile == Profile.CUSTOM) {
+            return PlayerConfig.fromDefaults(getDefaultHudComponents(), getDefaultDynamicHud());
+        }
+
+        PlayerConfig cfg = new PlayerConfig();
+        ProfilePresets.applyTo(cfg, profile);
+        return cfg;
+    }
 
     public String getConfigVersion() {
         return configVersion;
@@ -135,6 +158,11 @@ public final class GlobalConfig {
         boolean changed = false;
 
         changed |= configShortcut.sanitize();
+
+        if (defaultProfile == null) {
+            defaultProfile = Profile.CUSTOM;
+            changed = true;
+        }
 
         if (intervalMs < 200 || intervalMs > 1000) {
             intervalMs = INTERVAL_MS;
