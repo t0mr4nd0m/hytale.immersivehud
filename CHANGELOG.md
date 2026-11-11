@@ -1,18 +1,18 @@
 # Changelog
 
-## v1.2.9
+## v1.3.0
 
 **Features**
-* Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a building block or a placeable item when crouching.
+* `HOLDING_BUILDING_BLOCK` shows the reticle while holding a placeable blocks and while holding placeable item but only when crouching.
 * `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
 * `Balanced` profile now shows the reticle while holding a placeable block or decoration.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.
 * UI: Renamed the configuration tabs from `Profile` and `Visibility` to `Profiles` and `Customize`, and enabled descriptive tooltips on both tab buttons.
 * Added Spanish (Spain, `es-ES`), French (`fr-FR`), Brazilian Portuguese (`pt-BR`), Russian (`ru-RU`), Turkish (`tr-TR`), Ukrainian (`uk-UA`), and Simplified Chinese (`zh-CN`) translations for commands, configuration UI, profiles, and tooltips.
-* Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Enable it with `configShortcut.enabled: true` in the global configuration. Using the selected action without crouching preserves its normal behavior.
+* Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Enable it with `configShortcut.enabled: true` in the global configuration. Using the selected action without crouching preserves its normal behaviour.
 
 **Technical Changes**
-* Update to Hytale API 0.8.0-pre.4
+* Update to Hytale API 0.8.0-pre.4.1
 * Unify the initial HUD visibility wait and trigger hide delay under `HideDelayMs`. Remove `InitialHudGraceMs`; older configuration files remain compatible and the obsolete field is omitted on the next save.
 * Limit `ReticleTargetRange` to values greater than 0 and up to 24, matching `CombatScanRange`; out-of-range values reset to the default of 8.
 * Accept `IntervalMs` values from 200 to 1000 milliseconds, inclusive.
@@ -32,6 +32,14 @@
 * Reuse a single held-item weapon classification per HUD update for both ranged and melee signals, avoiding duplicate synchronized cache lookups and skipping classification when no active rules require weapon detection.
 * Performance: Run only the HUD detectors required by active rules on hidden components, with a cached detection plan refreshed when configuration changes.
 * Configuration UI now pauses only private singleplayer sessions. Multiplayer sessions remain running, and closing the UI preserves pauses it did not initiate.
+
+## v1.2.9
+
+**Features**
+* Added `HOLDING_BUILDING_BLOCK` trigger for the reticle. Shows the reticle while holding a placeable blocks.
+
+**Technical Changes**
+* Update to Hytale API 0.7.7
 
 ## v1.2.8
 
