@@ -7,6 +7,7 @@ import com.tom.immersivehudplugin.hud.component.HudComponent;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
 import com.tom.immersivehudplugin.profiles.Profile;
+import com.tom.immersivehudplugin.profiles.ProfilePresets;
 
 import java.util.EnumSet;
 
@@ -24,6 +25,7 @@ public final class ConfigJsonMapper {
     private static final String LOS_NPC_TARGET_HEIGHT = "LosNpcTargetHeight";
     private static final String LOS_TARGET_EPSILON = "LosTargetEpsilon";
     private static final String DEFAULT_PROFILE = "DefaultProfile";
+    private static final String PROFILE = "Profile";
     private static final String DEFAULT_HUD_COMPONENTS = "DefaultHudComponents";
     private static final String DEFAULT_DYNAMIC_HUD = "DefaultDynamicHud";
     private static final String HUD_COMPONENTS = "HudComponents";
@@ -116,15 +118,29 @@ public final class ConfigJsonMapper {
 
     public static JsonObject toJson(PlayerConfig cfg) {
         JsonObject root = new JsonObject();
-        root.add(HUD_COMPONENTS, toJson(cfg.getHudComponents()));
-        root.add(DYNAMIC_HUD, toJson(cfg.getDynamicHud()));
+        Profile profile = ProfilePresets.resolveCurrentProfile(cfg.getHudComponents(), cfg.getDynamicHud());
+        root.addProperty(PROFILE, profile.name());
+        if (profile == Profile.CUSTOM) {
+            root.add(HUD_COMPONENTS, toJson(cfg.getHudComponents()));
+            root.add(DYNAMIC_HUD, toJson(cfg.getDynamicHud()));
+        }
         return root;
+    }
+
+    static Profile readPlayerProfile(JsonObject root) {
+        return isString(root, PROFILE) ? Profile.fromString(root.get(PROFILE).getAsString()) : null;
     }
 
     public static PlayerConfig fromJsonPlayer(JsonObject root) {
         PlayerConfig cfg = new PlayerConfig();
 
         if (root == null) {
+            return cfg;
+        }
+
+        Profile profile = readPlayerProfile(root);
+        if (profile != null && profile != Profile.CUSTOM) {
+            ProfilePresets.applyTo(cfg, profile);
             return cfg;
         }
 

@@ -40,6 +40,9 @@ public final class ConfigSchemaValidator {
 
         JsonObject obj = root.getAsJsonObject();
 
+        Profile profile = ConfigJsonMapper.readPlayerProfile(obj);
+        if (profile != null && profile != Profile.CUSTOM) return true;
+
         if (hasAndNotObject(obj, "HudComponents")) return false;
         if (hasAndNotObject(obj, "DynamicHud")) return false;
 

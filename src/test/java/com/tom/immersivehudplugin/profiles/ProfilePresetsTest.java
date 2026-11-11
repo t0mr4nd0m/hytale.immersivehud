@@ -1,5 +1,7 @@
 package com.tom.immersivehudplugin.profiles;
 
+import com.tom.immersivehudplugin.config.ConfigJsonMapper;
+import com.tom.immersivehudplugin.config.ConfigSchemaValidator;
 import com.tom.immersivehudplugin.config.PlayerConfig;
 import com.tom.immersivehudplugin.hud.component.HudComponentRegistry;
 import com.tom.immersivehudplugin.hud.trigger.HudTrigger;
@@ -12,6 +14,7 @@ public final class ProfilePresetsTest {
         for (Profile profile : Profile.values()) {
             if (profile == Profile.CUSTOM) continue;
             verifyIndependentProfile(profile);
+            verifyProfilePersistence(profile);
         }
 
         PlayerConfig balanced = preset(Profile.BALANCED);
@@ -38,6 +41,25 @@ public final class ProfilePresetsTest {
         verify("Balanced remains recognized after no-op applications",
                 new HudConfigPresenter().resolveCurrentProfile(hud, dynamic) == Profile.BALANCED);
         System.out.println("Passed " + checks + " profile model regression checks.");
+    }
+
+    private static void verifyProfilePersistence(Profile profile) {
+        PlayerConfig config = preset(profile);
+        var compact = ConfigJsonMapper.toJson(config);
+        verify(profile + " saves only the profile", compact.size() == 1
+                && compact.get("Profile").getAsString().equals(profile.name()));
+        verify(profile + " loads from compact JSON", ConfigSchemaValidator.isValidPlayerConfig(compact)
+                && resolve(ConfigJsonMapper.fromJsonPlayer(compact)) == profile);
+
+        config.getDynamicHud().getHealth().setThreshold(37f);
+        var custom = ConfigJsonMapper.toJson(config);
+        verify("Custom saves both HUD sections", custom.get("Profile").getAsString().equals("CUSTOM")
+                && custom.has("HudComponents") && custom.has("DynamicHud"));
+        verify("Custom threshold survives reload",
+                ConfigJsonMapper.fromJsonPlayer(custom).getDynamicHud().getHealth().getThreshold() == 37f);
+        custom.remove("Profile");
+        verify("Legacy custom threshold survives reload", ConfigSchemaValidator.isValidPlayerConfig(custom)
+                && ConfigJsonMapper.fromJsonPlayer(custom).getDynamicHud().getHealth().getThreshold() == 37f);
     }
 
     private static void verifyIndependentProfile(Profile profile) {
