@@ -120,21 +120,8 @@ public final class HeldItemSignalTracker {
 
     @Nullable
     private Item getHeldItemFromInventory(PlayerTickContext tickContext) {
-        try {
-            var entityStoreHolder = tickContext.player().toHolder();
-            if (entityStoreHolder == null) return null;
-
-            var heldStack = InventoryComponent.getItemInHand(entityStoreHolder);
-            if (heldStack == null) return null;
-
-            String itemId = heldStack.getItemId();
-            if (itemId == null || itemId.isBlank()) return null;
-
-            return resolveItem(itemId);
-
-        } catch (Throwable ignored) {
-            return null;
-        }
+        var heldStack = InventoryComponent.getItemInHand(tickContext.store(), tickContext.ref());
+        return heldStack == null ? null : resolveItem(heldStack.getItemId());
     }
 
     @Nullable
