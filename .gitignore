@@ -1,10 +1,5 @@
-# Gradle
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-.kotlin/
+# Maven
+/target/
 
 # Server testing directory
 run/
@@ -35,7 +30,6 @@ bin/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
 
 # VS Code
 .vscode/*
@@ -57,10 +51,3 @@ desktop.ini
 *.bak
 *.swp
 *~
-
-# Template specific
-libs/HytaleServer.jar
-buildSrc/
-
-# Maven
-/target/
