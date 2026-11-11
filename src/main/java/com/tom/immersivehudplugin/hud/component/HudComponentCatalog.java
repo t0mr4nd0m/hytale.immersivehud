@@ -241,14 +241,21 @@ final class HudComponentCatalog {
                         ),
                         null
                 ),
-                staticComponent(
+                dynamicComponent(
                         "abilities",
                         "Abilities",
                         HudComponentRegistry.Group.UI,
                         Abilities,
                         HudComponentsConfig::isHideAbilitiesHud,
                         HudComponentsConfig::setHideAbilitiesHud,
-                        true
+                        cfg -> cfg.getByKey("abilities"),
+                        EnumSet.of(
+                                HudTrigger.IN_COMBAT,
+                                HudTrigger.HOLDING_RANGED_WEAPON,
+                                HudTrigger.HOLDING_MELEE_WEAPON
+                        ),
+                        EnumSet.noneOf(HudTrigger.class),
+                        null
                 ),
                 staticComponent(
                         "inputbindings",

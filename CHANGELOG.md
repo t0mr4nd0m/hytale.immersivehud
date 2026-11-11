@@ -3,12 +3,13 @@
 ## v1.3.0
 
 **Features**
-* Automatically open ImmersiveHud Config for new players.
+* `Abilities` is now a dynamic HUD component. Configure it in the **Customize** tab to appear during combat or while holding a ranged or melee weapon.
+* When a new player starts Hytale, ImmersiveHud Config will open automatically so the player can choose their experience.
 * `HOLDING_BUILDING_BLOCK` shows the reticle not only while holding a placeable blocks but while holding placeable item and crouching.
-* `Immersive` profile now shows the hotbar, reticle, health, mana, and compass during combat.
-* `Balanced` profile now shows the reticle while holding a placeable block or decoration.
+* `IMMERSIVE` profile now shows the hotbar, reticle, health, mana, and compass during combat.
+* `BALANCED` profile now shows the reticle while holding a placeable block or decoration.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.
-* UI: Renamed the configuration tabs from `Profile` and `Visibility` to `Profiles` and `Customize`, and enabled descriptive tooltips on both tab buttons.
+* UI: Renamed the configuration tabs to `Profiles` and `Customize`, and enabled descriptive tooltips on both.
 * Added Spanish (Spain, `es-ES`), French (`fr-FR`), Brazilian Portuguese (`pt-BR`), Russian (`ru-RU`), Turkish (`tr-TR`), Ukrainian (`uk-UA`), and Simplified Chinese (`zh-CN`) translations for commands, configuration UI, profiles, and tooltips.
 * Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Enable it with `configShortcut.enabled: true` in the global configuration. Using the selected action without crouching preserves its normal behaviour.
 

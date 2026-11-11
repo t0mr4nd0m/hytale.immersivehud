@@ -106,8 +106,8 @@ HUD components supported by ImmersiveHUD
 | <span style="color:orange">oxygen</span> 📊      | Bars    | Dynamic  | Hidden        | `OXYGEN_NOT_FULL`                                                                               | 100               |
 | <span style="color:orange">statusicons</span> ⚠️| UI      | Dynamic  | Hidden        | `HOTBAR_INPUT` `IN_COMBAT` | —                 |
 | <span style="color:orange">ammo</span>           | UI      | Dynamic  | Hidden        | `HOLDING_RANGED_WEAPON` `IN_COMBAT` | —                 |
+| <span style="color:orange">abilities</span>      | UI      | Dynamic  | Hidden        | None | - |
 | inputbindings                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
-| abilities ✨                                     | UI      | Static   | Hidden        | —                                                                                               | —                 |
 | notifications                                    | UI      | Static   | Hidden        | —                                                                                               | —                 |
 | speedometer                                      | UI      | Static   | Visible       | —                                                                                               | —                 |
 | utilityslotselector                              | UI      | Static   | Visible       | —                                                                                               | —                 |
@@ -133,7 +133,7 @@ HUD components supported by ImmersiveHUD
 
 ## 🏷️ Rules
 
-Rules to define the visibility behaviour of dynamic HUD components
+Rules to define the visibility behaviour of dynamic HUD components.
 
 | Rule                     | Trigger condition                                                  |
 |--------------------------|--------------------------------------------------------------------|
@@ -390,6 +390,9 @@ Example with `CUSTOM`, using the visibility settings and rules below.
         "HOLDING_RANGED_WEAPON",
         "IN_COMBAT"
       ]
+    },
+    "Abilities": {
+      "Rules": []
     }
   }
 }
@@ -506,6 +509,9 @@ Name: _d79b674a-9e8f-49a2-b7b0-8adf427df179.json_
         "HOLDING_RANGED_WEAPON",
         "IN_COMBAT"
       ]
+    },
+    "Abilities": {
+      "Rules": []
     }
   }
 }

@@ -10,6 +10,7 @@ $C = "../Common.ui";
 @statusiconsIcon  = PatchStyle(TexturePath: "../Assets/8statusicons_active.png");
 @staticIcon       = PatchStyle(TexturePath: "../Assets/9staticicon_active.png");
 @ammoIcon         = PatchStyle(TexturePath: "../Assets/10ammoicons_active.png");
+@abilitiesIcon    = PatchStyle(TexturePath: "../Assets/11abilities_active.png");
 
 $C.@SecondaryButton #ComponentButton {
   Anchor: (Left: 4, Right: 4);
