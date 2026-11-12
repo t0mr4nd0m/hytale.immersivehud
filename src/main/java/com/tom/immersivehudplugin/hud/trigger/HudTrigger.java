@@ -2,10 +2,8 @@ package com.tom.immersivehudplugin.hud.trigger;
 
 import com.tom.immersivehudplugin.config.DynamicHudRuleConfig;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 public enum HudTrigger {
 
@@ -123,15 +121,6 @@ public enum HudTrigger {
         } catch (IllegalArgumentException ex) {
             return null;
         }
-    }
-
-    public static String displayNameUpper(HudTrigger trigger) {
-        if  (trigger == null) {
-            return "";
-        }
-        return Arrays.stream(trigger.name().split("_"))
-                .map(String::toUpperCase)
-                .collect(Collectors.joining(" "));
     }
 
     public static List<Category> displayCategoryOrder() {
