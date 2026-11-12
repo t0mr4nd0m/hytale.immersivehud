@@ -563,6 +563,7 @@ src/main/java/com/tom/immersivehudplugin/
 ├── config/
 │   ├── ConfigJsonMapper.java
 │   ├── ConfigSchemaValidator.java
+│   ├── ConfigShortcut.java
 │   ├── ConfigSupport.java
 │   ├── DynamicHudConfig.java
 │   ├── DynamicHudRuleConfig.java
@@ -613,6 +614,7 @@ src/main/java/com/tom/immersivehudplugin/
 │   ├── PlayerHudState.java
 │   └── PlayerSessionService.java
 ├── ui/
+│   ├── HudConfigMapShortcut.java
 │   ├── HudConfigPauseController.java
 │   ├── HudConfigPresenter.java
 │   ├── HudConfigProfilesRenderer.java
@@ -620,6 +622,7 @@ src/main/java/com/tom/immersivehudplugin/
 │   ├── HudConfigUiSession.java
 │   ├── HudConfigView.java
 │   ├── HudConfigVisibilityRenderer.java
+│   ├── HudShortcutInputState.java
 │   ├── IHudConfigPage.java
 │   ├── VisibilityComponentSelectorRenderer.java
 │   ├── VisibilityDynamicDetailRenderer.java
