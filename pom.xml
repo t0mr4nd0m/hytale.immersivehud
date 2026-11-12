@@ -8,7 +8,7 @@
     <skipTests>false</skipTests>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <hytale.build>0.8.0-pre.4.1</hytale.build>
+    <hytale.build>0.8.0-pre.5</hytale.build>
     <hytale.build.supported>&gt;=0.8.0</hytale.build.supported>
   </properties>
   <repositories>

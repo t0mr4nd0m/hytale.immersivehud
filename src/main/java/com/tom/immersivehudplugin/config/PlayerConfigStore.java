@@ -36,7 +36,7 @@ public final class PlayerConfigStore {
                         ConfigSchemaValidator::isValidPlayerConfig, ConfigJsonMapper::fromJsonPlayer,
                         PlayerConfig::sanitize, "player config does not match expected schema"),
                 support::writeJson,
-                HytaleServer.SCHEDULED_EXECUTOR,
+                HytaleServer.get().getTaskScheduler(),
                 (uuid, failure) -> plugin.getLogger().at(Level.WARNING).withCause(failure)
                         .log("Failed to save player config for " + uuid + "; changes remain pending"));
     }

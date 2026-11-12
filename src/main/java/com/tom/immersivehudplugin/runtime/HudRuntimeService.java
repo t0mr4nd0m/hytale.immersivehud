@@ -114,7 +114,7 @@ public final class HudRuntimeService {
         cancelCurrentTickTask();
 
         runningIntervalMs = wantedInterval;
-        tickTask = HytaleServer.SCHEDULED_EXECUTOR.scheduleAtFixedRate(() -> {
+        tickTask = HytaleServer.get().getTaskScheduler().scheduleAtFixedRate(() -> {
             try {
                 tickReadyPlayers();
             } catch (Throwable throwable) {

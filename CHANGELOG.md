@@ -30,7 +30,8 @@
 
 ### Compatibility and performance
 
-- Updated to Hytale API `0.8.0-pre.4.1` and migrated the build to Maven.
+- Updated to Hytale API `0.8.0-pre.5` and migrated the build to Maven.
+- Adapted HUD updates and asynchronous player configuration saves to the updated Hytale server scheduler.
 - Classifies melee and ranged weapons by their attack interactions, including modded weapons. Reuses the classification for both weapon types and keeps held-item states separate from timed triggers.
 - Uses the NPC spatial index to find nearby combat candidates, reuses the player's look direction for visibility checks, and skips redundant target and attack checks.
 - Runs only the detectors needed by active rules on hidden HUD components. Reuses immutable profile and rule definitions while keeping each player's configuration independently editable.
