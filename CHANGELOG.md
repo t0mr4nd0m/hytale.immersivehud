@@ -2,39 +2,39 @@
 
 ## v1.3.0
 
-**Features**
-* When a new player starts Hytale, ImmersiveHud Config will open automatically so the player can choose their experience.
-* `ABILITIES` is now a dynamic HUD component. Configure it in the **Customize** tab to appear during combat or while holding a ranged or melee weapon and if at least one ability slot contains a rune.
-* `HOLDING_BUILDING_BLOCK` shows the reticle not only while holding a placeable blocks but while holding placeable item and crouching.
-* `IMMERSIVE` profile now shows the hotbar, reticle, health, mana, compass, and Abilities during combat. Abilities also appears while holding a weapon with at least one assigned rune.
-* `BALANCED` profile now shows the reticle while holding a placeable block or decoration. Also shows Abilities during combat or while holding a weapon.
-* UI: Added descriptive tooltips to all trigger names in the configuration UI.
-* UI: Renamed the configuration tabs to `Profiles` and `Customize`, and enabled descriptive tooltips on both.
-* UI: Updated Oxygen HUD component icon.
-* UI: Added Spanish (Spain, `es-ES`), French (`fr-FR`), Brazilian Portuguese (`pt-BR`), Russian (`ru-RU`), Turkish (`tr-TR`), Ukrainian (`uk-UA`), and Simplified Chinese (`zh-CN`) translations for commands, configuration UI, profiles, and tooltips.
-* Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Enable it with `configShortcut.enabled: true` in the global configuration. Using the selected action without crouching preserves its normal behaviour.
+### HUD and profiles
 
-**Technical Changes**
-* Update to Hytale API 0.8.0-pre.4.1
-* Unify the initial HUD visibility wait and trigger hide delay under `HideDelayMs`. Remove `InitialHudGraceMs`; older configuration files remain compatible and the obsolete field is omitted on the next save.
-* Limit `ReticleTargetRange` to values greater than 0 and up to 24, matching `CombatScanRange`; out-of-range values reset to the default of 8.
-* Accept `IntervalMs` values from 200 to 1000 milliseconds, inclusive.
-* Simplify numeric configuration validation to use range limits and retain bar threshold clamping to 0–100.
-* Document all global configuration parameters, limits, and defaults. Clarify that server HUD defaults initialize new players without changing existing saved configurations, and update the project structure and component defaults in the README.
-* Preserve the translated Apply and Cancel button labels instead of overriding them with fixed English text.
-* Make component catalogue rules immutable while keeping applied player configurations independently editable.
-* Query Hytale's NPC spatial index for nearby combat candidates instead of scanning all NPC entities. Reuse one look snapshot per scan for field-of-view and line-of-sight checks.
-* Short-circuit combat target and attack-state queries: skip desired-target lookup when the locked target is the player, and check attack states only as needed when the NPC targets the player, preserving existing detection behaviour.
-* Fix zero hide delay so timed triggers remain visible during the current HUD evaluation without persisting into the next update. Combat also honours zero delay instead of applying its minimum retention window.
-* Serialize player configuration saves using independent snapshots and revision tracking. Failed disconnect saves remain pending and are included in shutdown flushes.
-* Write configuration JSON through temporary files and atomic replacement to preserve the previous file if saving fails.
-* Build immutable profile models once and reuse them for profile matching and applying independent configurations.
-* Avoid rule-set copies for read-only queries, iteration, and profile comparisons while preserving independent configuration copies.
-* Separate held-item trigger states from timed signals and remove redundant holding-trigger timer clean-up.
-* Detect ranged and melee weapons through their attack interactions, including modded weapons using behaviour-based classification.
-* Reuse a single held-item weapon classification per HUD update for both ranged and melee signals, avoiding duplicate synchronized cache lookups and skipping classification when no active rules require weapon detection.
-* Performance: Run only the HUD detectors required by active rules on hidden components, with a cached detection plan refreshed when configuration changes.
-* Configuration UI now pauses only private singleplayer sessions. Multiplayer sessions remain running, and closing the UI preserves pauses it did not initiate.
+- **Abilities** are now a dynamic HUD component. You can show them during combat, while holding a ranged or melee weapon, or when holding a weapon with at least one rune assigned to an ability slot (`HAS_ASSIGNED_RUNE`).
+- Both `BALANCED` and `IMMERSIVE` profiles hide **Abilities** by default and show them during combat or when `HAS_ASSIGNED_RUNE` is active.
+- `IMMERSIVE` also shows the hotbar, reticle, health, mana, and compass during combat.
+- `BALANCED` shows the reticle while holding a placeable block or decoration. With `HOLDING_BUILDING_BLOCK`, placeable consumables also show the reticle while you crouch.
+- Updated **Oxygen** icon.
+
+### Configuration screen
+
+- The configuration screen opens on a player's first join with the mod enabled so they can choose a profile.
+- Renamed the tabs to **Profiles** and **Customize**, and added tooltips to both tabs and all trigger names.
+- Added language support for Spanish, French, Brazilian Portuguese, Russian, Turkish, Ukrainian, and Simplified Chinese.
+- The configuration screen only pauses private singleplayer sessions.
+- Enable the experimental crouch + open map shortcut with `configShortcut.enabled` in the global configuration. Opening the map without crouching works as usual.
+
+### Server configuration
+
+- Set `DefaultProfile` to choose the starting profile for new players. With `CUSTOM`, the mod uses the server's HUD defaults. Existing player settings are preserved.
+- Player configuration files store only the profile name for built-in presets. Custom configurations retain their HUD settings, and older files still load.
+- `HideDelayMs` now controls both the initial HUD grace period and the delay after a trigger stops. Older files still load, and `InitialHudGraceMs` is removed on the next save.
+- A zero delay now also applies to combat and keeps timed triggers visible for the current update only.
+- `IntervalMs` accepts 200–1000 ms. 
+- `ReticleTargetRange` accepts values greater than 0 and up to 24, with a fallback of 8.
+- Bar `thresholds` are clamped to 0–100.
+
+### Compatibility and performance
+
+- Updated to Hytale API `0.8.0-pre.4.1` and migrated the build to Maven.
+- Classifies melee and ranged weapons by their attack interactions, including modded weapons. Reuses the classification for both weapon types and keeps held-item states separate from timed triggers.
+- Uses the NPC spatial index to find nearby combat candidates, reuses the player's look direction for visibility checks, and skips redundant target and attack checks.
+- Runs only the detectors needed by active rules on hidden HUD components. Reuses immutable profile and rule definitions while keeping each player's configuration independently editable.
+- Saves configuration files atomically. Player saves use snapshots and revision tracking, and failed disconnect saves are retried at shutdown.
 
 ## v1.2.9
 
@@ -203,6 +203,6 @@
 
 **Commands**
 * `/ihud status` : check ihud player configuration
-* `/ihud toggle` <component> <action> : toggle hud components. actions:[show|hide]
-* `/ihud rules` <component> <action> <rule> : list, clear, add or remove rules from dynamic hud components. actions:[list|clear|add|remove]
-* `/ihud profile` <profile> : apply quick setup. profiles:[default|immersive|disabled]
+* `/ihud toggle` <component> <action> : toggle hud components. actions: (show|hide)
+* `/ihud rules` <component> <action> <rule> : list, clear, add or remove rules from dynamic hud components. actions: (list|clear|add|remove)
+* `/ihud profile` <profile> : apply quick setup. profiles: (default|immersive|disabled)
