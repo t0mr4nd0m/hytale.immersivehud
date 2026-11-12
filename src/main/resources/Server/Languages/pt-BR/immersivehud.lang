@@ -110,3 +110,5 @@ msg.visibility.no.triggers="Nenhum gatilho ativo. Este componente permanecerá o
 
 gui.component.state.hidden="oculto"
 gui.component.state.visible="visível"
+gui.trigger.has_assigned_rune.label="Tem uma runa atribuída"
+gui.trigger.has_assigned_rune.tooltip="Exibe as habilidades se pelo menos um espaço de habilidade contiver uma runa e você estiver segurando uma arma."

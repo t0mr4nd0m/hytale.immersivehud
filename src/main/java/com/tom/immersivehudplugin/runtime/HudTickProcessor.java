@@ -117,7 +117,7 @@ public final class HudTickProcessor {
 
         if (plan.bars()) barUpdater.update(state, tickContext, plan);
 
-        var dynamicContext = triggerContextFactory.create(state, now, plan);
+        var dynamicContext = triggerContextFactory.create(state, now, plan, tickContext);
 
         hudVisibilityCoordinator.rebuildDynamicHidden(
                 state,

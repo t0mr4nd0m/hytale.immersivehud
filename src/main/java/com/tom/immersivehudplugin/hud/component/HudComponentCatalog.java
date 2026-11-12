@@ -248,13 +248,18 @@ final class HudComponentCatalog {
                         Abilities,
                         HudComponentsConfig::isHideAbilitiesHud,
                         HudComponentsConfig::setHideAbilitiesHud,
-                        cfg -> cfg.getByKey("abilities"),
+                        DynamicHudConfig::getAbilities,
+                        EnumSet.of(
+                                HudTrigger.HAS_ASSIGNED_RUNE,
+                                HudTrigger.IN_COMBAT,
+                                HudTrigger.HOLDING_RANGED_WEAPON,
+                                HudTrigger.HOLDING_MELEE_WEAPON
+                        ),
                         EnumSet.of(
                                 HudTrigger.IN_COMBAT,
                                 HudTrigger.HOLDING_RANGED_WEAPON,
                                 HudTrigger.HOLDING_MELEE_WEAPON
                         ),
-                        EnumSet.noneOf(HudTrigger.class),
                         null
                 ),
                 staticComponent(

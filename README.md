@@ -125,7 +125,7 @@ HUD components supported by ImmersiveHUD
 
 ✨ New hud component
 
-📊 All components from `Bars` group support customizable threshold-based visibility [0-100]. If bar value is below the threshold the bar will be visible.
+📊 All components from `Bars` group support customizable threshold-based visibility (0-100). If bar value is below the threshold the bar will be visible.
 
 ⚠️ This component is affected by some kind of issue in Hytale API. See `Know Issues` section for more details and possible workarounds
 
@@ -160,6 +160,7 @@ Rules to define the visibility behaviour of dynamic HUD components.
 | `CHARGING_WEAPON`        | Player is aiming or charging a weapon                              |
 | `HOLDING_BUILDING_BLOCK` | Player is holding a building block or placeable item and crouching |
 | `HOLDING_MELEE_WEAPON`   | Player is holding a melee weapon                                   |
+| `HAS_ASSIGNED_RUNE`      | The player is holding a weapon and at least one ability slot contains a rune |
 | `HOLDING_RANGED_WEAPON`  | Player is holding a ranged weapon                                  |
 | `BLOCKING_ATTACK`        | Player is using a weapon to block an attack                        |
 | `IN_COMBAT`              | Player is engaged in combat with an hostile mob                    |

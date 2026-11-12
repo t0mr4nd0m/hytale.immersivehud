@@ -21,6 +21,10 @@ public final class ProfilePresetsTest {
         verify("Balanced includes construction", balanced.getDynamicHud().getReticle()
                 .hasRule(HudTrigger.HOLDING_BUILDING_BLOCK));
         PlayerConfig immersive = preset(Profile.IMMERSIVE);
+        verify("Immersive hides Abilities by default", immersive.getHudComponents().isHideAbilitiesHud());
+        verify("Immersive Abilities use combat and assigned rune rules",
+                immersive.getDynamicHud().getByKey("abilities").getRulesView().equals(
+                        java.util.Set.of(HudTrigger.IN_COMBAT, HudTrigger.HAS_ASSIGNED_RUNE)));
         for (String key : new String[]{"hotbar", "reticle", "health", "mana", "compass"}) {
             verify("Immersive combat: " + key, immersive.getDynamicHud().getByKey(key).hasRule(HudTrigger.IN_COMBAT));
         }

@@ -110,3 +110,5 @@ msg.visibility.no.triggers="No hay activadores activos. Este componente permanec
 
 gui.component.state.hidden="oculto"
 gui.component.state.visible="visible"
+gui.trigger.has_assigned_rune.label="Tiene una runa asignada"
+gui.trigger.has_assigned_rune.tooltip="Muestra las habilidades si alguna de sus ranuras tiene una runa asignada y sostienes un arma."

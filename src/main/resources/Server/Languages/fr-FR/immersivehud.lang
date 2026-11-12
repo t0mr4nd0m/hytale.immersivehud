@@ -110,3 +110,5 @@ msg.visibility.no.triggers="Aucun déclencheur actif. Ce composant restera masqu
 
 gui.component.state.hidden="masqué"
 gui.component.state.visible="visible"
+gui.trigger.has_assigned_rune.label="Rune assignée"
+gui.trigger.has_assigned_rune.tooltip="Affiche les capacités si une rune est assignée à un emplacement de capacité et que vous tenez une arme."

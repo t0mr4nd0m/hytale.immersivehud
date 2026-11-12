@@ -137,6 +137,10 @@ public final class ProfilePresets {
                 HudTrigger.HOLDING_RANGED_WEAPON,
                 HudTrigger.IN_COMBAT));
         dyn.getHotbar().setRules(EnumSet.of(HudTrigger.IN_COMBAT));
+        dyn.getAbilities().setRules(EnumSet.of(
+                HudTrigger.HAS_ASSIGNED_RUNE,
+                HudTrigger.IN_COMBAT
+        ));
     }
 
     private static void applyVanilla(PlayerConfig cfg) {

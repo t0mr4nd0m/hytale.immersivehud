@@ -14,6 +14,7 @@ public enum HudTrigger {
     TARGET_ENTITY           (Category.INTERACTION, Source.SIGNAL, false),
     INTERACTABLE_BLOCK      (Category.INTERACTION, Source.SIGNAL, false),
     HOLDING_BUILDING_BLOCK  (Category.INTERACTION, Source.SIGNAL, false),
+    HAS_ASSIGNED_RUNE       (Category.INTERACTION, Source.SIGNAL, false),
 
     PLAYER_MOVING           (Category.MOVEMENT, Source.SIGNAL, false),
     PLAYER_WALKING          (Category.MOVEMENT, Source.SIGNAL, false),

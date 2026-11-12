@@ -110,3 +110,5 @@ msg.visibility.no.triggers="Нет активных триггеров. Этот
 
 gui.component.state.hidden="скрыт"
 gui.component.state.visible="виден"
+gui.trigger.has_assigned_rune.label="Назначена руна"
+gui.trigger.has_assigned_rune.tooltip="Показывает способности, если хотя бы в одной ячейке способностей есть руна и вы держите оружие."

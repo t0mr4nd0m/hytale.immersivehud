@@ -110,3 +110,5 @@ msg.visibility.no.triggers="Etkin tetikleyici yok. Bu bileşen her zaman gizli k
 
 gui.component.state.hidden="gizli"
 gui.component.state.visible="görünür"
+gui.trigger.has_assigned_rune.label="Atanmış rün var"
+gui.trigger.has_assigned_rune.tooltip="En az bir yetenek yuvasında rün varken elinizde silah tutuyorsanız yetenekleri gösterir."

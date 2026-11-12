@@ -110,3 +110,5 @@ msg.visibility.no.triggers="没有已启用的触发条件。此组件将始终�
 
 gui.component.state.hidden="隐藏"
 gui.component.state.visible="显示"
+gui.trigger.has_assigned_rune.label="已分配符文"
+gui.trigger.has_assigned_rune.tooltip="至少有一个技能槽装有符文时显示技能，且必须手持武器。"

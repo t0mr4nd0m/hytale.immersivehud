@@ -45,7 +45,8 @@ public final class HudDetectionPlan {
     }
     public boolean weapons() {
         return requires(HudTrigger.HOLDING_RANGED_WEAPON) || requires(HudTrigger.HOLDING_MELEE_WEAPON)
-                || requires(HudTrigger.CHARGING_WEAPON) || requires(HudTrigger.BLOCKING_ATTACK);
+                || requires(HudTrigger.CHARGING_WEAPON) || requires(HudTrigger.BLOCKING_ATTACK)
+                || requires(HudTrigger.HAS_ASSIGNED_RUNE);
     }
     public boolean heldItem() {
         return weapons() || requires(HudTrigger.CONSUMABLE_USE) || requires(HudTrigger.HOLDING_BUILDING_BLOCK);

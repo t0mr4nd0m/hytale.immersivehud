@@ -24,7 +24,6 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getHotbar() {
         return getByKey("hotbar");
     }
-
     public void setHotbar(@Nullable DynamicHudRuleConfig value) {
         setByKey("hotbar", value);
     }
@@ -33,7 +32,6 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getReticle() {
         return getByKey("reticle");
     }
-
     public void setReticle(@Nullable DynamicHudRuleConfig value) {
         setByKey("reticle", value);
     }
@@ -42,7 +40,6 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getCompass() {
         return getByKey("compass");
     }
-
     public void setCompass(@Nullable DynamicHudRuleConfig value) {
         setByKey("compass", value);
     }
@@ -51,7 +48,6 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getHealth() {
         return getByKey("health");
     }
-
     public void setHealth(@Nullable DynamicHudRuleConfig value) {
         setByKey("health", value);
     }
@@ -60,7 +56,6 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getStamina() {
         return getByKey("stamina");
     }
-
     public void setStamina(@Nullable DynamicHudRuleConfig value) {
         setByKey("stamina", value);
     }
@@ -69,7 +64,6 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getMana() {
         return getByKey("mana");
     }
-
     public void setMana(@Nullable DynamicHudRuleConfig value) {
         setByKey("mana", value);
     }
@@ -78,21 +72,32 @@ public final class DynamicHudConfig {
     public DynamicHudRuleConfig getOxygen() {
         return getByKey("oxygen");
     }
-
     public void setOxygen(@Nullable DynamicHudRuleConfig value) {
         setByKey("oxygen", value);
     }
 
+    @Nonnull
     public DynamicHudRuleConfig getStatusIcons() {
         return getByKey("statusicons");
     }
+    public void setStatusIcons(@Nullable DynamicHudRuleConfig value) {
+        setByKey("statusicons", value);
+    }
 
+    @Nonnull
     public DynamicHudRuleConfig getAmmo() {
         return getByKey("ammo");
     }
+    public void setAmmo(@Nonnull DynamicHudRuleConfig value) {
+        setByKey("ammo", value);
+    }
 
-    public void setStatusIcons(@Nullable DynamicHudRuleConfig value) {
-        setByKey("statusicons", value);
+    @Nonnull
+    public DynamicHudRuleConfig getAbilities() {
+        return getByKey("abilities");
+    }
+    public void setAbilities(@Nonnull DynamicHudRuleConfig value) {
+        setByKey("abilities", value);
     }
 
     @Nonnull

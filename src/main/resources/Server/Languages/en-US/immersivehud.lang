@@ -110,3 +110,5 @@ msg.visibility.no.triggers="No active triggers. This component will remain hidde
 
 gui.component.state.hidden="hidden"
 gui.component.state.visible="visible"
+gui.trigger.has_assigned_rune.label="Has assigned rune"
+gui.trigger.has_assigned_rune.tooltip="Shows Abilities while at least one ability slot contains a rune and you are holding a weapon."

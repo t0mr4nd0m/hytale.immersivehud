@@ -110,3 +110,5 @@ msg.visibility.no.triggers="Немає активних тригерів. Цей
 
 gui.component.state.hidden="прихований"
 gui.component.state.visible="видимий"
+gui.trigger.has_assigned_rune.label="Є призначена руна"
+gui.trigger.has_assigned_rune.tooltip="Показує здібності, якщо хоча б в одному слоті здібностей є руна і ви тримаєте зброю."
