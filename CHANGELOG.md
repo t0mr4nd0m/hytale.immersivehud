@@ -10,6 +10,7 @@
 * `BALANCED` profile now shows the reticle while holding a placeable block or decoration. Also shows Abilities during combat or while holding a weapon.
 * UI: Added descriptive tooltips to all trigger names in the configuration UI.
 * UI: Renamed the configuration tabs to `Profiles` and `Customize`, and enabled descriptive tooltips on both.
+* UI: Updated Oxygen HUD component icon.
 * UI: Added Spanish (Spain, `es-ES`), French (`fr-FR`), Brazilian Portuguese (`pt-BR`), Russian (`ru-RU`), Turkish (`tr-TR`), Ukrainian (`uk-UA`), and Simplified Chinese (`zh-CN`) translations for commands, configuration UI, profiles, and tooltips.
 * Experimental: Added shortcut (`CROUCH + OPEN_MAP`) to open ImmersiveHud configuration. Enable it with `configShortcut.enabled: true` in the global configuration. Using the selected action without crouching preserves its normal behaviour.
 
