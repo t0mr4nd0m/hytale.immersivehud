@@ -161,14 +161,16 @@ public final class ImmersiveHudPlugin extends JavaPlugin {
                 this,
                 playerConfigService,
                 hudRuntimeService,
-                hudConfigUiService
+                hudConfigUiService,
+                () -> getGlobalConfig().isOpenConfigOnFirstJoin()
         );
     }
 
     private HudConfigUiService createHudConfigUiService() {
         return new HudConfigUiService(
                 playerConfigService,
-                hudRuntimeService
+                hudRuntimeService,
+                getPluginVersion()
         );
     }
 

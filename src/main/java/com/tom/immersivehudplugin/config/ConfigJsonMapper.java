@@ -24,6 +24,7 @@ public final class ConfigJsonMapper {
     private static final String PLAYER_COMBAT_VERTICAL_FOV_DEGREES = "PlayerCombatVerticalFovDegrees";
     private static final String LOS_NPC_TARGET_HEIGHT = "LosNpcTargetHeight";
     private static final String LOS_TARGET_EPSILON = "LosTargetEpsilon";
+    private static final String OPEN_CONFIG_ON_FIRST_JOIN = "OpenConfigOnFirstJoin";
     private static final String DEFAULT_PROFILE = "DefaultProfile";
     private static final String PROFILE = "Profile";
     private static final String DEFAULT_HUD_COMPONENTS = "DefaultHudComponents";
@@ -47,6 +48,7 @@ public final class ConfigJsonMapper {
         root.addProperty(PLAYER_COMBAT_VERTICAL_FOV_DEGREES, cfg.getPlayerCombatVerticalFovDegrees());
         root.addProperty(LOS_NPC_TARGET_HEIGHT, cfg.getLosNpcTargetHeight());
         root.addProperty(LOS_TARGET_EPSILON, cfg.getLosTargetEpsilon());
+        root.addProperty(OPEN_CONFIG_ON_FIRST_JOIN, cfg.isOpenConfigOnFirstJoin());
         root.addProperty(DEFAULT_PROFILE, cfg.getDefaultProfile().name());
         if (cfg.getDefaultProfile() == Profile.CUSTOM) {
             root.add(DEFAULT_HUD_COMPONENTS, toJson(cfg.getDefaultHudComponents()));
@@ -90,6 +92,11 @@ public final class ConfigJsonMapper {
         }
         if (isNumber(root, LOS_TARGET_EPSILON)) {
             cfg.setLosTargetEpsilon(root.get(LOS_TARGET_EPSILON).getAsDouble());
+        }
+
+        JsonElement openConfigOnFirstJoin = root.get(OPEN_CONFIG_ON_FIRST_JOIN);
+        if (isBoolean(openConfigOnFirstJoin)) {
+            cfg.setOpenConfigOnFirstJoin(openConfigOnFirstJoin.getAsBoolean());
         }
 
         cfg.setDefaultProfile(readDefaultProfile(root));

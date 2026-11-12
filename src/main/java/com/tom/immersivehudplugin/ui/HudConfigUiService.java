@@ -29,16 +29,19 @@ public final class HudConfigUiService {
 
     private final PlayerConfigService playerConfigService;
     private final HudRuntimeService hudRuntimeService;
+    private final String pluginVersion;
 
     private final Map<UUID, HudConfigUiSession> sessions = new ConcurrentHashMap<>();
     private final HudConfigPauseController pauseController = new HudConfigPauseController();
 
     public HudConfigUiService(
             @Nonnull PlayerConfigService playerConfigService,
-            @Nonnull HudRuntimeService hudRuntimeService
+            @Nonnull HudRuntimeService hudRuntimeService,
+            @Nonnull String pluginVersion
     ) {
         this.playerConfigService = playerConfigService;
         this.hudRuntimeService = hudRuntimeService;
+        this.pluginVersion = pluginVersion;
     }
 
     public void start(@Nonnull JavaPlugin plugin) {
@@ -62,6 +65,23 @@ public final class HudConfigUiService {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store
     ) {
+        open(playerRef, ref, store, false);
+    }
+
+    public void openFirstJoin(
+            @Nonnull PlayerRef playerRef,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store
+    ) {
+        open(playerRef, ref, store, true);
+    }
+
+    private void open(
+            @Nonnull PlayerRef playerRef,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            boolean showWelcome
+    ) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) return;
 
@@ -73,7 +93,7 @@ public final class HudConfigUiService {
         PlayerConfig playerCfg = playerConfigService.getPlayerConfig(playerRef);
         sessions.put(playerRef.getUuid(), new HudConfigUiSession(playerCfg));
         try {
-            player.getPageManager().openCustomPage(ref, store, new IHudConfigPage(this, playerRef));
+            player.getPageManager().openCustomPage(ref, store, new IHudConfigPage(this, playerRef, showWelcome, pluginVersion));
             World world = player.getWorld();
             if (world != null) {
                 pauseController.pause(playerRef.getUuid(), new WorldPauseTarget(world), canPause(playerRef));

@@ -7,6 +7,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
@@ -22,21 +23,30 @@ import javax.annotation.Nonnull;
 
 public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage.PageEventData> {
 
+    private static final String PROJECT_URL = "https://github.com/t0mr4nd0m/hytale.immersivehud";
     private static final String PAGE_UI = "IHudConfigPage.ui";
 
     private final HudConfigUiService uiService;
     private final PlayerRef playerRef;
+    private boolean showWelcome;
+    private boolean firstJoinWelcome;
+    private final String pluginVersion;
 
     private final HudConfigProfilesRenderer profilesRenderer;
     private final HudConfigVisibilityRenderer visibilityRenderer;
 
     public IHudConfigPage(
             @Nonnull HudConfigUiService uiService,
-            @Nonnull PlayerRef playerRef
+            @Nonnull PlayerRef playerRef,
+            boolean showWelcome,
+            @Nonnull String pluginVersion
     ) {
         super(playerRef, CustomPageLifetime.CanDismissOrCloseThroughInteraction, PageEventData.CODEC);
         this.uiService = uiService;
         this.playerRef = playerRef;
+        this.showWelcome = showWelcome;
+        this.firstJoinWelcome = showWelcome;
+        this.pluginVersion = pluginVersion;
         this.profilesRenderer = new HudConfigProfilesRenderer(new HudConfigPresenter());
         this.visibilityRenderer = new HudConfigVisibilityRenderer();
     }
@@ -50,6 +60,8 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
     ) {
 
         commands.append(PAGE_UI);
+        commands.set("#WelcomeProjectLink.Text", PROJECT_URL);
+        commands.set("#WelcomeCredits.Text", "Immersive Hud v" + pluginVersion + " by T0mR4nD0m");
         bindChromeEvents(events);
         render(commands, events);
     }
@@ -77,12 +89,33 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
         }
 
         String action = data.getAction();
+        if (showWelcome) {
+            if ("DISMISS_WELCOME".equals(action)) {
+                showWelcome = false;
+                firstJoinWelcome = false;
+                UICommandBuilder commands = new UICommandBuilder();
+                renderChrome(commands, session);
+                sendUpdate(commands, null, false);
+            } else if ("SEND_PROJECT_LINK".equals(action)) {
+                playerRef.sendMessage(Message.raw(PROJECT_URL).link(PROJECT_URL));
+                sendUpdate();
+            } else {
+                sendUpdate();
+            }
+            return;
+        }
         if (action == null) {
             sendUpdate();
             return;
         }
 
         switch (action) {
+            case "SHOW_WELCOME" -> {
+                showWelcome = true;
+                UICommandBuilder commands = new UICommandBuilder();
+                renderChrome(commands, session);
+                sendUpdate(commands, null, false);
+            }
 
             case "VIEW_PROFILES" -> {
                 session.showProfilesView();
@@ -257,11 +290,25 @@ public final class IHudConfigPage extends InteractiveCustomUIPage<IHudConfigPage
         boolean profilesSelected = currentView == HudConfigView.PROFILES;
         boolean visibilitySelected = currentView == HudConfigView.VISIBILITY;
 
-        commands.set("#ViewProfilesBtn.Disabled", profilesSelected);
-        commands.set("#ViewVisibilityBtn.Disabled", visibilitySelected);
+        commands.set("#WelcomeOverlay.Visible", showWelcome);
+        commands.set("#WelcomeContinue.Visible", firstJoinWelcome);
+        commands.set("#WelcomeSettings.Visible", !firstJoinWelcome);
+        commands.set("#ViewProfilesBtn.Disabled", showWelcome || profilesSelected);
+        commands.set("#ViewVisibilityBtn.Disabled", showWelcome || visibilitySelected);
+        commands.set("#ApplyButton.Disabled", showWelcome);
+        commands.set("#CancelButton.Disabled", showWelcome);
+        commands.set("#WelcomeHelp.Disabled", showWelcome);
     }
 
     private void bindChromeEvents(@Nonnull UIEventBuilder events) {
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#WelcomeProjectLink",
+                PageEventData.action("SEND_PROJECT_LINK"), false);
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#WelcomeHelp",
+                PageEventData.action("SHOW_WELCOME"), false);
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#WelcomeContinue",
+                PageEventData.action("DISMISS_WELCOME"), false);
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#WelcomeSettings",
+                PageEventData.action("DISMISS_WELCOME"), false);
         events.addEventBinding(
                 CustomUIEventBindingType.Activating,
                 "#ViewProfilesBtn",

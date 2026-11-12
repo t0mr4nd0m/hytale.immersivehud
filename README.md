@@ -247,6 +247,7 @@ Server administrators can configure HUD detection, timing, the configuration sho
 | `PlayerCombatVerticalFovDegrees` | Full vertical field of view used to detect visible hostile NPCs, in degrees. Attacking NPCs targeting the player can be detected outside it. | `45` | `70` | `70` |
 | `LosNpcTargetHeight` | Height above the NPC position used as the target for combat line-of-sight checks. | `1` | `3` | `1` |
 | `LosTargetEpsilon` | Distance subtracted from the line-of-sight ray length to avoid testing beyond the NPC target point. | `0` | `1` | `0.15` |
+| `OpenConfigOnFirstJoin` | Automatically opens the configuration screen for new players. Set to `false` to start with the default profile and let players open the screen with `/ihud config`. | - | - | `true` |
 | `DefaultProfile` | Initial profile for new players. `BALANCED`, `IMMERSIVE`, and `VANILLA` apply the selected preset. `CUSTOM` uses the two sections below. | - | - | `VANILLA` |
 | `DefaultHudComponents` | Initial component visibility with `CUSTOM`. | - | - | Component catalog defaults (Balanced profile) |
 | `DefaultDynamicHud` | Initial dynamic rules and bar thresholds with `CUSTOM`. | - | - | Component catalog defaults (Balanced profile) |
@@ -279,6 +280,7 @@ Example with the default profile (`VANILLA`).
   "PlayerCombatVerticalFovDegrees": 70.0,
   "LosNpcTargetHeight": 1.0,
   "LosTargetEpsilon": 0.15,
+  "OpenConfigOnFirstJoin": true,
   "DefaultProfile": "VANILLA"
 }
 ```
@@ -301,6 +303,7 @@ Example with `CUSTOM`, using the visibility settings and rules below.
   "PlayerCombatVerticalFovDegrees": 70.0,
   "LosNpcTargetHeight": 1.0,
   "LosTargetEpsilon": 0.15,
+  "OpenConfigOnFirstJoin": true,
   "DefaultProfile": "CUSTOM",
   "DefaultHudComponents": {
     "HideCompass": true,

@@ -17,6 +17,7 @@ public final class GlobalConfig {
     public static final double LOS_NPC_TARGET_HEIGHT = 1.0d;
     public static final double LOS_TARGET_EPSILON = 0.15d;
 
+    private boolean openConfigOnFirstJoin = true;
     private Profile defaultProfile = Profile.VANILLA;
     private String configVersion = "";
     private ConfigShortcut configShortcut = new ConfigShortcut();
@@ -36,6 +37,14 @@ public final class GlobalConfig {
 
     private HudComponentsConfig defaultHudComponents = HudComponentRegistry.buildDefaultHudComponents();
     private DynamicHudConfig defaultDynamicHud = HudComponentRegistry.buildDefaultDynamicHud();
+
+    public boolean isOpenConfigOnFirstJoin() {
+        return openConfigOnFirstJoin;
+    }
+
+    public void setOpenConfigOnFirstJoin(boolean openConfigOnFirstJoin) {
+        this.openConfigOnFirstJoin = openConfigOnFirstJoin;
+    }
 
     public Profile getDefaultProfile() {
         return defaultProfile == null ? Profile.CUSTOM : defaultProfile;

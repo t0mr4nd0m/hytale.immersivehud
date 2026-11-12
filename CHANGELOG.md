@@ -12,7 +12,7 @@
 
 ### Configuration screen
 
-- The configuration screen opens on a player's first join with the mod enabled so they can choose a profile.
+- The configuration screen opens on a player's first join with the mod enabled with a welcome overlay that introduces the mod and shows how to reopen the screen with `/ihud config`. Server administrators can turn this off with `OpenConfigOnFirstJoin` in `config.json`.
 - Renamed the tabs to **Profiles** and **Customize**, and added tooltips to both tabs and all trigger names.
 - Added language support for Spanish, French, Brazilian Portuguese, Russian, Turkish, Ukrainian, and Simplified Chinese.
 - The configuration screen only pauses private singleplayer sessions.

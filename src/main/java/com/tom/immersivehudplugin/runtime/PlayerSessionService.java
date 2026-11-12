@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.tom.immersivehudplugin.config.PlayerConfigService;
 import com.tom.immersivehudplugin.ui.HudConfigUiService;
 
+import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 
 public final class PlayerSessionService {
@@ -19,6 +20,7 @@ public final class PlayerSessionService {
     private final PlayerConfigService playerConfigService;
     private final HudRuntimeService hudRuntimeService;
     private final HudConfigUiService hudConfigUiService;
+    private final BooleanSupplier openConfigOnFirstJoin;
 
     private boolean playerEventsRegistered;
 
@@ -26,12 +28,14 @@ public final class PlayerSessionService {
             JavaPlugin plugin,
             PlayerConfigService playerConfigService,
             HudRuntimeService hudRuntimeService,
-            HudConfigUiService hudConfigUiService
+            HudConfigUiService hudConfigUiService,
+            BooleanSupplier openConfigOnFirstJoin
     ) {
         this.plugin = plugin;
         this.playerConfigService = playerConfigService;
         this.hudRuntimeService = hudRuntimeService;
         this.hudConfigUiService = hudConfigUiService;
+        this.openConfigOnFirstJoin = openConfigOnFirstJoin;
     }
 
     public void start() {
@@ -57,9 +61,9 @@ public final class PlayerSessionService {
 
         boolean newPlayer = playerConfigService.preparePlayerSession(playerRef);
         hudRuntimeService.onPlayerReady(playerRef);
-        if (newPlayer) {
+        if (newPlayer && openConfigOnFirstJoin.getAsBoolean()) {
             try {
-                hudConfigUiService.open(playerRef, ref, store);
+                hudConfigUiService.openFirstJoin(playerRef, ref, store);
             } catch (RuntimeException exception) {
                 plugin.getLogger().at(Level.WARNING).withCause(exception)
                         .log("Failed to open initial HUD configuration for " + playerRef.getUuid());

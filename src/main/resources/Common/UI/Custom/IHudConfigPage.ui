@@ -14,6 +14,14 @@ $C = "Common.ui";
     Sounds:   $C.@ButtonSounds
 );
 
+@ProjectLinkLabelStyle = LabelStyle (...@CustomLabelStyle, FontSize: 12, RenderUppercase: false, RenderBold: false, RenderUnderlined: true, TextColor: #80b8ee);
+@ProjectLinkButtonStyle = TextButtonStyle(
+    Default: (LabelStyle: @ProjectLinkLabelStyle),
+    Hovered: (LabelStyle: (...@ProjectLinkLabelStyle, TextColor: #ffffff)),
+    Pressed: (LabelStyle: @ProjectLinkLabelStyle),
+    Sounds: $C.@ButtonSounds
+);
+
 $C.@PageOverlay {
 
     $C.@Container {
@@ -26,62 +34,219 @@ $C.@PageOverlay {
         }
 
         #Content {
-            LayoutMode: Top;
-            Padding: (Full: 8);
+            LayoutMode: Full;
+            Padding: (Full: 0);
 
-            Group #NavBar {
-                LayoutMode: Center;
-                Anchor: (Height: 40);
-                Padding: (Vertical: 16);
-
-                $C.@TextButton #ViewProfilesBtn {
-                    Text: %immersivehud.gui.profile.button;
-                    Style: @NavButtonStyle;
-                    TooltipText: %immersivehud.gui.profile.button.tooltip;
-                    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
-                    Disabled: false;
-                }
-
-                @HorizontalSpacer {}
-
-                $C.@TextButton #ViewVisibilityBtn {
-                    Text: %immersivehud.gui.visibility.button;
-                    Style: @NavButtonStyle;
-                    TooltipText: %immersivehud.gui.visibility.button.tooltip;
-                    TextTooltipStyle: $C.@DefaultTextTooltipStyle;
-                    Disabled: false;
-                }
-            }
-
-            $C.@ContentSeparator {}
-
-            Group #ContentHost {
+            Group #ConfigControls {
                 LayoutMode: Top;
-                FlexWeight: 1;
                 Padding: (Full: 8);
 
-                Group #ViewHost {
+                Group #NavBar {
+                    LayoutMode: Center;
+                    Anchor: (Height: 40);
+                    Padding: (Vertical: 16);
+
+                    $C.@TextButton #ViewProfilesBtn {
+                        Text: %immersivehud.gui.profile.button;
+                        Style: @NavButtonStyle;
+                        TooltipText: %immersivehud.gui.profile.button.tooltip;
+                        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+                        Disabled: false;
+                    }
+
+                    @HorizontalSpacer {}
+
+                    $C.@TextButton #ViewVisibilityBtn {
+                        Text: %immersivehud.gui.visibility.button;
+                        Style: @NavButtonStyle;
+                        TooltipText: %immersivehud.gui.visibility.button.tooltip;
+                        TextTooltipStyle: $C.@DefaultTextTooltipStyle;
+                        Disabled: false;
+                    }
+                }
+
+                $C.@ContentSeparator {}
+
+                Group #ContentHost {
                     LayoutMode: Top;
+                    FlexWeight: 1;
+                    Padding: (Full: 8);
+
+                    Group #ViewHost {
+                        LayoutMode: Top;
+                    }
+                }
+
+                $C.@ContentSeparator {}
+
+                Group {
+                    LayoutMode: Full;
+                    Anchor: (Height: 44);
+
+                    $C.@ActionButtonContainer #Footer {
+                        LayoutMode: Center;
+                        Anchor: (Full: 0);
+                        Padding: (Vertical: 8);
+
+                        $C.@TextButton #ApplyButton {
+                            Anchor: (Width: 130);
+                            Text: %immersivehud.gui.apply.button;
+                        }
+
+                        $C.@ActionButtonSeparator {}
+
+                        $C.@CancelTextButton #CancelButton {
+                            Anchor: (Width: 130);
+                            Text: %immersivehud.gui.cancel.button;
+                        }
+                    }
+
+                    $C.@SecondaryButton #WelcomeHelp {
+                        Anchor: (Right: 4, Top: 7, Width: 30, Height: 30);
+
+                        Label {
+                            Anchor: (Full: 0);
+                            Text: "?";
+                            Style: (...@CustomLabelStyle, FontSize: 22, TextColor: #ffffff);
+                        }
+                    }
                 }
             }
 
-            $C.@ContentSeparator {}
+            Group #WelcomeOverlay {
+                Anchor: (Left: 8, Right: 8, Top: 0, Bottom: 8);
+                LayoutMode: Top;
+                Padding: (Top: 20, Horizontal: 66);
+                Background: #111c29(0.94);
+                Visible: false;
 
-            $C.@ActionButtonContainer #Footer {
-                LayoutMode: Center;
-                Anchor: (Height: 44);
-                Padding: (Vertical: 8);
+                Group {
+                    LayoutMode: Center;
+                    Anchor: (Height: 76);
 
-                $C.@TextButton #ApplyButton {
-                    Anchor: (Width: 130);
-                    Text: %immersivehud.gui.apply.button;
+                    Group {
+                        Anchor: (Width: 76, Height: 76);
+                        Background: PatchStyle(TexturePath: "Assets/ImmersiveHudIcon.png");
+                    }
                 }
 
-                $C.@ActionButtonSeparator {}
+                Label {
+                    Anchor: (Top: 8, Height: 88);
+                    Text: %immersivehud.gui.welcome.description;
+                    Style: (FontSize: 16, TextColor: #ffffff, Wrap: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
 
-                $C.@CancelTextButton #CancelButton {
-                    Anchor: (Width: 130);
-                    Text: %immersivehud.gui.cancel.button;
+                Group {
+                    LayoutMode: Left;
+                    Anchor: (Top: 12, Height: 76);
+
+                    Group {
+                        LayoutMode: Top;
+                        FlexWeight: 1;
+                        Padding: (Horizontal: 8);
+
+                        Label {
+                            Anchor: (Height: 24);
+                            Text: %immersivehud.gui.welcome.step1.title;
+                            Style: (FontSize: 16, TextColor: $C.@ColorGoldHighlight, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+
+                        Label {
+                            Anchor: (Height: 52);
+                            Text: %immersivehud.gui.welcome.step1.body;
+                            Style: (FontSize: 16, TextColor: #ffffff, Wrap: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+                    }
+
+                    Group {
+                        Anchor: (Width: 2);
+                        Background: #3a4a5a(0.6);
+                    }
+
+                    Group {
+                        LayoutMode: Top;
+                        FlexWeight: 1;
+                        Padding: (Horizontal: 8);
+
+                        Label {
+                            Anchor: (Height: 24);
+                            Text: %immersivehud.gui.welcome.step2.title;
+                            Style: (FontSize: 16, TextColor: $C.@ColorGoldHighlight, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+
+                        Label {
+                            Anchor: (Height: 52);
+                            Text: %immersivehud.gui.welcome.step2.body;
+                            Style: (FontSize: 16, TextColor: #ffffff, Wrap: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+                    }
+
+                    Group {
+                        Anchor: (Width: 2);
+                        Background: #3a4a5a(0.6);
+                    }
+
+                    Group {
+                        LayoutMode: Top;
+                        FlexWeight: 1;
+                        Padding: (Horizontal: 8);
+
+                        Label {
+                            Anchor: (Height: 24);
+                            Text: %immersivehud.gui.welcome.step3.title;
+                            Style: (FontSize: 16, TextColor: $C.@ColorGoldHighlight, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+
+                        Label {
+                            Anchor: (Height: 52);
+                            Text: %immersivehud.gui.welcome.step3.body;
+                            Style: (FontSize: 16, TextColor: #ffffff, Wrap: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                        }
+                    }
+                }
+
+
+                Label {
+                    Anchor: (Top: 12, Height: 52);
+                    Text: %immersivehud.gui.welcome.thanks;
+                    Style: (FontSize: 16, TextColor: #ffffff, Wrap: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+
+                Label {
+                    Anchor: (Top: 4, Height: 42);
+                    Text: %immersivehud.gui.welcome.command;
+                    Style: (FontSize: 14, TextColor: $C.@ColorGoldHighlight, Wrap: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+
+                Group {
+                    LayoutMode: Center;
+                    Anchor: (Top: 16, Height: 44);
+
+                    $C.@TextButton #WelcomeContinue {
+                        Anchor: (Width: 200);
+                        Text: %immersivehud.gui.welcome.continue;
+                    }
+
+                    $C.@TextButton #WelcomeSettings {
+                        Anchor: (Width: 200);
+                        Text: %immersivehud.gui.welcome.settings;
+                        Visible: false;
+                    }
+                }
+
+                Label #WelcomeCredits {
+                    Anchor: (Top: 10, Height: 18);
+                    Style: (FontSize: 12, TextColor: $C.@ColorDefaultLabel, HorizontalAlignment: Center, VerticalAlignment: Center);
+                }
+
+                Group {
+                    LayoutMode: Center;
+                    Anchor: (Top: 4, Height: 24);
+
+                    TextButton #WelcomeProjectLink {
+                        Anchor: (Width: 420, Height: 24);
+                        Style: @ProjectLinkButtonStyle;
+                    }
                 }
             }
         }
